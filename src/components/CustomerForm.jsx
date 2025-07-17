@@ -1,33 +1,27 @@
-// src/components/CustomerForm.jsx
-
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../api";
 
 function CustomerForm() {
   const [customers, setCustomers] = useState([]);
   const [formData, setFormData] = useState({
-    musteriNo: "",
+    customerNo: "",
     name: "",
-    unvan: "",
+    title: "",
     type: "Gerçek",
-    vergiKimlikNo: "",
-    kayitTarihi: "",
-    adres: "",
+    taxId: "",
+    registerDate: "",
+    address: "",
     phone: "",
     email: "",
-
-    // Gerçek müşteri alanları
-    tcKimlikNo: "",
-    babaAdi: "",
-    anneAdi: "",
-    dogumTarihi: "",
-    dogumYeri: "",
-    cinsiyet: "",
-    ogrenimDurumu: "",
-    medeniDurum: "",
-
-    // Tüzel müşteri alanı
-    kamuDurumu: false,
+    identityNumber: "",
+    fatherName: "",
+    motherName: "",
+    birthDate: "",
+    birthPlace: "",
+    gender: "",
+    education: "",
+    maritalStatus: "",
+    isPublic: false, // sadece tüzel müşteride
   });
 
   const fetchCustomers = async () => {
@@ -35,7 +29,7 @@ function CustomerForm() {
       const res = await api.get("/customers");
       setCustomers(res.data);
     } catch (err) {
-      console.error("Veri alınamadı", err);
+      console.error("Müşteriler alınamadı:", err);
     }
   };
 
@@ -56,58 +50,71 @@ function CustomerForm() {
     try {
       await api.post("/customers", formData);
       setFormData({
-        musteriNo: "",
+        customerNo: "",
         name: "",
-        unvan: "",
+        title: "",
         type: "Gerçek",
-        vergiKimlikNo: "",
-        kayitTarihi: "",
-        adres: "",
+        taxId: "",
+        registerDate: "",
+        address: "",
         phone: "",
         email: "",
-        tcKimlikNo: "",
-        babaAdi: "",
-        anneAdi: "",
-        dogumTarihi: "",
-        dogumYeri: "",
-        cinsiyet: "",
-        ogrenimDurumu: "",
-        medeniDurum: "",
-        kamuDurumu: false,
+        identityNumber: "",
+        fatherName: "",
+        motherName: "",
+        birthDate: "",
+        birthPlace: "",
+        gender: "",
+        education: "",
+        maritalStatus: "",
+        isPublic: false,
       });
       fetchCustomers();
     } catch (err) {
-      console.error("Müşteri eklenemedi", err);
+      console.error("Müşteri eklenemedi:", err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/customers/${id}`);
+      fetchCustomers();
+    } catch (err) {
+      console.error("Silme başarısız:", err);
     }
   };
 
   return (
     <div>
-      <h1>Müşteri Formu</h1>
+      <h1>Müşteri İşlemleri</h1>
       <form onSubmit={handleSubmit}>
-        <input name="musteriNo" placeholder="Müşteri No" onChange={handleChange} value={formData.musteriNo} />
-        <input name="name" placeholder="Ad Soyad" onChange={handleChange} value={formData.name} />
-        <input name="unvan" placeholder="Unvan" onChange={handleChange} value={formData.unvan} />
-        <select name="type" onChange={handleChange} value={formData.type}>
+        <input name="customerNo" placeholder="Müşteri No" value={formData.customerNo} onChange={handleChange} />
+        <input name="name" placeholder="Ad Soyad" value={formData.name} onChange={handleChange} />
+        <input name="title" placeholder="Ünvan" value={formData.title} onChange={handleChange} />
+        <select name="type" value={formData.type} onChange={handleChange}>
           <option value="Gerçek">Gerçek</option>
           <option value="Tüzel">Tüzel</option>
         </select>
-        <input name="email" placeholder="Email" onChange={handleChange} value={formData.email} />
-        <input name="phone" placeholder="Telefon" onChange={handleChange} value={formData.phone} />
-        <input name="vergiKimlikNo" placeholder="Vergi Kimlik No" onChange={handleChange} value={formData.vergiKimlikNo} />
-        <input type="date" name="kayitTarihi" onChange={handleChange} value={formData.kayitTarihi} />
-        <input name="adres" placeholder="Adres" onChange={handleChange} value={formData.adres} />
+        <input name="taxId" placeholder="Vergi Kimlik No" value={formData.taxId} onChange={handleChange} />
+        <input name="registerDate" type="date" value={formData.registerDate} onChange={handleChange} />
+        <input name="address" placeholder="Adres" value={formData.address} onChange={handleChange} />
+        <input name="phone" placeholder="Telefon" value={formData.phone} onChange={handleChange} />
+        <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
 
         {formData.type === "Gerçek" && (
           <>
-            <input name="tcKimlikNo" placeholder="TC Kimlik No" onChange={handleChange} value={formData.tcKimlikNo} />
-            <input name="babaAdi" placeholder="Baba Adı" onChange={handleChange} value={formData.babaAdi} />
-            <input name="anneAdi" placeholder="Anne Adı" onChange={handleChange} value={formData.anneAdi} />
-            <input type="date" name="dogumTarihi" onChange={handleChange} value={formData.dogumTarihi} />
-            <input name="dogumYeri" placeholder="Doğum Yeri" onChange={handleChange} value={formData.dogumYeri} />
-            <input name="cinsiyet" placeholder="Cinsiyet" onChange={handleChange} value={formData.cinsiyet} />
-            <input name="ogrenimDurumu" placeholder="Öğrenim Durumu" onChange={handleChange} value={formData.ogrenimDurumu} />
-            <input name="medeniDurum" placeholder="Medeni Durum" onChange={handleChange} value={formData.medeniDurum} />
+            <input name="identityNumber" placeholder="TC Kimlik No" value={formData.identityNumber} onChange={handleChange} />
+            <input name="fatherName" placeholder="Baba Adı" value={formData.fatherName} onChange={handleChange} />
+            <input name="motherName" placeholder="Anne Adı" value={formData.motherName} onChange={handleChange} />
+            <input name="birthDate" type="date" value={formData.birthDate} onChange={handleChange} />
+            <input name="birthPlace" placeholder="Doğum Yeri" value={formData.birthPlace} onChange={handleChange} />
+            <input name="gender" placeholder="Cinsiyet" value={formData.gender} onChange={handleChange} />
+            <input name="education" placeholder="Öğrenim Durumu" value={formData.education} onChange={handleChange} />
+            <select name="maritalStatus" value={formData.maritalStatus} onChange={handleChange}>
+              <option value="">Medeni Durum</option>
+              <option value="Evli">Evli</option>
+              <option value="Bekar">Bekar</option>
+            </select>
           </>
         )}
 
@@ -115,39 +122,45 @@ function CustomerForm() {
           <label>
             <input
               type="checkbox"
-              name="kamuDurumu"
-              checked={formData.kamuDurumu}
+              name="isPublic"
+              checked={formData.isPublic}
               onChange={handleChange}
             />{" "}
             Kamu Müşterisi mi?
           </label>
         )}
 
-        <button type="submit">Ekle</button>
+        <button type="submit">Müşteri Ekle</button>
       </form>
 
       <h2>Mevcut Müşteriler</h2>
       <ul>
         {customers.map((c) => (
           <li key={c.id}>
-            <strong>{c.name}</strong> - {c.email} - {c.phone}
+            <strong>{c.name}</strong> - {c.email} - {c.type}
             <br />
-            Müşteri No: {c.musteriNo} | Tür: {c.type}
+            Müşteri No: {c.customerNo} | Ünvan: {c.title} | VKN: {c.taxId}
             <br />
-            Ünvan: {c.unvan} | VKN: {c.vergiKimlikNo}
+            Kayıt Tarihi: {c.registerDate} | Adres: {c.address} | Tel: {c.phone}
             <br />
-            Kayıt Tarihi: {c.kayitTarihi} | Adres: {c.adres}
             {c.type === "Gerçek" && (
               <>
+                TC: {c.identityNumber} | Baba: {c.fatherName} | Anne: {c.motherName}
                 <br />
-                TC: {c.tcKimlikNo} | Baba: {c.babaAdi} | Anne: {c.anneAdi}
+                Doğum: {c.birthDate} / {c.birthPlace} | Cinsiyet: {c.gender}
                 <br />
-                Doğum: {c.dogumTarihi} - {c.dogumYeri} | Cinsiyet: {c.cinsiyet}
-                <br />
-                Eğitim: {c.ogrenimDurumu} | Medeni Durum: {c.medeniDurum}
+                Eğitim: {c.education} | Medeni Durum: {c.maritalStatus}
               </>
             )}
-            {c.type === "Tüzel" && <p>Kamu Durumu: {c.kamuDurumu ? "Evet" : "Hayır"}</p>}
+            {c.type === "Tüzel" && (
+              <>
+                <br />
+                Kamu Müşterisi mi: {c.isPublic ? "Evet" : "Hayır"}
+              </>
+            )}
+            <br />
+            <button onClick={() => handleDelete(c.id)}>Sil</button>
+            <hr />
           </li>
         ))}
       </ul>
