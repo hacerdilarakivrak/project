@@ -1,28 +1,22 @@
-function CustomerList({ customers }) {
+import React from "react";
+
+const CustomerList = ({ customers }) => {
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Müşteri No</th>
-          <th>Ad Soyad / Ünvan</th>
-          <th>Tür</th>
-          <th>Email</th>
-          <th>Telefon</th>
-        </tr>
-      </thead>
-      <tbody>
-        {customers.map((c) => (
-          <tr key={c.id}>
-            <td>{c.id}</td>
-            <td>{c.name}</td>
-            <td>{c.type}</td>
-            <td>{c.email}</td>
-            <td>{c.phone}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div>
+      <h2>Müşteri Listesi</h2>
+      <ul>
+        {customers
+          .filter(
+            (customer) => customer.name && customer.email // boş verileri filtrele
+          )
+          .map((customer) => (
+            <li key={customer.id}>
+              {customer.name} - {customer.email}
+            </li>
+          ))}
+      </ul>
+    </div>
   );
-}
+};
 
 export default CustomerList;

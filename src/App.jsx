@@ -1,12 +1,14 @@
-import CustomerPage from "./pages/CustomerPage";
+import React from "react";
+import CustomerForm from "./components/CustomerForm";
 
 function App() {
   return (
-    <div>
-      <CustomerPage />
+    <div className="App">
+      <CustomerForm />
     </div>
   );
 }
 
 export default App;
+
 
