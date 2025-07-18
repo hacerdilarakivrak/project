@@ -26,7 +26,7 @@ const CustomerForm = () => {
   });
 
   const [customers, setCustomers] = useState([]);
-  const [editId, setEditId] = useState(null); // Güncelleme modunu takip eder
+  const [editId, setEditId] = useState(null);
 
   useEffect(() => {
     axios.get(API_URL).then((res) => setCustomers(res.data));
@@ -87,42 +87,96 @@ const CustomerForm = () => {
     <div>
       <h1>Müşteri İşlemleri</h1>
       <form onSubmit={handleSubmit}>
-        <input name="musteriNo" placeholder="Müşteri No" value={formData.musteriNo} onChange={handleChange} />
-        <input name="adSoyad" placeholder="Ad Soyad" value={formData.adSoyad} onChange={handleChange} />
-        <input name="unvan" placeholder="Ünvan" value={formData.unvan} onChange={handleChange} />
-        <select name="musteriTuru" value={formData.musteriTuru} onChange={handleChange}>
-          <option value="Gerçek">Gerçek</option>
-          <option value="Tüzel">Tüzel</option>
-        </select>
-        <input name="vergiKimlikNo" placeholder="Vergi Kimlik No" value={formData.vergiKimlikNo} onChange={handleChange} />
-        <input name="kayitTarihi" type="date" value={formData.kayitTarihi} onChange={handleChange} />
-        <input name="adres" placeholder="Adres" value={formData.adres} onChange={handleChange} />
-        <input name="telefon" placeholder="Telefon" value={formData.telefon} onChange={handleChange} />
-        <input name="email" placeholder="E-Posta" value={formData.email} onChange={handleChange} />
+        <label>
+          Müşteri No:
+          <input name="musteriNo" value={formData.musteriNo} onChange={handleChange} />
+        </label>
+        <label>
+          Ad Soyad:
+          <input name="adSoyad" value={formData.adSoyad} onChange={handleChange} />
+        </label>
+        <label>
+          Ünvan:
+          <input name="unvan" value={formData.unvan} onChange={handleChange} />
+        </label>
+        <label>
+          Müşteri Türü:
+          <select name="musteriTuru" value={formData.musteriTuru} onChange={handleChange}>
+            <option value="Gerçek">Gerçek</option>
+            <option value="Tüzel">Tüzel</option>
+          </select>
+        </label>
+        <label>
+          Vergi Kimlik No:
+          <input name="vergiKimlikNo" value={formData.vergiKimlikNo} onChange={handleChange} />
+        </label>
+        <label>
+          Kayıt Tarihi:
+          <input name="kayitTarihi" type="date" value={formData.kayitTarihi} onChange={handleChange} />
+        </label>
+        <label>
+          Adres:
+          <input name="adres" value={formData.adres} onChange={handleChange} />
+        </label>
+        <label>
+          Telefon:
+          <input name="telefon" value={formData.telefon} onChange={handleChange} />
+        </label>
+        <label>
+          E-Posta:
+          <input name="email" value={formData.email} onChange={handleChange} />
+        </label>
 
         {formData.musteriTuru === "Gerçek" && (
           <>
-            <input name="tcKimlikNo" placeholder="TC Kimlik No" value={formData.tcKimlikNo} onChange={handleChange} />
-            <input name="babaAdi" placeholder="Baba Adı" value={formData.babaAdi} onChange={handleChange} />
-            <input name="anneAdi" placeholder="Anne Adı" value={formData.anneAdi} onChange={handleChange} />
-            <input name="dogumTarihi" type="date" value={formData.dogumTarihi} onChange={handleChange} />
-            <input name="dogumYeri" placeholder="Doğum Yeri" value={formData.dogumYeri} onChange={handleChange} />
-            <input name="cinsiyet" placeholder="Cinsiyet" value={formData.cinsiyet} onChange={handleChange} />
-            <input name="ogrenimDurumu" placeholder="Öğrenim Durumu" value={formData.ogrenimDurumu} onChange={handleChange} />
-            <select name="medeniDurum" value={formData.medeniDurum} onChange={handleChange}>
-              <option value="">Medeni Durum</option>
-              <option value="Bekar">Bekar</option>
-              <option value="Evli">Evli</option>
-            </select>
+            <label>
+              TC Kimlik No:
+              <input name="tcKimlikNo" value={formData.tcKimlikNo} onChange={handleChange} />
+            </label>
+            <label>
+              Baba Adı:
+              <input name="babaAdi" value={formData.babaAdi} onChange={handleChange} />
+            </label>
+            <label>
+              Anne Adı:
+              <input name="anneAdi" value={formData.anneAdi} onChange={handleChange} />
+            </label>
+            <label>
+              Doğum Tarihi:
+              <input name="dogumTarihi" type="date" value={formData.dogumTarihi} onChange={handleChange} />
+            </label>
+            <label>
+              Doğum Yeri:
+              <input name="dogumYeri" value={formData.dogumYeri} onChange={handleChange} />
+            </label>
+            <label>
+              Cinsiyet:
+              <input name="cinsiyet" value={formData.cinsiyet} onChange={handleChange} />
+            </label>
+            <label>
+              Öğrenim Durumu:
+              <input name="ogrenimDurumu" value={formData.ogrenimDurumu} onChange={handleChange} />
+            </label>
+            <label>
+              Medeni Durum:
+              <select name="medeniDurum" value={formData.medeniDurum} onChange={handleChange}>
+                <option value="">Medeni Durum</option>
+                <option value="Bekar">Bekar</option>
+                <option value="Evli">Evli</option>
+              </select>
+            </label>
           </>
         )}
 
         {formData.musteriTuru === "Tüzel" && (
-          <select name="kamuDurumu" value={formData.kamuDurumu} onChange={handleChange}>
-            <option value="">Kamu Durumu</option>
-            <option value="Evet">Evet</option>
-            <option value="Hayır">Hayır</option>
-          </select>
+          <label>
+            Kamu Durumu:
+            <select name="kamuDurumu" value={formData.kamuDurumu} onChange={handleChange}>
+              <option value="">Kamu Durumu</option>
+              <option value="Evet">Evet</option>
+              <option value="Hayır">Hayır</option>
+            </select>
+          </label>
         )}
 
         <button type="submit">{editId ? "Güncelle" : "Müşteri Ekle"}</button>
