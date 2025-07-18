@@ -76,11 +76,15 @@ const AccountsPage = () => {
         </label>
 
         <label>
-          Kayıt Durumu (açık/kapalı):
-          <input
+          Kayıt Durumu:
+          <select
             value={newAccount.kayitDurumu}
             onChange={(e) => setNewAccount({ ...newAccount, kayitDurumu: e.target.value })}
-          />
+          >
+            <option value="">Seçiniz</option>
+            <option value="Açık">Açık</option>
+            <option value="Kapalı">Kapalı</option>
+          </select>
         </label>
 
         <label>
@@ -185,4 +189,3 @@ const AccountsPage = () => {
 };
 
 export default AccountsPage;
-
