@@ -84,108 +84,91 @@ const CustomerForm = () => {
   };
 
   return (
-    <div>
-      <h1>Müşteri İşlemleri</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Müşteri No:
-          <input name="musteriNo" value={formData.musteriNo} onChange={handleChange} />
-        </label>
-        <label>
-          Ad Soyad:
-          <input name="adSoyad" value={formData.adSoyad} onChange={handleChange} />
-        </label>
-        <label>
-          Ünvan:
-          <input name="unvan" value={formData.unvan} onChange={handleChange} />
-        </label>
-        <label>
-          Müşteri Türü:
-          <select name="musteriTuru" value={formData.musteriTuru} onChange={handleChange}>
+    <div style={{ padding: "20px" }}>
+      <h1>Müşteri Tanımlama</h1>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}
+      >
+        {Object.entries({
+          musteriNo: "Müşteri No",
+          adSoyad: "Ad Soyad",
+          unvan: "Ünvan",
+          vergiKimlikNo: "Vergi Kimlik No",
+          kayitTarihi: "Kıyat Tarihi",
+          adres: "Adres",
+          telefon: "Telefon",
+          email: "E-Posta",
+          tcKimlikNo: "TC Kimlik No",
+          babaAdi: "Baba Adı",
+          anneAdi: "Anne Adı",
+          dogumTarihi: "Doğum Tarihi",
+          dogumYeri: "Doğum Yeri",
+          cinsiyet: "Cinsiyet",
+          ogrenimDurumu: "Öğrenim Durumu",
+        }).map(([key, label]) => (
+          <div style={{ display: "flex", flexDirection: "column", width: "250px" }} key={key}>
+            <label>{label}</label>
+            <input
+              type={key.toLowerCase().includes("tarihi") ? "date" : "text"}
+              name={key}
+              value={formData[key] || ""}
+              onChange={handleChange}
+            />
+          </div>
+        ))}
+
+        <div style={{ display: "flex", flexDirection: "column", width: "250px" }}>
+          <label>Müşteri Türü</label>
+          <select
+            name="musteriTuru"
+            value={formData.musteriTuru}
+            onChange={handleChange}
+          >
             <option value="Gerçek">Gerçek</option>
             <option value="Tüzel">Tüzel</option>
           </select>
-        </label>
-        <label>
-          Vergi Kimlik No:
-          <input name="vergiKimlikNo" value={formData.vergiKimlikNo} onChange={handleChange} />
-        </label>
-        <label>
-          Kayıt Tarihi:
-          <input name="kayitTarihi" type="date" value={formData.kayitTarihi} onChange={handleChange} />
-        </label>
-        <label>
-          Adres:
-          <input name="adres" value={formData.adres} onChange={handleChange} />
-        </label>
-        <label>
-          Telefon:
-          <input name="telefon" value={formData.telefon} onChange={handleChange} />
-        </label>
-        <label>
-          E-Posta:
-          <input name="email" value={formData.email} onChange={handleChange} />
-        </label>
+        </div>
 
-        {formData.musteriTuru === "Gerçek" && (
-          <>
-            <label>
-              TC Kimlik No:
-              <input name="tcKimlikNo" value={formData.tcKimlikNo} onChange={handleChange} />
-            </label>
-            <label>
-              Baba Adı:
-              <input name="babaAdi" value={formData.babaAdi} onChange={handleChange} />
-            </label>
-            <label>
-              Anne Adı:
-              <input name="anneAdi" value={formData.anneAdi} onChange={handleChange} />
-            </label>
-            <label>
-              Doğum Tarihi:
-              <input name="dogumTarihi" type="date" value={formData.dogumTarihi} onChange={handleChange} />
-            </label>
-            <label>
-              Doğum Yeri:
-              <input name="dogumYeri" value={formData.dogumYeri} onChange={handleChange} />
-            </label>
-            <label>
-              Cinsiyet:
-              <input name="cinsiyet" value={formData.cinsiyet} onChange={handleChange} />
-            </label>
-            <label>
-              Öğrenim Durumu:
-              <input name="ogrenimDurumu" value={formData.ogrenimDurumu} onChange={handleChange} />
-            </label>
-            <label>
-              Medeni Durum:
-              <select name="medeniDurum" value={formData.medeniDurum} onChange={handleChange}>
-                <option value="">Medeni Durum</option>
-                <option value="Bekar">Bekar</option>
-                <option value="Evli">Evli</option>
-              </select>
-            </label>
-          </>
-        )}
-
-        {formData.musteriTuru === "Tüzel" && (
-          <label>
-            Kamu Durumu:
-            <select name="kamuDurumu" value={formData.kamuDurumu} onChange={handleChange}>
-              <option value="">Kamu Durumu</option>
+        {formData.musteriTuru === "Gerçek" ? (
+          <div style={{ display: "flex", flexDirection: "column", width: "250px" }}>
+            <label>Medeni Durum</label>
+            <select
+              name="medeniDurum"
+              value={formData.medeniDurum}
+              onChange={handleChange}
+            >
+              <option value="">Seçiniz</option>
+              <option value="Bekar">Bekar</option>
+              <option value="Evli">Evli</option>
+            </select>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", width: "250px" }}>
+            <label>Kamu Durumu</label>
+            <select
+              name="kamuDurumu"
+              value={formData.kamuDurumu}
+              onChange={handleChange}
+            >
+              <option value="">Seçiniz</option>
               <option value="Evet">Evet</option>
               <option value="Hayır">Hayır</option>
             </select>
-          </label>
+          </div>
         )}
 
-        <button type="submit">{editId ? "Güncelle" : "Müşteri Ekle"}</button>
-        {editId && <button type="button" onClick={resetForm}>İptal</button>}
+        <button
+          type="submit"
+          style={{ padding: "10px 20px", marginTop: "25px", height: "40px" }}
+        >
+          {editId ? "Güncelle" : "Müşteri Ekle"}
+        </button>
       </form>
 
-      <h2>Mevcut Müşteriler</h2>
+      <h2 style={{ marginTop: "40px" }}>Mevcut Müşteriler</h2>
       {customers.map((cust) => (
-        <div key={cust.id}>
+        <div key={cust.id} style={{ marginBottom: "20px" }}>
           <strong>{cust.adSoyad}</strong> - {cust.email} - {cust.musteriTuru}
           <br />
           Müşteri No: {cust.musteriNo} | Ünvan: {cust.unvan} | VKN: {cust.vergiKimlikNo}
@@ -209,4 +192,3 @@ const CustomerForm = () => {
 };
 
 export default CustomerForm;
-
