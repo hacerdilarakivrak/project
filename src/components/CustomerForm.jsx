@@ -37,22 +37,15 @@ const CustomerForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (["vergiKimlikNo", "tcKimlikNo", "telefon"].includes(name) && /\D/.test(value)) {
-      return;
-    }
-
-    if (["ad", "soyad", "babaAdi", "anneAdi", "dogumYeri"].includes(name) && /\d/.test(value)) {
-      return;
-    }
+    if (["vergiKimlikNo", "tcKimlikNo", "telefon"].includes(name) && /\D/.test(value)) return;
+    if (["ad", "soyad", "babaAdi", "anneAdi", "dogumYeri"].includes(name) && /\d/.test(value)) return;
 
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isValidEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const isValidTcKimlik = (tc) => {
-    if (typeof tc !== "string") tc = tc.toString();
     if (!/^\d{11}$/.test(tc)) return false;
     const digits = tc.split("").map(Number);
     const sum = digits.slice(0, 10).reduce((a, b) => a + b, 0);
@@ -68,7 +61,7 @@ const CustomerForm = () => {
     }
 
     if (!isValidTcKimlik(formData.tcKimlikNo)) {
-      alert("Geçerli bir TC kimlik numarası giriniz.");
+      alert("Geçerli bir TC Kimlik Numarası giriniz.");
       return;
     }
 
@@ -86,6 +79,7 @@ const CustomerForm = () => {
       const res = await axios.post(API_URL, dataToSend);
       setCustomers([...customers, res.data]);
     }
+
     resetForm();
   };
 
@@ -123,12 +117,26 @@ const CustomerForm = () => {
     setEditId(customer.id);
   };
 
+  const fieldLabels = {
+    ad: "Ad",
+    soyad: "Soyad",
+    unvan: "Unvan",
+    vergiKimlikNo: "Vergi Kimlik No",
+    adres: "Adres",
+    telefon: "Telefon",
+    email: "Email",
+    tcKimlikNo: "TC Kimlik No",
+    babaAdi: "Baba Adı",
+    anneAdi: "Anne Adı",
+    dogumYeri: "Doğum Yeri"
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-        {["ad", "soyad", "unvan", "vergiKimlikNo", "adres", "telefon", "email", "tcKimlikNo", "babaAdi", "anneAdi", "dogumYeri"].map((key) => (
+        {Object.entries(fieldLabels).map(([key, label]) => (
           <div key={key} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
-            <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+            <label>{label}</label>
             <input
               type="text"
               name={key}
