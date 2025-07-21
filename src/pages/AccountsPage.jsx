@@ -5,6 +5,7 @@ const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts";
 
 const AccountsPage = () => {
   const [accounts, setAccounts] = useState([]);
+  const [editId, setEditId] = useState(null); // <-- Güncelleme için eklendi
   const [newAccount, setNewAccount] = useState({
     musteriNo: "",
     ekNo: "",
@@ -27,9 +28,32 @@ const AccountsPage = () => {
     fetchAccounts();
   }, []);
 
+  const resetForm = () => {
+    setNewAccount({
+      musteriNo: "",
+      ekNo: "",
+      kayitTarihi: "",
+      kayitDurumu: "",
+      hesapAdi: "",
+      dovizKodu: "",
+      bakiyeTutar: 0,
+      blokeTutar: 0,
+      faizOrani: 0,
+      iban: ""
+    });
+    setEditId(null);
+  };
+
   const handleAddAccount = async () => {
     await axios.post(API_URL, newAccount);
     fetchAccounts();
+    resetForm();
+  };
+
+  const handleUpdate = async () => {
+    await axios.put(`${API_URL}/${editId}`, newAccount);
+    fetchAccounts();
+    resetForm();
   };
 
   const handleDelete = async (id) => {
@@ -37,12 +61,17 @@ const AccountsPage = () => {
     fetchAccounts();
   };
 
+  const handleEdit = (acc) => {
+    setNewAccount(acc);
+    setEditId(acc.id);
+  };
+
   const dovizSembolleri = {
-    "USD": "$",
-    "EUR": "€",
-    "TRY": "₺",
-    "GBP": "£",
-    "JPY": "¥"
+    USD: "$",
+    EUR: "€",
+    TRY: "₺",
+    GBP: "£",
+    JPY: "¥"
   };
 
   return (
@@ -145,7 +174,9 @@ const AccountsPage = () => {
           />
         </label>
 
-        <button onClick={handleAddAccount}>Ekle</button>
+        <button onClick={editId ? handleUpdate : handleAddAccount}>
+          {editId ? "Güncelle" : "Ekle"}
+        </button>
       </div>
 
       <table border="1">
@@ -161,7 +192,7 @@ const AccountsPage = () => {
             <th>Bloke</th>
             <th>Faiz</th>
             <th>IBAN</th>
-            <th>Sil</th>
+            <th>İşlem</th>
           </tr>
         </thead>
         <tbody>
@@ -178,6 +209,7 @@ const AccountsPage = () => {
               <td>{acc.faizOrani}</td>
               <td>{acc.iban}</td>
               <td>
+                <button onClick={() => handleEdit(acc)}>Güncelle</button>
                 <button onClick={() => handleDelete(acc.id)}>Sil</button>
               </td>
             </tr>
