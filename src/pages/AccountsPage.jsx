@@ -47,7 +47,7 @@ const AccountsPage = () => {
 
   return (
     <div>
-      <h2>Hesap Tanımlama</h2>
+      
 
       <div style={{ marginBottom: 20, display: "grid", gap: "10px" }}>
         <label>
