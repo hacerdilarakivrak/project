@@ -5,7 +5,7 @@ const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts";
 
 const AccountsPage = () => {
   const [accounts, setAccounts] = useState([]);
-  const [editId, setEditId] = useState(null); // <-- Güncelleme için eklendi
+  const [editId, setEditId] = useState(null); 
   const [newAccount, setNewAccount] = useState({
     musteriNo: "",
     ekNo: "",
