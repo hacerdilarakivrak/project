@@ -52,13 +52,11 @@ const CustomerForm = () => {
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const isValidTcKimlik = (tc) => {
+    if (typeof tc !== "string") tc = tc.toString();
     if (!/^\d{11}$/.test(tc)) return false;
-    const sum = tc
-      .slice(0, 10)
-      .split("")
-      .reduce((a, b) => a + Number(b), 0);
-    const lastDigit = Number(tc[10]);
-    return sum % 10 === 8 && lastDigit === 8;
+    const digits = tc.split("").map(Number);
+    const sum = digits.slice(0, 10).reduce((a, b) => a + b, 0);
+    return sum % 10 === 8 && digits[10] === 8;
   };
 
   const handleSubmit = async (e) => {
@@ -76,9 +74,9 @@ const CustomerForm = () => {
 
     const dataToSend = {
       ...formData,
-      musteriNo: editId ? formData.musteriNo : Math.floor(100000000 + Math.random() * 900000000).toString(),
-      cinsiyet: formData.cinsiyet,
-      musteriTuru: formData.musteriTuru,
+      musteriNo: editId
+        ? formData.musteriNo
+        : Math.floor(100000000 + Math.random() * 900000000).toString(),
     };
 
     if (editId) {
@@ -227,13 +225,3 @@ const CustomerForm = () => {
 };
 
 export default CustomerForm;
-
-
-  
-
-
-
-
-
-
-  
