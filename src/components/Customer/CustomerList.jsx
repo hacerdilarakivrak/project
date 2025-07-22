@@ -27,42 +27,79 @@ const CustomerList = ({ refresh }) => {
   };
 
   return (
-    <div>
-      <h3>Kayıtlı Müşteriler</h3>
+    <div style={{ marginTop: "40px", overflowX: "auto" }}>
+      <h2 style={{ marginBottom: "20px", color: "#fff" }}>📋 Kayıtlı Müşteriler</h2>
+
       {customers.length === 0 ? (
-        <p>Henüz müşteri kaydı bulunmuyor.</p>
+        <p style={{ color: "#ccc" }}>Henüz müşteri kaydı yok.</p>
       ) : (
-        <table border="1" cellPadding="6" cellSpacing="0">
-          <thead>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            fontSize: "14px",
+            minWidth: "1200px",
+            backgroundColor: "#1e1e1e",
+            color: "#f1f1f1",
+          }}
+        >
+          <thead style={{ backgroundColor: "#333", color: "#fff" }}>
             <tr>
-              <th>Ad</th>
-              <th>Soyad</th>
-              <th>Ünvan</th>
-              <th>Tür</th>
-              <th>VKN</th>
-              <th>TC</th>
-              <th>Telefon</th>
-              <th>Email</th>
-              <th>Adres</th>
-              <th>Kayıt Tarihi</th>
-              <th>İşlem</th>
+              {[
+                "Müşteri No", "Ad", "Soyad", "Ünvan", "Tür", "Vergi No", "TC Kimlik No",
+                "Baba Adı", "Anne Adı", "Doğum Tarihi", "Doğum Yeri", "Cinsiyet",
+                "Öğrenim Durumu", "Medeni Durum", "Telefon", "Email", "Adres",
+                "Kayıt Tarihi", "İşlem"
+              ].map((header, i) => (
+                <th
+                  key={i}
+                  style={{
+                    padding: "8px",
+                    border: "1px solid #555",
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {customers.map((customer) => (
-              <tr key={customer.id}>
-                <td>{customer.ad}</td>
-                <td>{customer.soyad}</td>
-                <td>{customer.unvan}</td>
-                <td>{customer.tur === "G" ? "Gerçek" : "Tüzel"}</td>
-                <td>{customer.vkn}</td>
-                <td>{customer.tcKimlikNo}</td>
-                <td>{customer.telefon}</td>
-                <td>{customer.email}</td>
-                <td>{customer.adres}</td>
-                <td>{customer.kayitTarihi}</td>
-                <td>
-                  <button onClick={() => handleDelete(customer.id)}>Sil</button>
+            {customers.map((c) => (
+              <tr key={c.id} style={{ backgroundColor: "#2a2a2a", textAlign: "center" }}>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.musteriNo}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.ad}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.soyad}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.unvan}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.musteriTuru === "G" ? "Gerçek" : "Tüzel"}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.vergiKimlikNo}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.tcKimlikNo}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.babaAdi}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.anneAdi}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.dogumTarihi}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.dogumYeri}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.cinsiyet === "K" ? "Kadın" : "Erkek"}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.ogrenimDurumu}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.medeniDurum}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.telefon}</td>
+                <td style={{ padding: "6px", border: "1px solid #555", whiteSpace: "pre-wrap" }}>{c.email}</td>
+                <td style={{ padding: "6px", border: "1px solid #555", whiteSpace: "pre-wrap" }}>{c.adres}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.kayitTarihi}</td>
+                <td style={{ padding: "6px", border: "1px solid #555" }}>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    style={{
+                      backgroundColor: "#d9534f",
+                      color: "white",
+                      border: "none",
+                      padding: "4px 10px",
+                      cursor: "pointer",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    Sil
+                  </button>
                 </td>
               </tr>
             ))}
