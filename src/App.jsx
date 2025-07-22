@@ -1,18 +1,19 @@
 import React from "react";
-import CustomerForm from "./components/CustomerForm";
-import AccountsPage from "./pages/AccountsPage"; // <-- bunu ekliyoruz
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import CustomersPage from "./pages/CustomersPage";
+import AccountsPage from "./pages/AccountsPage";
+import Layout from "./components/Layout/Layout";
 
 function App() {
   return (
-    <div className="App">
-      <h2>Müşteri Tanımlama</h2>
-      <CustomerForm />
-
-      <hr />
-
-      <h2>Hesap Tanımlama</h2>
-      <AccountsPage /> {/* <-- Hesap ekranını buraya yerleştiriyoruz */}
-    </div>
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<CustomersPage />} />
+          <Route path="/accounts" element={<AccountsPage />} />
+        </Routes>
+      </Layout>
+    </Router>
   );
 }
 
