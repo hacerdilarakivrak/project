@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
 
-const CustomerList = ({ refresh }) => {
+const CustomerList = ({ refresh, onEdit }) => {
   const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
@@ -88,6 +88,20 @@ const CustomerList = ({ refresh }) => {
                 <td style={{ padding: "6px", border: "1px solid #555" }}>{c.kayitTarihi}</td>
                 <td style={{ padding: "6px", border: "1px solid #555" }}>
                   <button
+                    onClick={() => onEdit(c)}
+                    style={{
+                      backgroundColor: "#5bc0de",
+                      color: "white",
+                      border: "none",
+                      padding: "4px 10px",
+                      marginRight: "5px",
+                      cursor: "pointer",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    Güncelle
+                  </button>
+                  <button
                     onClick={() => handleDelete(c.id)}
                     style={{
                       backgroundColor: "#d9534f",
@@ -111,3 +125,4 @@ const CustomerList = ({ refresh }) => {
 };
 
 export default CustomerList;
+
