@@ -1,29 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AccountForm from "../components/Account/AccountForm";
 import AccountList from "../components/Account/AccountList";
+import axios from "axios";
+
+const CUSTOMER_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
 
 const AccountsPage = () => {
   const [refresh, setRefresh] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [musteriNoFilter, setMusteriNoFilter] = useState(""); // ✅ filtre state
+  const [musteriNoFilter, setMusteriNoFilter] = useState("");
+  const [customers, setCustomers] = useState([]); // ✅ customers state
 
   const handleRefresh = () => {
     setRefresh(!refresh);
   };
+
+  // ✅ Müşterileri çek
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const res = await axios.get(CUSTOMER_API);
+        setCustomers(res.data);
+      } catch (err) {
+        console.error("Müşteriler alınamadı:", err);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
 
   return (
     <div style={{ padding: "20px" }}>
       <h2>Hesap Tanımlama</h2>
 
       <AccountForm
-        onAccountAdded={handleRefresh}
+        onAccountAdd={handleRefresh}
         selectedAccount={selectedAccount}
-        clearSelectedAccount={() => setSelectedAccount(null)}
+        clearSelection={() => setSelectedAccount(null)}
+        customers={customers} // ✅ customers props'u geçiriliyor
       />
 
       <hr />
 
-      {/* ✅ Filtreleme inputu */}
       <div style={{ margin: "20px 0" }}>
         <label>
           Müşteri No ile Filtrele:{" "}
@@ -36,7 +54,6 @@ const AccountsPage = () => {
         </label>
       </div>
 
-      {/* ✅ Filtrelenmiş liste */}
       <AccountList
         refresh={refresh}
         onEdit={(account) => setSelectedAccount(account)}

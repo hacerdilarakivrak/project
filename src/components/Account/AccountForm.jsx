@@ -1,153 +1,181 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts";
-const CUSTOMER_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
 
-const AccountForm = ({ onAccountAdded, selectedAccount, clearSelectedAccount }) => {
-  const [editId, setEditId] = useState(null);
-  const [customers, setCustomers] = useState([]);
+const initialForm = {
+  musteriNo: "",
+  ekNo: "",
+  kayitTarihi: new Date().toISOString().split("T")[0],
+  kayitDurumu: "",
+  hesapAdi: "",
+  dovizKodu: "",
+  bakiye: "",
+  blokeTutar: "",
+  faizOrani: "",
+  iban: "",
+  kapanmaTarihi: "",
+  faizliBakiye: "0.00"
+};
 
-  const [account, setAccount] = useState({
-    musteriNo: "",
-    ekNo: "",
-    kayitTarihi: new Date().toISOString().split("T")[0],
-    kayitDurumu: "",
-    hesapAdi: "",
-    dovizKodu: "",
-    bakiyeTutar: "",
-    blokeTutar: "",
-    faizOrani: "",
-    iban: "",
-    kapanmaTarihi: "",
-    faizliBakiye: ""
-  });
+const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers }) => {
+  const [form, setForm] = useState(initialForm);
 
-  // Formu güncelleme modunda doldur
   useEffect(() => {
     if (selectedAccount) {
-      setAccount(selectedAccount);
-      setEditId(selectedAccount.id);
+      setForm(selectedAccount);
     }
   }, [selectedAccount]);
 
-  // Müşteri listesini çek
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const response = await axios.get(CUSTOMER_API);
-        setCustomers(response.data);
-      } catch (error) {
-        console.error("Müşteriler alınamadı:", error);
-      }
-    };
-
-    fetchCustomers();
-  }, []);
-
-  // Faizli bakiye hesapla (otomatik)
-  useEffect(() => {
-    const faiz = parseFloat(account.faizOrani) || 0;
-    const bakiye = parseFloat(account.bakiyeTutar) || 0;
-    const faizli = bakiye + (bakiye * faiz / 100);
-    setAccount(prev => ({ ...prev, faizliBakiye: faizli.toFixed(2) }));
-  }, [account.bakiyeTutar, account.faizOrani]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setAccount({ ...account, [name]: value });
+
+    if (["bakiye", "blokeTutar", "faizOrani", "faizliBakiye"].includes(name)) {
+      if (!/^\d*\.?\d*$/.test(value)) return;
+    }
+
+    setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     try {
-      if (editId) {
-        await axios.put(`${API_URL}/${editId}`, account);
+      if (selectedAccount) {
+        await axios.put(`${API_URL}/${selectedAccount.id}`, form);
+        alert("Hesap güncellendi.");
       } else {
-        await axios.post(API_URL, account);
+        await axios.post(API_URL, form);
+        alert("Hesap eklendi.");
       }
-      resetForm();
-      onAccountAdded();
-      clearSelectedAccount();
+
+      setForm(initialForm);
+      if (onAccountAdd) onAccountAdd();
+      if (clearSelection) clearSelection();
     } catch (error) {
-      console.error("Hesap işlemi hatası:", error);
+      alert("Hata oluştu: " + error);
     }
   };
 
-  const resetForm = () => {
-    setAccount({
-      musteriNo: "",
-      ekNo: "",
-      kayitTarihi: new Date().toISOString().split("T")[0],
-      kayitDurumu: "",
-      hesapAdi: "",
-      dovizKodu: "",
-      bakiyeTutar: "",
-      blokeTutar: "",
-      faizOrani: "",
-      iban: "",
-      kapanmaTarihi: "",
-      faizliBakiye: ""
-    });
-    setEditId(null);
-  };
-
   return (
-    <div style={{ padding: "20px" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" }}>
+    <form onSubmit={handleSubmit} style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+      <h2 style={{ color: "#fff", marginBottom: "20px" }}>Hesap Tanımlama</h2>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "20px",
+          backgroundColor: "#1f1f1f",
+          padding: "20px",
+          borderRadius: "8px",
+        }}
+      >
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Müşteri Seçin:</label>
+          <select name="musteriNo" value={form.musteriNo} onChange={handleChange} required>
+            <option value="">Müşteri Seçin</option>
+            {customers.map((c) => (
+              <option key={c.musteriNo} value={c.musteriNo}>
+                {c.ad} {c.soyad} - {c.musteriNo}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select name="musteriNo" value={account.musteriNo} onChange={handleChange}>
-          <option value="">Müşteri Seçin</option>
-          {customers.map((c) => (
-            <option key={c.id} value={c.musteriNo}>
-              {c.ad && c.soyad ? `${c.ad} ${c.soyad}` : c.adSoyad} ({c.musteriNo})
-            </option>
-          ))}
-        </select>
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Ek No:</label>
+          <input name="ekNo" value={form.ekNo} onChange={handleChange} required />
+        </div>
 
-        <input name="ekNo" placeholder="Ek No" value={account.ekNo} onChange={handleChange} />
-        <input name="kayitTarihi" type="date" value={account.kayitTarihi} onChange={handleChange} />
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Kayıt Tarihi:</label>
+          <input type="date" name="kayitTarihi" value={form.kayitTarihi} onChange={handleChange} required />
+        </div>
 
-        <select name="hesapDurumu" value={account.hesapDurumu} onChange={handleChange}>
-          <option value="">Hesap Durumu</option>
-          <option value="Açık">Açık</option>
-          <option value="Kapalı">Kapalı</option>
-        </select>
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Kayıt Durumu:</label>
+          <select name="kayitDurumu" value={form.kayitDurumu} onChange={handleChange} required>
+            <option value="">Kayıt Durumu</option>
+            <option value="Açık">Açık</option>
+            <option value="Kapalı">Kapalı</option>
+          </select>
+        </div>
 
-        <input name="hesapAdi" placeholder="Hesap Adı" value={account.hesapAdi} onChange={handleChange} />
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Hesap Adı:</label>
+          <input name="hesapAdi" value={form.hesapAdi} onChange={handleChange} />
+        </div>
 
-        <select name="dovizKodu" value={account.dovizKodu} onChange={handleChange}>
-          <option value="">Döviz Kodu</option>
-          <option value="TRY">₺ - Türk Lirası</option>
-          <option value="USD">$ - Dolar</option>
-          <option value="EUR">€ - Euro</option>
-          <option value="GBP">£ - Sterlin</option>
-          <option value="JPY">¥ - Yen</option>
-        </select>
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Döviz Kodu:</label>
+          <select name="dovizKodu" value={form.dovizKodu} onChange={handleChange}>
+            <option value="">Döviz Kodu</option>
+            <option value="TRY">TRY</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
+        </div>
 
-        <input name="bakiyeTutar" type="number" placeholder="Bakiye" value={account.bakiyeTutar} onChange={handleChange} />
-        <input name="blokeTutar" type="number" placeholder="Bloke Tutar" value={account.blokeTutar} onChange={handleChange} />
-        <input name="faizOrani" type="number" placeholder="Faiz Oranı (%)" value={account.faizOrani} onChange={handleChange} />
-        <input name="iban" placeholder="IBAN" value={account.iban} onChange={handleChange} />
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Bakiye:</label>
+          <input name="bakiye" value={form.bakiye} onChange={handleChange} />
+        </div>
 
-        <input name="kapanmaTarihi" type="date" placeholder="Kapanma Tarihi" value={account.kapanmaTarihi} onChange={handleChange} />
-        <input name="faizliBakiye" value={account.faizliBakiye} disabled placeholder="Faizli Bakiye" />
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Bloke Tutar:</label>
+          <input name="blokeTutar" value={form.blokeTutar} onChange={handleChange} />
+        </div>
 
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Faiz Oranı (%):</label>
+          <input name="faizOrani" value={form.faizOrani} onChange={handleChange} />
+        </div>
+
+        <div style={fieldStyle}>
+          <label style={labelStyle}>IBAN:</label>
+          <input name="iban" value={form.iban} onChange={handleChange} />
+        </div>
+
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Kapanma Tarihi:</label>
+          <input type="date" name="kapanmaTarihi" value={form.kapanmaTarihi} onChange={handleChange} />
+        </div>
+
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Faizli Bakiye:</label>
+          <input name="faizliBakiye" value={form.faizliBakiye} onChange={handleChange} disabled />
+        </div>
       </div>
 
-      <button onClick={handleSubmit}>{editId ? "Güncelle" : "Ekle"}</button>
-      {editId && (
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
         <button
-          onClick={() => {
-            resetForm();
-            clearSelectedAccount();
+          type="submit"
+          style={{
+            padding: "10px 30px",
+            backgroundColor: "#4caf50",
+            color: "#fff",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
           }}
-          style={{ marginLeft: "10px" }}
         >
-          İptal
+          {selectedAccount ? "Güncelle" : "Ekle"}
         </button>
-      )}
-    </div>
+      </div>
+    </form>
   );
 };
 
+const fieldStyle = {
+  display: "flex",
+  flexDirection: "column",
+};
+
+const labelStyle = {
+  marginBottom: "6px",
+  fontWeight: "bold",
+  color: "#ccc",
+};
+
 export default AccountForm;
+

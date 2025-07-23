@@ -8,6 +8,7 @@ const generateCustomerNo = () => {
 };
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
 const validateTC = (tc) => {
   if (tc.length !== 11) return false;
   const total = tc
@@ -35,6 +36,19 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    if (name === "vergiKimlikNo") {
+      if (!/^\d*$/.test(value) || value.length > 10) return;
+    }
+
+    if (name === "telefon") {
+      if (!/^\d*$/.test(value) || value.length > 11) return;
+    }
+
+    if (["ad", "soyad", "babaAdi", "anneAdi", "dogumYeri", "unvan"].includes(name)) {
+      if (!/^[a-zA-ZğüşöçıİĞÜŞÖÇ\s]*$/.test(value)) return;
+    }
+
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   };
 
@@ -74,42 +88,95 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <input name="ad" placeholder="Ad" value={form.ad} onChange={handleChange} required />
-        <input name="soyad" placeholder="Soyad" value={form.soyad} onChange={handleChange} required />
-        <input name="unvan" placeholder="Ünvan" value={form.unvan} onChange={handleChange} />
-        
+    <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", maxWidth: "1000px" }}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Ad</label>
+        <input name="ad" value={form.ad} onChange={handleChange} required />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Soyad</label>
+        <input name="soyad" value={form.soyad} onChange={handleChange} required />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Ünvan</label>
+        <input name="unvan" value={form.unvan} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Müşteri Türü</label>
         <select name="musteriTuru" value={form.musteriTuru} onChange={handleChange}>
           <option value="G">Gerçek</option>
           <option value="T">Tüzel</option>
         </select>
+      </div>
 
-        {form.musteriTuru === "T" && (
-          <label>
-            <input type="checkbox" name="kamuDurumu" checked={form.kamuDurumu} onChange={handleChange} />
-            Kamu müşterisi mi?
-          </label>
-        )}
+      {form.musteriTuru === "T" && (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <label>Kamu müşterisi mi?</label>
+          <input type="checkbox" name="kamuDurumu" checked={form.kamuDurumu} onChange={handleChange} />
+        </div>
+      )}
 
-        <input name="vergiKimlikNo" placeholder="Vergi Kimlik No" value={form.vergiKimlikNo} onChange={handleChange} />
-        <input name="tcKimlikNo" placeholder="TC Kimlik No" value={form.tcKimlikNo} onChange={handleChange} />
-        <input name="telefon" placeholder="Telefon" value={form.telefon} onChange={handleChange} />
-        <input name="email" placeholder="Email" value={form.email} onChange={handleChange} />
-        <input name="adres" placeholder="Adres" value={form.adres} onChange={handleChange} />
-        <input name="babaAdi" placeholder="Baba Adı" value={form.babaAdi} onChange={handleChange} />
-        <input name="anneAdi" placeholder="Anne Adı" value={form.anneAdi} onChange={handleChange} />
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Vergi Kimlik No</label>
+        <input name="vergiKimlikNo" value={form.vergiKimlikNo} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>TC Kimlik No</label>
+        <input name="tcKimlikNo" value={form.tcKimlikNo} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Telefon</label>
+        <input name="telefon" value={form.telefon} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Email</label>
+        <input name="email" value={form.email} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Adres</label>
+        <input name="adres" value={form.adres} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Baba Adı</label>
+        <input name="babaAdi" value={form.babaAdi} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Anne Adı</label>
+        <input name="anneAdi" value={form.anneAdi} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Doğum Tarihi</label>
         <input type="date" name="dogumTarihi" value={form.dogumTarihi} onChange={handleChange} />
-        <input name="dogumYeri" placeholder="Doğum Yeri" value={form.dogumYeri} onChange={handleChange} />
+      </div>
 
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Doğum Yeri</label>
+        <input name="dogumYeri" value={form.dogumYeri} onChange={handleChange} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Cinsiyet</label>
         <select name="cinsiyet" value={form.cinsiyet} onChange={handleChange}>
-          <option value="">Cinsiyet Seç</option>
+          <option value="">Seçiniz</option>
           <option value="K">Kadın</option>
           <option value="E">Erkek</option>
         </select>
+      </div>
 
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Öğrenim Durumu</label>
         <select name="ogrenimDurumu" value={form.ogrenimDurumu} onChange={handleChange}>
-          <option value="">Öğrenim Durumu</option>
+          <option value="">Seçiniz</option>
           <option value="İlköğretim">İlköğretim</option>
           <option value="Ortaöğretim">Ortaöğretim</option>
           <option value="Lise">Lise</option>
@@ -117,14 +184,19 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
           <option value="Yüksek Lisans">Yüksek Lisans</option>
           <option value="Doktora">Doktora</option>
         </select>
+      </div>
 
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <label>Medeni Durum</label>
         <select name="medeniDurum" value={form.medeniDurum} onChange={handleChange}>
-          <option value="">Medeni Durum</option>
+          <option value="">Seçiniz</option>
           <option value="Bekar">Bekar</option>
           <option value="Evli">Evli</option>
         </select>
+      </div>
 
-        <button type="submit">
+      <div style={{ gridColumn: "1 / -1", marginTop: "20px" }}>
+        <button type="submit" style={{ padding: "10px 20px", backgroundColor: "#000", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
           {selectedCustomer ? "Güncelle" : "Kaydet"}
         </button>
       </div>

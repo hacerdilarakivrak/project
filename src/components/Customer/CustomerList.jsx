@@ -79,7 +79,16 @@ const CustomerList = ({ refresh, onEdit }) => {
                 <td style={{ padding: "6px", border: "1px solid #555" }}>{c.anneAdi}</td>
                 <td style={{ padding: "6px", border: "1px solid #555" }}>{c.dogumTarihi}</td>
                 <td style={{ padding: "6px", border: "1px solid #555" }}>{c.dogumYeri}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.cinsiyet === "K" ? "Kadın" : "Erkek"}</td>
+
+                {/* Geliştirilmiş cinsiyet gösterimi */}
+                <td style={{ padding: "6px", border: "1px solid #555" }}>
+                  {c.cinsiyet === "K"
+                    ? "Kadın"
+                    : c.cinsiyet === "E"
+                    ? "Erkek"
+                    : "-"}
+                </td>
+
                 <td style={{ padding: "6px", border: "1px solid #555" }}>{c.ogrenimDurumu}</td>
                 <td style={{ padding: "6px", border: "1px solid #555" }}>{c.medeniDurum}</td>
                 <td style={{ padding: "6px", border: "1px solid #555" }}>{c.telefon}</td>
@@ -125,4 +134,5 @@ const CustomerList = ({ refresh, onEdit }) => {
 };
 
 export default CustomerList;
+
 
