@@ -9,13 +9,12 @@ const AccountsPage = () => {
   const [refresh, setRefresh] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [musteriNoFilter, setMusteriNoFilter] = useState("");
-  const [customers, setCustomers] = useState([]); // ✅ customers state
+  const [customers, setCustomers] = useState([]);
 
   const handleRefresh = () => {
     setRefresh(!refresh);
   };
 
-  // ✅ Müşterileri çek
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
@@ -31,13 +30,13 @@ const AccountsPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Hesap Tanımlama</h2>
+      {/* <h2>Hesap Tanımlama</h2> ❌ bu satırı kaldırdık */}
 
       <AccountForm
         onAccountAdd={handleRefresh}
         selectedAccount={selectedAccount}
         clearSelection={() => setSelectedAccount(null)}
-        customers={customers} // ✅ customers props'u geçiriliyor
+        customers={customers}
       />
 
       <hr />
