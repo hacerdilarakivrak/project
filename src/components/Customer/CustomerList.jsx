@@ -26,8 +26,15 @@ const CustomerList = ({ refresh, onEdit }) => {
     }
   };
 
+  const headers = [
+    "Müşteri No", "Ad", "Soyad", "Ünvan", "Tür", "Vergi No", "TC Kimlik No",
+    "Baba Adı", "Anne Adı", "Doğum Tarihi", "Doğum Yeri", "Cinsiyet",
+    "Öğrenim Durumu", "Medeni Durum", "Telefon", "Email", "Adres",
+    "Kayıt Tarihi", "İşlem"
+  ];
+
   return (
-    <div style={{ marginTop: "40px", overflowX: "auto" }}>
+    <div style={{ marginTop: "40px", overflowX: "auto", paddingBottom: "30px" }}>
       <h2 style={{ marginBottom: "20px", color: "#fff" }}>📋 Kayıtlı Müşteriler</h2>
 
       {customers.length === 0 ? (
@@ -43,86 +50,39 @@ const CustomerList = ({ refresh, onEdit }) => {
             color: "#f1f1f1",
           }}
         >
-          <thead style={{ backgroundColor: "#333", color: "#fff" }}>
+          <thead style={{ backgroundColor: "#333" }}>
             <tr>
-              {[
-                "Müşteri No", "Ad", "Soyad", "Ünvan", "Tür", "Vergi No", "TC Kimlik No",
-                "Baba Adı", "Anne Adı", "Doğum Tarihi", "Doğum Yeri", "Cinsiyet",
-                "Öğrenim Durumu", "Medeni Durum", "Telefon", "Email", "Adres",
-                "Kayıt Tarihi", "İşlem"
-              ].map((header, i) => (
-                <th
-                  key={i}
-                  style={{
-                    padding: "8px",
-                    border: "1px solid #555",
-                    textAlign: "center",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {header}
-                </th>
+              {headers.map((header, i) => (
+                <th key={i} style={thStyle}>{header}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {customers.map((c) => (
               <tr key={c.id} style={{ backgroundColor: "#2a2a2a", textAlign: "center" }}>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.musteriNo}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.ad}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.soyad}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.unvan}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.musteriTuru === "G" ? "Gerçek" : "Tüzel"}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.vergiKimlikNo}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.tcKimlikNo}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.babaAdi}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.anneAdi}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.dogumTarihi}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.dogumYeri}</td>
-
-                {/* Geliştirilmiş cinsiyet gösterimi */}
-                <td style={{ padding: "6px", border: "1px solid #555" }}>
-                  {c.cinsiyet === "K"
-                    ? "Kadın"
-                    : c.cinsiyet === "E"
-                    ? "Erkek"
-                    : "-"}
+                <td style={tdStyle}>{c.musteriNo}</td>
+                <td style={tdStyle}>{c.ad}</td>
+                <td style={tdStyle}>{c.soyad}</td>
+                <td style={tdStyle}>{c.unvan}</td>
+                <td style={tdStyle}>{c.musteriTuru === "G" ? "Gerçek" : "Tüzel"}</td>
+                <td style={tdStyle}>{c.vergiKimlikNo}</td>
+                <td style={tdStyle}>{c.tcKimlikNo}</td>
+                <td style={tdStyle}>{c.babaAdi}</td>
+                <td style={tdStyle}>{c.anneAdi}</td>
+                <td style={tdStyle}>{c.dogumTarihi}</td>
+                <td style={tdStyle}>{c.dogumYeri}</td>
+                <td style={tdStyle}>
+                  {c.cinsiyet === "K" ? "Kadın" : c.cinsiyet === "E" ? "Erkek" : "-"}
                 </td>
-
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.ogrenimDurumu}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.medeniDurum}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.telefon}</td>
-                <td style={{ padding: "6px", border: "1px solid #555", whiteSpace: "pre-wrap" }}>{c.email}</td>
-                <td style={{ padding: "6px", border: "1px solid #555", whiteSpace: "pre-wrap" }}>{c.adres}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>{c.kayitTarihi}</td>
-                <td style={{ padding: "6px", border: "1px solid #555" }}>
-                  <button
-                    onClick={() => onEdit(c)}
-                    style={{
-                      backgroundColor: "#5bc0de",
-                      color: "white",
-                      border: "none",
-                      padding: "4px 10px",
-                      marginRight: "5px",
-                      cursor: "pointer",
-                      borderRadius: "4px",
-                    }}
-                  >
-                    Güncelle
-                  </button>
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    style={{
-                      backgroundColor: "#d9534f",
-                      color: "white",
-                      border: "none",
-                      padding: "4px 10px",
-                      cursor: "pointer",
-                      borderRadius: "4px",
-                    }}
-                  >
-                    Sil
-                  </button>
+                <td style={tdStyle}>{c.ogrenimDurumu}</td>
+                <td style={tdStyle}>{c.medeniDurum}</td>
+                <td style={tdStyle}>{c.telefon}</td>
+                <td style={{ ...tdStyle, whiteSpace: "pre-wrap" }}>{c.email}</td>
+                <td style={{ ...tdStyle, whiteSpace: "pre-wrap" }}>{c.adres}</td>
+                <td style={tdStyle}>{c.kayitTarihi}</td>
+                <td style={tdStyle}>
+                  <button onClick={() => onEdit(c)} style={btnStyle("#5bc0de")}>Güncelle</button>
+                  <button onClick={() => handleDelete(c.id)} style={btnStyle("#d9534f")}>Sil</button>
                 </td>
               </tr>
             ))}
@@ -132,6 +92,29 @@ const CustomerList = ({ refresh, onEdit }) => {
     </div>
   );
 };
+
+const thStyle = {
+  padding: "8px",
+  border: "1px solid #555",
+  textAlign: "center",
+  whiteSpace: "nowrap"
+};
+
+const tdStyle = {
+  padding: "6px",
+  border: "1px solid #555",
+  textAlign: "center"
+};
+
+const btnStyle = (bgColor) => ({
+  backgroundColor: bgColor,
+  color: "#fff",
+  border: "none",
+  padding: "4px 10px",
+  margin: "0 3px",
+  borderRadius: "4px",
+  cursor: "pointer"
+});
 
 export default CustomerList;
 

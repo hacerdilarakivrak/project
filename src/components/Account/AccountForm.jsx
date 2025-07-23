@@ -30,6 +30,7 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Sayısal alanlara sadece sayı ve nokta girişi
     if (["bakiye", "blokeTutar", "faizOrani", "faizliBakiye"].includes(name)) {
       if (!/^\d*\.?\d*$/.test(value)) return;
     }
@@ -39,7 +40,6 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       if (selectedAccount) {
         await axios.put(`${API_URL}/${selectedAccount.id}`, form);
@@ -48,18 +48,20 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
         await axios.post(API_URL, form);
         alert("Hesap eklendi.");
       }
-
       setForm(initialForm);
       if (onAccountAdd) onAccountAdd();
       if (clearSelection) clearSelection();
-    } catch (error) {
-      alert("Hata oluştu: " + error);
+    } catch (err) {
+      alert("Hata oluştu: " + err.message);
     }
   };
+
+  const isKapali = form.kayitDurumu === "Kapalı";
 
   return (
     <form onSubmit={handleSubmit} style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
       <h2 style={{ color: "#fff", marginBottom: "20px" }}>Hesap Tanımlama</h2>
+
       <div
         style={{
           display: "grid",
@@ -136,14 +138,26 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
           <input name="iban" value={form.iban} onChange={handleChange} />
         </div>
 
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Kapanma Tarihi:</label>
-          <input type="date" name="kapanmaTarihi" value={form.kapanmaTarihi} onChange={handleChange} />
-        </div>
+        {isKapali && (
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Kapanma Tarihi:</label>
+            <input
+              type="date"
+              name="kapanmaTarihi"
+              value={form.kapanmaTarihi}
+              onChange={handleChange}
+            />
+          </div>
+        )}
 
         <div style={fieldStyle}>
           <label style={labelStyle}>Faizli Bakiye:</label>
-          <input name="faizliBakiye" value={form.faizliBakiye} onChange={handleChange} disabled />
+          <input
+            name="faizliBakiye"
+            value={form.faizliBakiye}
+            onChange={handleChange}
+            disabled
+          />
         </div>
       </div>
 
@@ -178,4 +192,6 @@ const labelStyle = {
 };
 
 export default AccountForm;
+
+
 
