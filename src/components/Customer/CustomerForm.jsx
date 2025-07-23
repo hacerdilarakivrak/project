@@ -76,20 +76,22 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        {/* Alanlar */}
         <input name="ad" placeholder="Ad" value={form.ad} onChange={handleChange} required />
         <input name="soyad" placeholder="Soyad" value={form.soyad} onChange={handleChange} required />
         <input name="unvan" placeholder="Ünvan" value={form.unvan} onChange={handleChange} />
+        
         <select name="musteriTuru" value={form.musteriTuru} onChange={handleChange}>
           <option value="G">Gerçek</option>
           <option value="T">Tüzel</option>
         </select>
+
         {form.musteriTuru === "T" && (
           <label>
             <input type="checkbox" name="kamuDurumu" checked={form.kamuDurumu} onChange={handleChange} />
             Kamu müşterisi mi?
           </label>
         )}
+
         <input name="vergiKimlikNo" placeholder="Vergi Kimlik No" value={form.vergiKimlikNo} onChange={handleChange} />
         <input name="tcKimlikNo" placeholder="TC Kimlik No" value={form.tcKimlikNo} onChange={handleChange} />
         <input name="telefon" placeholder="Telefon" value={form.telefon} onChange={handleChange} />
@@ -99,11 +101,13 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
         <input name="anneAdi" placeholder="Anne Adı" value={form.anneAdi} onChange={handleChange} />
         <input type="date" name="dogumTarihi" value={form.dogumTarihi} onChange={handleChange} />
         <input name="dogumYeri" placeholder="Doğum Yeri" value={form.dogumYeri} onChange={handleChange} />
+
         <select name="cinsiyet" value={form.cinsiyet} onChange={handleChange}>
           <option value="">Cinsiyet Seç</option>
           <option value="K">Kadın</option>
           <option value="E">Erkek</option>
         </select>
+
         <select name="ogrenimDurumu" value={form.ogrenimDurumu} onChange={handleChange}>
           <option value="">Öğrenim Durumu</option>
           <option value="İlköğretim">İlköğretim</option>
@@ -113,11 +117,13 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
           <option value="Yüksek Lisans">Yüksek Lisans</option>
           <option value="Doktora">Doktora</option>
         </select>
+
         <select name="medeniDurum" value={form.medeniDurum} onChange={handleChange}>
           <option value="">Medeni Durum</option>
           <option value="Bekar">Bekar</option>
           <option value="Evli">Evli</option>
         </select>
+
         <button type="submit">
           {selectedCustomer ? "Güncelle" : "Kaydet"}
         </button>
@@ -127,4 +133,3 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
 };
 
 export default CustomerForm;
-
