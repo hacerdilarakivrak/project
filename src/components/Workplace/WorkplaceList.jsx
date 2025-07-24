@@ -7,6 +7,13 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   const [workplaces, setWorkplaces] = useState([]);
   const [nameFilter, setNameFilter] = useState("");
   const [cityFilter, setCityFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
+
+  // Yeni sayaç state'leri
+  const [totalCount, setTotalCount] = useState(0);
+  const [openCount, setOpenCount] = useState(0);
+  const [closedCount, setClosedCount] = useState(0);
 
   useEffect(() => {
     fetchWorkplaces();
@@ -15,7 +22,11 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   const fetchWorkplaces = async () => {
     try {
       const response = await axios.get(API_URL);
-      setWorkplaces(response.data);
+      const data = response.data;
+      setWorkplaces(data);
+      setTotalCount(data.length);
+      setOpenCount(data.filter(wp => wp.status === "açık").length);
+      setClosedCount(data.filter(wp => wp.status === "kapalı").length);
     } catch (error) {
       console.error("İşyeri verileri alınamadı:", error);
     }
@@ -32,18 +43,38 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
     }
   };
 
-  // Filtrelenmiş veri
-  const filteredWorkplaces = workplaces.filter((wp) =>
-    wp.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
-    wp.city.toLowerCase().includes(cityFilter.toLowerCase())
-  );
+  const filteredWorkplaces = workplaces
+    .filter((wp) =>
+      wp.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
+      wp.city.toLowerCase().includes(cityFilter.toLowerCase()) &&
+      (statusFilter === "" || wp.status === statusFilter)
+    )
+    .sort((a, b) =>
+      sortOrder === "asc"
+        ? new Date(a.registrationDate) - new Date(b.registrationDate)
+        : new Date(b.registrationDate) - new Date(a.registrationDate)
+    );
 
   return (
     <div style={{ marginTop: "40px", overflowX: "auto" }}>
       <h2 style={{ marginBottom: "16px", color: "#fff" }}>Tanımlı İşyeri Listesi</h2>
 
-      {/* Filtre alanları */}
-      <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+      {/* 🔹 Sayaçlar */}
+      <div style={{
+        display: "flex",
+        gap: "20px",
+        marginBottom: "16px",
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: "16px"
+      }}>
+        <div>Toplam: {totalCount}</div>
+        <div style={{ color: "#4caf50" }}>Açık: {openCount}</div>
+        <div style={{ color: "#f44336" }}>Kapalı: {closedCount}</div>
+      </div>
+
+      {/* 🔹 Filtre Alanları */}
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
         <input
           type="text"
           placeholder="İşyeri adına göre filtrele"
@@ -58,8 +89,44 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
           onChange={(e) => setCityFilter(e.target.value)}
           style={inputStyle}
         />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={inputStyle}
+        >
+          <option value="">Tüm Durumlar</option>
+          <option value="açık">Açık</option>
+          <option value="kapalı">Kapalı</option>
+        </select>
+        <button
+          onClick={() => {
+            setNameFilter("");
+            setCityFilter("");
+            setStatusFilter("");
+          }}
+          style={{
+            ...inputStyle,
+            cursor: "pointer",
+            backgroundColor: "#444",
+            border: "1px solid #666",
+            fontWeight: "bold",
+            width: "160px"
+          }}
+        >
+          Filtreleri Sıfırla
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ color: "#ccc", fontSize: "14px" }}>Tarihe göre:</span>
+          <button onClick={() => setSortOrder("desc")} style={sortBtnStyle(sortOrder === "desc")}>
+            En Yeni
+          </button>
+          <button onClick={() => setSortOrder("asc")} style={sortBtnStyle(sortOrder === "asc")}>
+            En Eski
+          </button>
+        </div>
       </div>
 
+      {/* 🔹 Tablo */}
       <table style={{
         width: "100%",
         borderCollapse: "collapse",
@@ -144,6 +211,7 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   );
 };
 
+// Stil nesneleri
 const inputStyle = {
   padding: "8px",
   borderRadius: "6px",
@@ -176,6 +244,19 @@ const btnStyle = (color) => ({
   borderRadius: "4px"
 });
 
+const sortBtnStyle = (active) => ({
+  backgroundColor: active ? "#4caf50" : "#444",
+  color: "#fff",
+  border: "none",
+  padding: "4px 10px",
+  borderRadius: "4px",
+  cursor: "pointer",
+  fontWeight: active ? "bold" : "normal"
+});
+
 export default WorkplaceList;
+
+
+
 
 
