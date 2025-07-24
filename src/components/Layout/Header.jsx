@@ -8,7 +8,7 @@ const Header = () => {
       <nav style={{ display: "flex", gap: "20px" }}>
         <Link to="/">Müşteri İşlemleri</Link>
         <Link to="/accounts">Hesap Tanımlama</Link>
-        {/* İleride işyeri tanımlama da ekleyebiliriz */}
+        <Link to="/workplaces">İşyeri Tanımlama</Link>
       </nav>
     </header>
   );
