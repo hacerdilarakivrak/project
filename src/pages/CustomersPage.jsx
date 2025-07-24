@@ -18,7 +18,7 @@ const CustomersPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2 style={{ color: "#333" }}>Müşteri İşlemleri</h2>
+      <h2 style={{ color: "#fff" }}>Müşteri İşlemleri</h2>
       <CustomerForm
         onCustomerAdded={handleRefresh}
         selectedCustomer={selectedCustomer}
