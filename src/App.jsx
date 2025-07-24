@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage"; // ← Yeni eklenen ana sayfa
 import CustomersPage from "./pages/CustomersPage";
 import AccountsPage from "./pages/AccountsPage";
 import WorkplacesPage from "./pages/WorkplacesPage";
+import HomePage from "./pages/HomePage";
 import Layout from "./components/Layout/Layout";
 
 function App() {
@@ -11,10 +11,10 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<HomePage />} />               {/* Ana sayfa */}
-          <Route path="/customers" element={<CustomersPage />} /> {/* Müşteri işlemleri */}
-          <Route path="/accounts" element={<AccountsPage />} />   {/* Hesap tanımlama */}
-          <Route path="/workplaces" element={<WorkplacesPage />} /> {/* İşyeri tanımlama */}
+          <Route path="/" element={<HomePage />} /> {/* ← Anasayfa */}
+          <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/accounts" element={<AccountsPage />} />
+          <Route path="/workplaces" element={<WorkplacesPage />} />
         </Routes>
       </Layout>
     </Router>

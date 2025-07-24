@@ -1,3 +1,4 @@
+// src/pages/CustomersPage.jsx
 import React, { useState } from "react";
 import CustomerForm from "../components/Customer/CustomerForm";
 import CustomerList from "../components/Customer/CustomerList";
@@ -8,25 +9,22 @@ const CustomersPage = () => {
 
   const handleRefresh = () => {
     setRefresh(!refresh);
-    setSelectedCustomer(null); 
+    setSelectedCustomer(null);
   };
 
   const handleEdit = (customer) => {
-    setSelectedCustomer(customer); 
+    setSelectedCustomer(customer);
   };
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2 style={{ color: "#fff" }}>Müşteri İşlemleri</h2>
+      <h2 style={{ color: "#333" }}>Müşteri İşlemleri</h2>
       <CustomerForm
         onCustomerAdded={handleRefresh}
         selectedCustomer={selectedCustomer}
       />
-      <hr style={{ borderColor: "#555" }} />
-      <CustomerList
-        refresh={refresh}
-        onEdit={handleEdit}
-      />
+      <hr style={{ borderColor: "#ccc" }} />
+      <CustomerList refresh={refresh} onEdit={handleEdit} />
     </div>
   );
 };

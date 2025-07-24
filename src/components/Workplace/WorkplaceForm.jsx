@@ -89,56 +89,59 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
   };
 
   return (
-    <div className="form-container" style={{ marginBottom: "30px" }}>
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-        {[
-          { label: "İşyeri No", name: "workplaceNo" },
-          { label: "İşyeri Adı", name: "name" },
-          { label: "Kayıt Tarihi", name: "registrationDate", type: "date" },
-          { label: "Kayıt Durumu", name: "status", type: "select", options: ["açık", "kapalı"] },
-          { label: "Ortak 1", name: "partner1" },
-          { label: "Ortak 2", name: "partner2" },
-          { label: "Yönetici Adı", name: "managerName" },
-          { label: "Adres", name: "address" },
-          { label: "Semt", name: "district" },
-          { label: "Şehir", name: "city" },
-          { label: "Posta Kodu", name: "postalCode" },
-          { label: "Telefon 1", name: "phone1" },
-          { label: "Telefon 2", name: "phone2" },
-          { label: "Cep Telefonu", name: "mobile" },
-          { label: "Fax", name: "fax" },
-          { label: "Vergi No", name: "taxNo" },
-          { label: "TC Kimlik No", name: "nationalId" },
-          { label: "İşyeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
-          { label: "Komisyon Oranı (%)", name: "commissionRate" },
-        ].map(({ label, name, type = "text", options }) => (
-          <div key={name} className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">{label}</label>
-            {type === "select" ? (
-              <select
-                name={name}
-                value={formData[name]}
-                onChange={handleChange}
-                className="p-2 rounded bg-gray-800 text-white border border-gray-600"
-              >
-                {options.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type={type}
-                name={name}
-                value={formData[name]}
-                onChange={handleChange}
-                className="p-2 rounded bg-gray-800 text-white border border-gray-600"
-              />
-            )}
-            {errors[name] && <span className="text-red-500 text-xs mt-1">{errors[name]}</span>}
-          </div>
-        ))}
+    <div className="bg-gray-900 p-6 rounded-md shadow-md text-white">
+      <h2 className="text-2xl font-bold mb-6">İşyeri Tanımlama</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            { label: "İşyeri No", name: "workplaceNo" },
+            { label: "İşyeri Adı", name: "name" },
+            { label: "Kayıt Tarihi", name: "registrationDate", type: "date" },
+            { label: "Kayıt Durumu", name: "status", type: "select", options: ["açık", "kapalı"] },
+            { label: "Ortak 1", name: "partner1" },
+            { label: "Ortak 2", name: "partner2" },
+            { label: "Yönetici Adı", name: "managerName" },
+            { label: "Adres", name: "address" },
+            { label: "Semt", name: "district" },
+            { label: "Şehir", name: "city" },
+            { label: "Posta Kodu", name: "postalCode" },
+            { label: "Telefon 1", name: "phone1" },
+            { label: "Telefon 2", name: "phone2" },
+            { label: "Cep Telefonu", name: "mobile" },
+            { label: "Fax", name: "fax" },
+            { label: "Vergi No", name: "taxNo" },
+            { label: "TC Kimlik No", name: "nationalId" },
+            { label: "İşyeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
+            { label: "Komisyon Oranı (%)", name: "commissionRate" },
+          ].map(({ label, name, type = "text", options }) => (
+            <div key={name} className="flex flex-col">
+              <label className="text-sm font-semibold mb-1">{label}</label>
+              {type === "select" ? (
+                <select
+                  name={name}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  className="p-2 rounded bg-gray-800 text-white border border-gray-600"
+                >
+                  {options.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={type}
+                  name={name}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  className="p-2 rounded bg-gray-800 text-white border border-gray-600"
+                />
+              )}
+              {errors[name] && <span className="text-red-500 text-xs mt-1">{errors[name]}</span>}
+            </div>
+          ))}
+        </div>
 
-        <div className="col-span-2 flex justify-between mt-4">
+        <div className="flex justify-between mt-6">
           {selectedWorkplace && (
             <button
               type="button"

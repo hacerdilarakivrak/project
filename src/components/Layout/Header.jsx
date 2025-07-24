@@ -9,19 +9,16 @@ const Header = () => {
         justifyContent: "space-between",
         alignItems: "center",
         padding: "16px 32px",
-        backgroundColor: "#f0f0f0",
-        borderBottom: "1px solid #ccc",
-        marginBottom: "20px",
+        backgroundColor: "#000", // siyah üst bar
+        borderBottom: "1px solid #444",
       }}
     >
-      {/* Sol logo veya başlık (Ana Sayfaya Link) */}
-      <div style={{ fontWeight: "bold", fontSize: "20px" }}>
-        <Link to="/" style={{ textDecoration: "none", color: "#333" }}>
+      <div style={{ fontWeight: "bold", fontSize: "20px", color: "#fff" }}>
+        <Link to="/" style={{ textDecoration: "none", color: "#fff" }}>
           Ziraat Bankası
         </Link>
       </div>
 
-      {/* Sağ menü */}
       <nav style={{ display: "flex", gap: "20px" }}>
         <Link to="/customers" style={linkStyle}>Müşteri İşlemleri</Link>
         <Link to="/accounts" style={linkStyle}>Hesap Tanımlama</Link>
@@ -33,11 +30,15 @@ const Header = () => {
 
 const linkStyle = {
   textDecoration: "none",
-  color: "#4b4bff",
+  color: "#fff",
   fontWeight: "bold",
   fontSize: "16px",
 };
 
 export default Header;
+
+
+
+
 
 
