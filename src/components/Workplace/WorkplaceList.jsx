@@ -5,6 +5,8 @@ const API_URL = "https://6881d02966a7eb81224c12c1.mockapi.io/workplaces";
 
 const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   const [workplaces, setWorkplaces] = useState([]);
+  const [nameFilter, setNameFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
 
   useEffect(() => {
     fetchWorkplaces();
@@ -30,9 +32,34 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
     }
   };
 
+  // Filtrelenmiş veri
+  const filteredWorkplaces = workplaces.filter((wp) =>
+    wp.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
+    wp.city.toLowerCase().includes(cityFilter.toLowerCase())
+  );
+
   return (
     <div style={{ marginTop: "40px", overflowX: "auto" }}>
       <h2 style={{ marginBottom: "16px", color: "#fff" }}>Tanımlı İşyeri Listesi</h2>
+
+      {/* Filtre alanları */}
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+        <input
+          type="text"
+          placeholder="İşyeri adına göre filtrele"
+          value={nameFilter}
+          onChange={(e) => setNameFilter(e.target.value)}
+          style={inputStyle}
+        />
+        <input
+          type="text"
+          placeholder="Şehre göre filtrele"
+          value={cityFilter}
+          onChange={(e) => setCityFilter(e.target.value)}
+          style={inputStyle}
+        />
+      </div>
+
       <table style={{
         width: "100%",
         borderCollapse: "collapse",
@@ -54,14 +81,14 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
           </tr>
         </thead>
         <tbody>
-          {workplaces.length === 0 ? (
+          {filteredWorkplaces.length === 0 ? (
             <tr>
               <td colSpan="20" style={{ textAlign: "center", padding: "12px", color: "#ccc" }}>
-                Henüz kayıtlı işyeri yok.
+                Filtreye uygun işyeri bulunamadı.
               </td>
             </tr>
           ) : (
-            workplaces.map((wp) => (
+            filteredWorkplaces.map((wp) => (
               <tr key={wp.id} style={{ backgroundColor: "#2a2a2a", textAlign: "center" }}>
                 <td style={tdStyle}>{wp.workplaceNo}</td>
                 <td style={tdStyle}>{wp.name}</td>
@@ -117,6 +144,15 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   );
 };
 
+const inputStyle = {
+  padding: "8px",
+  borderRadius: "6px",
+  border: "1px solid #888",
+  backgroundColor: "#2a2a2a",
+  color: "#fff",
+  width: "250px"
+};
+
 const thStyle = {
   padding: "8px",
   border: "1px solid #555",
@@ -141,4 +177,5 @@ const btnStyle = (color) => ({
 });
 
 export default WorkplaceList;
+
 
