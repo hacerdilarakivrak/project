@@ -260,7 +260,7 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
           name="dogumYeri"
           value={form.dogumYeri}
           onChange={handleChange}
-          placeholder="Örn: Eskişehir"
+          placeholder="Örn: İstanbul"
           style={inputStyle}
         />
       </div>
