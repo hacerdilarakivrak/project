@@ -102,7 +102,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
         gridTemplateColumns: "1fr 1fr",
         gap: "16px"
       }}>
-        {[
+        {[ 
           { label: "İşyeri No", name: "workplaceNo" },
           { label: "İşyeri Adı", name: "name" },
           { label: "Kayıt Tarihi", name: "registrationDate", type: "date" },
@@ -158,14 +158,14 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
                 setFormData(initialForm);
                 setSelectedWorkplace(null);
               }}
-              style={buttonStyle("#666")}
+              style={cancelButtonStyle}
             >
               İptal
             </button>
           )}
           <button
             type="submit"
-            style={buttonStyle("#007bff")}
+            style={submitButtonStyle}
           >
             {selectedWorkplace ? "Güncelle" : "Kaydet"}
           </button>
@@ -175,6 +175,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
   );
 };
 
+// ✅ Input stilleri
 const inputStyle = {
   padding: "10px",
   borderRadius: "6px",
@@ -184,17 +185,31 @@ const inputStyle = {
   fontSize: "14px"
 };
 
-const buttonStyle = (bgColor) => ({
+// ✅ Buton stilleri ayrı ayrı tanımlandı
+const cancelButtonStyle = {
   padding: "10px 20px",
-  backgroundColor: bgColor,
+  backgroundColor: "#6c757d",
   color: "#fff",
   border: "none",
   borderRadius: "6px",
   cursor: "pointer",
-  fontWeight: "bold"
-});
+  fontWeight: "bold",
+  transition: "0.3s",
+};
+
+const submitButtonStyle = {
+  padding: "10px 20px",
+  backgroundColor: "#007bff",
+  color: "#fff",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontWeight: "bold",
+  transition: "0.3s",
+};
 
 export default WorkplaceForm;
+
 
 
 
