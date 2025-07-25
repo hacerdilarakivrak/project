@@ -15,7 +15,7 @@ const Header = () => {
     >
       <div style={{ fontWeight: "bold", fontSize: "20px", color: "#fff" }}>
         <Link to="/" style={{ textDecoration: "none", color: "#fff" }}>
-          Ziraat Bankası
+          X Bankası
         </Link>
       </div>
 

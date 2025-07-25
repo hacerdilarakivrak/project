@@ -1,5 +1,25 @@
 import React from "react";
+import Slider from "react-slick";
 import { motion } from "framer-motion";
+
+// Slider ayarları
+const sliderSettings = {
+  dots: true,
+  infinite: true,
+  speed: 800,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  autoplay: true,
+  autoplaySpeed: 5000,
+  arrows: true,
+  pauseOnHover: true,
+};
+
+const bannerImages = [
+  "/images/banner1.jpg",
+  "/images/banner2.jpg",
+  "/images/banner3.jpg",
+];
 
 const HomePage = () => {
   return (
@@ -7,6 +27,9 @@ const HomePage = () => {
       style={{
         minHeight: "100vh",
         background: "linear-gradient(135deg, #1e1e1e 40%, #2d2d2d 100%)",
+        backgroundImage: `url('https://www.transparenttextures.com/patterns/cubes.png')`,
+        backgroundRepeat: "repeat",
+        backgroundSize: "auto",
         color: "#fff",
         position: "relative",
       }}
@@ -21,17 +44,38 @@ const HomePage = () => {
           fontWeight: "bold",
         }}
       >
-        Ziraat Bankası Uygulama Paneli
+        X Bankası Uygulama Paneli
       </header>
 
-      {/* İçerik - Animasyonlu */}
+      {/* Slider */}
+      <div style={{ maxWidth: "1000px", margin: "40px auto", zIndex: 2 }}>
+        <Slider {...sliderSettings}>
+          {bannerImages.map((src, index) => (
+            <div key={index}>
+              <img
+                src={src}
+                alt={`Slider ${index + 1}`}
+                style={{
+                  width: "100%",
+                  height: "400px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
+              />
+            </div>
+          ))}
+        </Slider>
+      </div>
+
+      {/* Animasyonlu içerik */}
       <motion.section
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
         style={{
           textAlign: "center",
-          paddingTop: "100px",
+          marginTop: "60px",
+          zIndex: 1,
         }}
       >
         <h2 style={{ fontSize: "32px", marginBottom: "16px" }}>Hoş Geldiniz</h2>
@@ -40,7 +84,7 @@ const HomePage = () => {
         </p>
       </motion.section>
 
-      {/* Animasyonlu arka plan simgesi (basit desen efekti) */}
+      {/* Arka planda hareketli kırmızı daire */}
       <motion.div
         animate={{ x: [0, 20, -20, 0], y: [0, 10, -10, 0] }}
         transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
@@ -70,13 +114,16 @@ const HomePage = () => {
           bottom: 0,
         }}
       >
-        © 2025 Ziraat Bankası Projesi
+        © 2025 X Bankası Projesi
       </footer>
     </div>
   );
 };
 
 export default HomePage;
+
+
+
 
 
 
