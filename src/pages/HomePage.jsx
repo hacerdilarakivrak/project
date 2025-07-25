@@ -48,7 +48,7 @@ const HomePage = () => {
       </header>
 
       {/* Slider */}
-      <div style={{ maxWidth: "1000px", margin: "40px auto", zIndex: 2 }}>
+      <div style={{ maxWidth: "1200px", margin: "40px auto", zIndex: 2 }}>
         <Slider {...sliderSettings}>
           {bannerImages.map((src, index) => (
             <div key={index}>
@@ -57,9 +57,9 @@ const HomePage = () => {
                 alt={`Slider ${index + 1}`}
                 style={{
                   width: "100%",
-                  height: "400px",
+                  height: "70vh", // Dinamik yüksek boy
                   objectFit: "cover",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                 }}
               />
             </div>
@@ -121,6 +121,7 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
 
 
 
