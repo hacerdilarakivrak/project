@@ -7,13 +7,13 @@ const Layout = ({ children }) => {
       <Header />
       <main
         style={{
-          padding: "20px",
-          maxWidth: "1200px",
-          margin: "0 auto",
-          overflowX: "auto",
+          width: "100vw",               // Tüm ekran genişliği
+          overflowX: "hidden",          // Yatay scroll engeli
           minHeight: "calc(100vh - 80px)",
-          backgroundColor: "#2c2c2c", // zemin gri
-          color: "#fff", // yazı beyaz
+          backgroundColor: "#2c2c2c",
+          color: "#fff",
+          margin: 0,
+          padding: 0,
         }}
       >
         {children}
@@ -23,6 +23,9 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+
+
+
 
 
 

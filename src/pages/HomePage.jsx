@@ -9,13 +9,14 @@ const CustomPrevArrow = ({ onClick }) => (
   <div
     style={{
       position: "absolute",
-      left: "10px",
+      left: "15px",
       top: "50%",
       transform: "translateY(-50%)",
       zIndex: 10,
       fontSize: "30px",
       cursor: "pointer",
       color: "#fff",
+      userSelect: "none",
     }}
     onClick={onClick}
   >
@@ -28,13 +29,14 @@ const CustomNextArrow = ({ onClick }) => (
   <div
     style={{
       position: "absolute",
-      right: "10px",
+      right: "15px",
       top: "50%",
       transform: "translateY(-50%)",
       zIndex: 10,
       fontSize: "30px",
       cursor: "pointer",
       color: "#fff",
+      userSelect: "none",
     }}
     onClick={onClick}
   >
@@ -66,35 +68,29 @@ const HomePage = () => {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #1e1e1e 40%, #2d2d2d 100%)",
-        color: "#fff",
-        position: "relative",
+        margin: 0,
+        padding: 0,
         overflowX: "hidden",
+        backgroundColor: "#1e1e1e",
+        color: "#fff",
       }}
     >
-      {/* Üst Başlık Panel */}
-      <header
+      {/* Kırmızı Başlık Paneli */}
+      <div
         style={{
           backgroundColor: "#9e0b0f",
-          padding: "20px",
+          padding: "20px 0",
           textAlign: "center",
           fontSize: "24px",
           fontWeight: "bold",
+          width: "100%",
         }}
       >
         X Bankası Uygulama Paneli
-      </header>
+      </div>
 
-      {/* Slider Alanı */}
-      <div
-        style={{
-          maxWidth: "96vw",
-          margin: "0 auto",
-          padding: "0 10px",
-          zIndex: 2,
-        }}
-      >
+      {/* Tam Ekran Slider */}
+      <div style={{ width: "100%", margin: 0, padding: 0 }}>
         <Slider {...sliderSettings}>
           {bannerImages.map((src, index) => (
             <div key={index}>
@@ -102,10 +98,10 @@ const HomePage = () => {
                 src={src}
                 alt={`Slider ${index + 1}`}
                 style={{
-                  width: "100%",
-                  height: "100vh",
+                  width: "100vw",
+                  height: "90vh",
                   objectFit: "cover",
-                  borderRadius: "10px",
+                  display: "block",
                 }}
               />
             </div>
@@ -121,7 +117,6 @@ const HomePage = () => {
         style={{
           textAlign: "center",
           marginTop: "60px",
-          zIndex: 1,
         }}
       >
         <h2 style={{ fontSize: "32px", marginBottom: "16px" }}>Hoş Geldiniz</h2>
@@ -155,9 +150,7 @@ const HomePage = () => {
           textAlign: "center",
           fontSize: "14px",
           color: "#aaa",
-          position: "absolute",
-          width: "100%",
-          bottom: 0,
+          marginTop: "80px",
         }}
       >
         © 2025 X Bankası Projesi
@@ -167,6 +160,12 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+
+
+
+
+
 
 
 
