@@ -11,7 +11,7 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<HomePage />} /> {/* ← Anasayfa */}
+          <Route path="/" element={<HomePage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/workplaces" element={<WorkplacesPage />} />
@@ -22,4 +22,5 @@ function App() {
 }
 
 export default App;
+
 

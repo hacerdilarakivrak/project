@@ -7,8 +7,8 @@ const Layout = ({ children }) => {
       <Header />
       <main
         style={{
-          width: "100vw",               // Tüm ekran genişliği
-          overflowX: "hidden",          // Yatay scroll engeli
+          width: "100vw",               
+          overflowX: "hidden",          
           minHeight: "calc(100vh - 80px)",
           backgroundColor: "#2c2c2c",
           color: "#fff",

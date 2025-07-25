@@ -10,7 +10,7 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
 
-  // Yeni sayaç state'leri
+  
   const [totalCount, setTotalCount] = useState(0);
   const [openCount, setOpenCount] = useState(0);
   const [closedCount, setClosedCount] = useState(0);
@@ -211,7 +211,7 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   );
 };
 
-// Stil nesneleri
+
 const inputStyle = {
   padding: "8px",
   borderRadius: "6px",

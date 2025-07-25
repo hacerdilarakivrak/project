@@ -18,7 +18,7 @@ const CustomerList = ({ refresh, onEdit }) => {
       const response = await axios.get(`${API_URL}?page=${page}&limit=${limit}`);
       setCustomers(response.data);
 
-      // Toplam kayıt sayısını öğrenmek için ekstra istek
+      
       const allRes = await axios.get(API_URL);
       const totalCount = allRes.data.length;
       setTotalPages(Math.ceil(totalCount / limit));

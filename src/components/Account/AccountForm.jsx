@@ -30,7 +30,7 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Sayısal alanlara sadece sayı ve nokta girişi
+    
     if (["bakiye", "blokeTutar", "faizOrani", "faizliBakiye"].includes(name)) {
       if (!/^\d*\.?\d*$/.test(value)) return;
     }

@@ -175,7 +175,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
   );
 };
 
-// ✅ Input stilleri
+
 const inputStyle = {
   padding: "10px",
   borderRadius: "6px",
@@ -185,7 +185,7 @@ const inputStyle = {
   fontSize: "14px"
 };
 
-// ✅ Buton stilleri ayrı ayrı tanımlandı
+
 const cancelButtonStyle = {
   padding: "10px 20px",
   backgroundColor: "#6c757d",

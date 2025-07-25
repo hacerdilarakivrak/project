@@ -30,8 +30,6 @@ const AccountsPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      {/* <h2>Hesap Tanımlama</h2> ❌ bu satırı kaldırdık */}
-
       <AccountForm
         onAccountAdd={handleRefresh}
         selectedAccount={selectedAccount}
@@ -63,3 +61,4 @@ const AccountsPage = () => {
 };
 
 export default AccountsPage;
+

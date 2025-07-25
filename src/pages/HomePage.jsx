@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-// Özel sol buton
 const CustomPrevArrow = ({ onClick }) => (
   <div
     style={{
@@ -24,7 +23,6 @@ const CustomPrevArrow = ({ onClick }) => (
   </div>
 );
 
-// Özel sağ buton
 const CustomNextArrow = ({ onClick }) => (
   <div
     style={{
@@ -44,7 +42,6 @@ const CustomNextArrow = ({ onClick }) => (
   </div>
 );
 
-// Slider ayarları
 const sliderSettings = {
   dots: true,
   infinite: true,
@@ -75,7 +72,6 @@ const HomePage = () => {
         color: "#fff",
       }}
     >
-      {/* Kırmızı Başlık Paneli */}
       <div
         style={{
           backgroundColor: "#9e0b0f",
@@ -89,7 +85,6 @@ const HomePage = () => {
         X Bankası Uygulama Paneli
       </div>
 
-      {/* Tam Ekran Slider */}
       <div style={{ width: "100%", margin: 0, padding: 0 }}>
         <Slider {...sliderSettings}>
           {bannerImages.map((src, index) => (
@@ -109,7 +104,6 @@ const HomePage = () => {
         </Slider>
       </div>
 
-      {/* Hoş Geldiniz metni */}
       <motion.section
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -125,7 +119,6 @@ const HomePage = () => {
         </p>
       </motion.section>
 
-      {/* Kırmızı daire animasyonu */}
       <motion.div
         animate={{ x: [0, 20, -20, 0], y: [0, 10, -10, 0] }}
         transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
@@ -142,7 +135,6 @@ const HomePage = () => {
         }}
       ></motion.div>
 
-      {/* Footer */}
       <footer
         style={{
           backgroundColor: "#111",
@@ -160,6 +152,7 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
 
 
 

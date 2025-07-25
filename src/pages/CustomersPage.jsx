@@ -1,4 +1,3 @@
-// src/pages/CustomersPage.jsx
 import React, { useState } from "react";
 import CustomerForm from "../components/Customer/CustomerForm";
 import CustomerList from "../components/Customer/CustomerList";
