@@ -1,6 +1,46 @@
 import React from "react";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
+// Özel sol buton
+const CustomPrevArrow = ({ onClick }) => (
+  <div
+    style={{
+      position: "absolute",
+      left: "10px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      zIndex: 10,
+      fontSize: "30px",
+      cursor: "pointer",
+      color: "#fff",
+    }}
+    onClick={onClick}
+  >
+    ‹
+  </div>
+);
+
+// Özel sağ buton
+const CustomNextArrow = ({ onClick }) => (
+  <div
+    style={{
+      position: "absolute",
+      right: "10px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      zIndex: 10,
+      fontSize: "30px",
+      cursor: "pointer",
+      color: "#fff",
+    }}
+    onClick={onClick}
+  >
+    ›
+  </div>
+);
 
 // Slider ayarları
 const sliderSettings = {
@@ -11,8 +51,9 @@ const sliderSettings = {
   slidesToScroll: 1,
   autoplay: true,
   autoplaySpeed: 5000,
-  arrows: true,
   pauseOnHover: true,
+  nextArrow: <CustomNextArrow />,
+  prevArrow: <CustomPrevArrow />,
 };
 
 const bannerImages = [
@@ -27,11 +68,9 @@ const HomePage = () => {
       style={{
         minHeight: "100vh",
         background: "linear-gradient(135deg, #1e1e1e 40%, #2d2d2d 100%)",
-        backgroundImage: `url('https://www.transparenttextures.com/patterns/cubes.png')`,
-        backgroundRepeat: "repeat",
-        backgroundSize: "auto",
         color: "#fff",
         position: "relative",
+        overflowX: "hidden",
       }}
     >
       {/* Üst Başlık Panel */}
@@ -47,8 +86,15 @@ const HomePage = () => {
         X Bankası Uygulama Paneli
       </header>
 
-      {/* Slider */}
-      <div style={{ maxWidth: "1200px", margin: "40px auto", zIndex: 2 }}>
+      {/* Slider Alanı */}
+      <div
+        style={{
+          maxWidth: "96vw",
+          margin: "0 auto",
+          padding: "0 10px",
+          zIndex: 2,
+        }}
+      >
         <Slider {...sliderSettings}>
           {bannerImages.map((src, index) => (
             <div key={index}>
@@ -57,9 +103,9 @@ const HomePage = () => {
                 alt={`Slider ${index + 1}`}
                 style={{
                   width: "100%",
-                  height: "70vh", // Dinamik yüksek boy
+                  height: "100vh",
                   objectFit: "cover",
-                  borderRadius: "12px",
+                  borderRadius: "10px",
                 }}
               />
             </div>
@@ -67,7 +113,7 @@ const HomePage = () => {
         </Slider>
       </div>
 
-      {/* Animasyonlu içerik */}
+      {/* Hoş Geldiniz metni */}
       <motion.section
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -84,7 +130,7 @@ const HomePage = () => {
         </p>
       </motion.section>
 
-      {/* Arka planda hareketli kırmızı daire */}
+      {/* Kırmızı daire animasyonu */}
       <motion.div
         animate={{ x: [0, 20, -20, 0], y: [0, 10, -10, 0] }}
         transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
@@ -121,6 +167,10 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+
+
+
 
 
 
