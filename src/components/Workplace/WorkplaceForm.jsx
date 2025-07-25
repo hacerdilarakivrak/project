@@ -47,13 +47,8 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
       "partner1", "partner2", "managerName", "district", "city"
     ];
 
-    if (onlyNumbers.includes(name) && !/^\d*$/.test(value)) {
-      return;
-    }
-
-    if (onlyLetters.includes(name) && !/^[a-zA-ZığüşöçİĞÜŞÖÇ\s]*$/.test(value)) {
-      return;
-    }
+    if (onlyNumbers.includes(name) && !/^\d*$/.test(value)) return;
+    if (onlyLetters.includes(name) && !/^[a-zA-ZığüşöçİĞÜŞÖÇ\s]*$/.test(value)) return;
 
     setFormData({ ...formData, [name]: value });
   };
@@ -89,59 +84,73 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
   };
 
   return (
-    <div className="bg-gray-900 p-6 rounded-md shadow-md text-white">
-      <h2 className="text-2xl font-bold mb-6">İşyeri Tanımlama</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { label: "İşyeri No", name: "workplaceNo" },
-            { label: "İşyeri Adı", name: "name" },
-            { label: "Kayıt Tarihi", name: "registrationDate", type: "date" },
-            { label: "Kayıt Durumu", name: "status", type: "select", options: ["açık", "kapalı"] },
-            { label: "Ortak 1", name: "partner1" },
-            { label: "Ortak 2", name: "partner2" },
-            { label: "Yönetici Adı", name: "managerName" },
-            { label: "Adres", name: "address" },
-            { label: "Semt", name: "district" },
-            { label: "Şehir", name: "city" },
-            { label: "Posta Kodu", name: "postalCode" },
-            { label: "Telefon 1", name: "phone1" },
-            { label: "Telefon 2", name: "phone2" },
-            { label: "Cep Telefonu", name: "mobile" },
-            { label: "Fax", name: "fax" },
-            { label: "Vergi No", name: "taxNo" },
-            { label: "TC Kimlik No", name: "nationalId" },
-            { label: "İşyeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
-            { label: "Komisyon Oranı (%)", name: "commissionRate" },
-          ].map(({ label, name, type = "text", options }) => (
-            <div key={name} className="flex flex-col">
-              <label className="text-sm font-semibold mb-1">{label}</label>
-              {type === "select" ? (
-                <select
-                  name={name}
-                  value={formData[name]}
-                  onChange={handleChange}
-                  className="p-2 rounded bg-gray-800 text-white border border-gray-600"
-                >
-                  {options.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={type}
-                  name={name}
-                  value={formData[name]}
-                  onChange={handleChange}
-                  className="p-2 rounded bg-gray-800 text-white border border-gray-600"
-                />
-              )}
-              {errors[name] && <span className="text-red-500 text-xs mt-1">{errors[name]}</span>}
-            </div>
-          ))}
-        </div>
+    <div style={{
+      backgroundColor: "#1e1e1e",
+      color: "#ffffff",
+      padding: "30px",
+      borderRadius: "8px",
+      maxWidth: "1000px",
+      margin: "40px auto",
+      boxShadow: "0 0 10px rgba(0,0,0,0.5)"
+    }}>
+      <h2 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "24px", textAlign: "center" }}>
+        İşyeri Tanımlama
+      </h2>
 
-        <div className="flex justify-between mt-6">
+      <form onSubmit={handleSubmit} style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "16px"
+      }}>
+        {[
+          { label: "İşyeri No", name: "workplaceNo" },
+          { label: "İşyeri Adı", name: "name" },
+          { label: "Kayıt Tarihi", name: "registrationDate", type: "date" },
+          { label: "Kayıt Durumu", name: "status", type: "select", options: ["açık", "kapalı"] },
+          { label: "Ortak 1", name: "partner1" },
+          { label: "Ortak 2", name: "partner2" },
+          { label: "Yönetici Adı", name: "managerName" },
+          { label: "Adres", name: "address" },
+          { label: "Semt", name: "district" },
+          { label: "Şehir", name: "city" },
+          { label: "Posta Kodu", name: "postalCode" },
+          { label: "Telefon 1", name: "phone1" },
+          { label: "Telefon 2", name: "phone2" },
+          { label: "Cep Telefonu", name: "mobile" },
+          { label: "Fax", name: "fax" },
+          { label: "Vergi No", name: "taxNo" },
+          { label: "TC Kimlik No", name: "nationalId" },
+          { label: "İşyeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
+          { label: "Komisyon Oranı (%)", name: "commissionRate" },
+        ].map(({ label, name, type = "text", options }) => (
+          <div key={name} style={{ display: "flex", flexDirection: "column" }}>
+            <label style={{ marginBottom: "4px", fontWeight: "bold", fontSize: "14px" }}>{label}</label>
+            {type === "select" ? (
+              <select
+                name={name}
+                value={formData[name]}
+                onChange={handleChange}
+                style={inputStyle}
+              >
+                {options.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type={type}
+                name={name}
+                value={formData[name]}
+                onChange={handleChange}
+                style={inputStyle}
+              />
+            )}
+            {errors[name] && <span style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{errors[name]}</span>}
+          </div>
+        ))}
+
+        {/* Butonlar */}
+        <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "space-between", marginTop: "24px" }}>
           {selectedWorkplace && (
             <button
               type="button"
@@ -149,12 +158,15 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
                 setFormData(initialForm);
                 setSelectedWorkplace(null);
               }}
-              className="px-4 py-2 bg-gray-500 hover:bg-gray-600 rounded text-white"
+              style={buttonStyle("#666")}
             >
               İptal
             </button>
           )}
-          <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white">
+          <button
+            type="submit"
+            style={buttonStyle("#007bff")}
+          >
             {selectedWorkplace ? "Güncelle" : "Kaydet"}
           </button>
         </div>
@@ -163,7 +175,28 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
   );
 };
 
+const inputStyle = {
+  padding: "10px",
+  borderRadius: "6px",
+  border: "1px solid #888",
+  backgroundColor: "#2a2a2a",
+  color: "#fff",
+  fontSize: "14px"
+};
+
+const buttonStyle = (bgColor) => ({
+  padding: "10px 20px",
+  backgroundColor: bgColor,
+  color: "#fff",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontWeight: "bold"
+});
+
 export default WorkplaceForm;
+
+
 
 
 
