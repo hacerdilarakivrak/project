@@ -61,8 +61,8 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name) newErrors.name = "İşyeri adı zorunludur";
-    if (!formData.workplaceNo) newErrors.workplaceNo = "İşyeri numarası girilmelidir";
+    if (!formData.name) newErrors.name = "İş yeri adı zorunludur";
+    if (!formData.workplaceNo) newErrors.workplaceNo = "İş yeri numarası girilmelidir";
     if (!formData.taxNo || formData.taxNo.length !== 10) newErrors.taxNo = "Vergi no 10 haneli olmalıdır";
     if (!formData.nationalId || formData.nationalId.length !== 11) newErrors.nationalId = "TC kimlik no 11 haneli olmalıdır";
     if (!formData.commissionRate) newErrors.commissionRate = "Komisyon oranı girilmelidir";
@@ -101,7 +101,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
       boxShadow: "0 0 10px rgba(0,0,0,0.5)"
     }}>
       <h2 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "24px", textAlign: "center" }}>
-        İşyeri Tanımlama
+        İş Yeri Tanımlama
       </h2>
 
       <form onSubmit={handleSubmit} style={{
@@ -110,8 +110,8 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
         gap: "16px"
       }}>
         {[
-          { label: "İşyeri No", name: "workplaceNo" },
-          { label: "İşyeri Adı", name: "name" },
+          { label: "İş Yeri No", name: "workplaceNo" },
+          { label: "İş Yeri Adı", name: "name" },
           { label: "Kayıt Tarihi", name: "registrationDate", type: "date" },
           { label: "Kayıt Durumu", name: "status", type: "select", options: ["açık", "kapalı"] },
           { label: "Ortak 1", name: "partner1" },
@@ -127,10 +127,10 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
           { label: "Fax", name: "fax" },
           { label: "Vergi No", name: "taxNo" },
           { label: "TC Kimlik No", name: "nationalId" },
-          { label: "İşyeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
+          { label: "İş Yeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
           { label: "Komisyon Oranı (%)", name: "commissionRate" },
           { label: "Müşteri", name: "customerId", type: "select", dynamicOptions: true },
-        ].map(({ label, name, type = "text", options, dynamicOptions }) => {
+        ].map(({ label, name, type = "text", options }) => {
           const isDisabledForSanal = [
             "address", "district", "city", "postalCode",
             "phone1", "phone2", "mobile", "fax"
@@ -157,7 +157,9 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
                         <option key={opt} value={opt}>{opt}</option>
                       ))
                     : customers.map((cust) => (
-                        <option key={cust.id} value={cust.id}>{cust.adSoyad}</option>
+                        <option key={cust.id} value={cust.id}>
+                          {cust.musteriNo} - {cust.ad} {cust.soyad} - {cust.unvan}
+                        </option>
                       ))}
                 </select>
               ) : (
@@ -233,6 +235,8 @@ const submitButtonStyle = {
 };
 
 export default WorkplaceForm;
+
+
 
 
 
