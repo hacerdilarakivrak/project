@@ -10,7 +10,6 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
 
-  
   const [totalCount, setTotalCount] = useState(0);
   const [openCount, setOpenCount] = useState(0);
   const [closedCount, setClosedCount] = useState(0);
@@ -59,7 +58,6 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
     <div style={{ marginTop: "40px", overflowX: "auto" }}>
       <h2 style={{ marginBottom: "16px", color: "#fff" }}>Tanımlı İşyeri Listesi</h2>
 
-      {/* 🔹 Sayaçlar */}
       <div style={{
         display: "flex",
         gap: "20px",
@@ -73,7 +71,6 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
         <div style={{ color: "#f44336" }}>Kapalı: {closedCount}</div>
       </div>
 
-      {/* 🔹 Filtre Alanları */}
       <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
         <input
           type="text"
@@ -126,7 +123,6 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
         </div>
       </div>
 
-      {/* 🔹 Tablo */}
       <table style={{
         width: "100%",
         borderCollapse: "collapse",
@@ -211,7 +207,6 @@ const WorkplaceList = ({ refresh, onRefresh, setSelectedWorkplace }) => {
   );
 };
 
-
 const inputStyle = {
   padding: "8px",
   borderRadius: "6px",
@@ -255,6 +250,7 @@ const sortBtnStyle = (active) => ({
 });
 
 export default WorkplaceList;
+
 
 
 
