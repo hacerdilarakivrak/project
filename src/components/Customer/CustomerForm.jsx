@@ -25,7 +25,7 @@ const initialForm = {
   cinsiyet: "", ogrenimDurumu: "", medeniDurum: "", kamuDurumu: false
 };
 
-const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
+const CustomerForm = ({ onCustomerAdded, selectedCustomer, clearSelection }) => {
   const [form, setForm] = useState(initialForm);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
       }
 
       setForm(initialForm);
-      if (onCustomerAdd) onCustomerAdd();
+      if (onCustomerAdded) onCustomerAdded();
       if (clearSelection) clearSelection();
     } catch (error) {
       alert("Hata oluştu: " + error);
@@ -331,3 +331,4 @@ const CustomerForm = ({ onCustomerAdd, selectedCustomer, clearSelection }) => {
 };
 
 export default CustomerForm;
+
