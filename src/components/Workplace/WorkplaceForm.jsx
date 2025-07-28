@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const API_URL = "https://6881d02966a7eb81224c12c1.mockapi.io/workplaces";
+const CUSTOMERS_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
 
 const initialForm = {
   workplaceNo: "",
@@ -23,16 +24,21 @@ const initialForm = {
   nationalId: "",
   workplaceType: "normal",
   commissionRate: "",
+  customerId: ""
 };
 
 const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) => {
   const [formData, setFormData] = useState(initialForm);
   const [errors, setErrors] = useState({});
+  const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
     if (selectedWorkplace) {
       setFormData(selectedWorkplace);
     }
+    axios.get(CUSTOMERS_API)
+      .then((res) => setCustomers(res.data))
+      .catch((err) => console.error("Müşteriler alınamadı:", err));
   }, [selectedWorkplace]);
 
   const handleChange = (e) => {
@@ -60,6 +66,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
     if (!formData.taxNo || formData.taxNo.length !== 10) newErrors.taxNo = "Vergi no 10 haneli olmalıdır";
     if (!formData.nationalId || formData.nationalId.length !== 11) newErrors.nationalId = "TC kimlik no 11 haneli olmalıdır";
     if (!formData.commissionRate) newErrors.commissionRate = "Komisyon oranı girilmelidir";
+    if (!formData.customerId) newErrors.customerId = "Müşteri seçilmelidir";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -122,7 +129,8 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
           { label: "TC Kimlik No", name: "nationalId" },
           { label: "İşyeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
           { label: "Komisyon Oranı (%)", name: "commissionRate" },
-        ].map(({ label, name, type = "text", options }) => {
+          { label: "Müşteri", name: "customerId", type: "select", dynamicOptions: true },
+        ].map(({ label, name, type = "text", options, dynamicOptions }) => {
           const isDisabledForSanal = [
             "address", "district", "city", "postalCode",
             "phone1", "phone2", "mobile", "fax"
@@ -143,9 +151,14 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
                     cursor: isDisabledForSanal ? "not-allowed" : "text"
                   }}
                 >
-                  {options.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
+                  <option value="">Seçiniz</option>
+                  {options
+                    ? options.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))
+                    : customers.map((cust) => (
+                        <option key={cust.id} value={cust.id}>{cust.adSoyad}</option>
+                      ))}
                 </select>
               ) : (
                 <input
@@ -166,7 +179,6 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
           );
         })}
 
-        {/* Butonlar */}
         <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "space-between", marginTop: "24px" }}>
           {selectedWorkplace && (
             <button
@@ -180,10 +192,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
               İptal
             </button>
           )}
-          <button
-            type="submit"
-            style={submitButtonStyle}
-          >
+          <button type="submit" style={submitButtonStyle}>
             {selectedWorkplace ? "Güncelle" : "Kaydet"}
           </button>
         </div>
@@ -209,7 +218,7 @@ const cancelButtonStyle = {
   borderRadius: "6px",
   cursor: "pointer",
   fontWeight: "bold",
-  transition: "0.3s",
+  transition: "0.3s"
 };
 
 const submitButtonStyle = {
@@ -220,10 +229,11 @@ const submitButtonStyle = {
   borderRadius: "6px",
   cursor: "pointer",
   fontWeight: "bold",
-  transition: "0.3s",
+  transition: "0.3s"
 };
 
 export default WorkplaceForm;
+
 
 
 
