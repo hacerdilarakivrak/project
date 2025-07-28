@@ -102,7 +102,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
         gridTemplateColumns: "1fr 1fr",
         gap: "16px"
       }}>
-        {[ 
+        {[
           { label: "İşyeri No", name: "workplaceNo" },
           { label: "İşyeri Adı", name: "name" },
           { label: "Kayıt Tarihi", name: "registrationDate", type: "date" },
@@ -122,32 +122,49 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
           { label: "TC Kimlik No", name: "nationalId" },
           { label: "İşyeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
           { label: "Komisyon Oranı (%)", name: "commissionRate" },
-        ].map(({ label, name, type = "text", options }) => (
-          <div key={name} style={{ display: "flex", flexDirection: "column" }}>
-            <label style={{ marginBottom: "4px", fontWeight: "bold", fontSize: "14px" }}>{label}</label>
-            {type === "select" ? (
-              <select
-                name={name}
-                value={formData[name]}
-                onChange={handleChange}
-                style={inputStyle}
-              >
-                {options.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type={type}
-                name={name}
-                value={formData[name]}
-                onChange={handleChange}
-                style={inputStyle}
-              />
-            )}
-            {errors[name] && <span style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{errors[name]}</span>}
-          </div>
-        ))}
+        ].map(({ label, name, type = "text", options }) => {
+          const isDisabledForSanal = [
+            "address", "district", "city", "postalCode",
+            "phone1", "phone2", "mobile", "fax"
+          ].includes(name) && formData.workplaceType === "sanal";
+
+          return (
+            <div key={name} style={{ display: "flex", flexDirection: "column" }}>
+              <label style={{ marginBottom: "4px", fontWeight: "bold", fontSize: "14px" }}>{label}</label>
+              {type === "select" ? (
+                <select
+                  name={name}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  disabled={isDisabledForSanal}
+                  style={{
+                    ...inputStyle,
+                    backgroundColor: isDisabledForSanal ? "#555" : inputStyle.backgroundColor,
+                    cursor: isDisabledForSanal ? "not-allowed" : "text"
+                  }}
+                >
+                  {options.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={type}
+                  name={name}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  disabled={isDisabledForSanal}
+                  style={{
+                    ...inputStyle,
+                    backgroundColor: isDisabledForSanal ? "#555" : inputStyle.backgroundColor,
+                    cursor: isDisabledForSanal ? "not-allowed" : "text"
+                  }}
+                />
+              )}
+              {errors[name] && <span style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{errors[name]}</span>}
+            </div>
+          );
+        })}
 
         {/* Butonlar */}
         <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "space-between", marginTop: "24px" }}>
@@ -175,7 +192,6 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
   );
 };
 
-
 const inputStyle = {
   padding: "10px",
   borderRadius: "6px",
@@ -184,7 +200,6 @@ const inputStyle = {
   color: "#fff",
   fontSize: "14px"
 };
-
 
 const cancelButtonStyle = {
   padding: "10px 20px",
@@ -209,6 +224,7 @@ const submitButtonStyle = {
 };
 
 export default WorkplaceForm;
+
 
 
 
