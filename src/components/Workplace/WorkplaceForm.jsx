@@ -182,18 +182,38 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
         })}
 
         <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "space-between", marginTop: "24px" }}>
-          {selectedWorkplace && (
-            <button
-              type="button"
-              onClick={() => {
-                setFormData(initialForm);
-                setSelectedWorkplace(null);
-              }}
-              style={cancelButtonStyle}
-            >
-              İptal
-            </button>
-          )}
+          <div style={{ display: "flex", gap: "12px" }}>
+            {!selectedWorkplace && (
+              <button
+                type="button"
+                onClick={() => setFormData(initialForm)}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "#007bff",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  transition: "0.3s"
+                }}
+              >
+                Temizle
+              </button>
+            )}
+            {selectedWorkplace && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData(initialForm);
+                  setSelectedWorkplace(null);
+                }}
+                style={cancelButtonStyle}
+              >
+                İptal
+              </button>
+            )}
+          </div>
           <button type="submit" style={submitButtonStyle}>
             {selectedWorkplace ? "Güncelle" : "Kaydet"}
           </button>
@@ -235,6 +255,7 @@ const submitButtonStyle = {
 };
 
 export default WorkplaceForm;
+
 
 
 
