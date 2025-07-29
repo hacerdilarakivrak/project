@@ -37,6 +37,10 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
     }
   };
 
+  useEffect(() => {
+    console.log("API'den gelen hesaplar:", accounts);
+  }, [accounts]);
+
   return (
     <div style={{ marginTop: "40px", overflowX: "auto", paddingBottom: "30px" }}>
       <h2 style={{ marginBottom: "16px", color: "#fff" }}>📑 Tanımlı Hesaplar</h2>
@@ -50,7 +54,7 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
               width: "100%",
               borderCollapse: "collapse",
               fontSize: "14px",
-              minWidth: "1200px",
+              minWidth: "1300px",
               backgroundColor: "#1e1e1e",
               color: "#f1f1f1",
             }}
@@ -58,11 +62,24 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
             <thead style={{ backgroundColor: "#333" }}>
               <tr>
                 {[
-                  "Müşteri No", "Ek No", "Kayıt Tarihi", "Kayıt Durumu", "Hesap Adı",
-                  "Döviz", "Bakiye", "Bloke", "Faiz (%)", "IBAN", "Kapanma Tarihi",
-                  "Faizli Bakiye", "İşlem"
+                  "Müşteri No",
+                  "Ek No",
+                  "Kayıt Tarihi",
+                  "Kayıt Durumu",
+                  "Hesap Adı",
+                  "Döviz",
+                  "Bakiye",
+                  "Bloke",
+                  "Faiz (%)",
+                  "IBAN",
+                  "Hesap Türü",
+                  "Kapanma Tarihi",
+                  "Faizli Bakiye",
+                  "İşlem",
                 ].map((header, i) => (
-                  <th key={i} style={thStyle}>{header}</th>
+                  <th key={i} style={thStyle}>
+                    {header}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -91,19 +108,14 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
                   <td style={cellStyle}>{acc.blokeTutar}</td>
                   <td style={cellStyle}>{acc.faizOrani}</td>
                   <td style={cellStyle}>{acc.iban}</td>
+                  <td style={cellStyle}>{acc.hesapTuru || "-"}</td>
                   <td style={cellStyle}>{acc.kapanmaTarihi || "-"}</td>
                   <td style={cellStyle}>{acc.faizliBakiye}</td>
                   <td style={cellStyle}>
-                    <button
-                      onClick={() => onEdit(acc)}
-                      style={buttonStyle("dodgerblue")}
-                    >
+                    <button onClick={() => onEdit(acc)} style={buttonStyle("dodgerblue")}>
                       Güncelle
                     </button>
-                    <button
-                      onClick={() => handleDelete(acc.id)}
-                      style={buttonStyle("crimson")}
-                    >
+                    <button onClick={() => handleDelete(acc.id)} style={buttonStyle("crimson")}>
                       Sil
                     </button>
                   </td>
@@ -112,7 +124,6 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
             </tbody>
           </table>
 
-          {/* Sayfalama butonları */}
           <div style={{ marginTop: "20px", textAlign: "center" }}>
             {Array.from({ length: totalPages }, (_, i) => (
               <button
@@ -161,5 +172,8 @@ const buttonStyle = (bgColor) => ({
 });
 
 export default AccountList;
+
+
+
 
 

@@ -14,8 +14,9 @@ const initialForm = {
   blokeTutar: "",
   faizOrani: "",
   iban: "",
+  hesapTuru: "",
   kapanmaTarihi: "",
-  faizliBakiye: "0.00"
+  faizliBakiye: "0.00",
 };
 
 const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers }) => {
@@ -30,7 +31,6 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    
     if (["bakiye", "blokeTutar", "faizOrani", "faizliBakiye"].includes(name)) {
       if (!/^\d*\.?\d*$/.test(value)) return;
     }
@@ -119,6 +119,15 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
         </div>
 
         <div style={fieldStyle}>
+          <label style={labelStyle}>Hesap Türü:</label>
+          <select name="hesapTuru" value={form.hesapTuru} onChange={handleChange} required>
+            <option value="">Hesap Türü Seçin</option>
+            <option value="Vadeli">Vadeli</option>
+            <option value="Vadesiz">Vadesiz</option>
+          </select>
+        </div>
+
+        <div style={fieldStyle}>
           <label style={labelStyle}>Bakiye:</label>
           <input name="bakiye" value={form.bakiye} onChange={handleChange} />
         </div>
@@ -192,6 +201,7 @@ const labelStyle = {
 };
 
 export default AccountForm;
+
 
 
 
