@@ -35,14 +35,13 @@ const Dashboard = () => {
   const today = new Date().toISOString().split("T")[0];
   const todaysAccounts = accounts.filter((acc) => acc.kayitTarihi === today).length;
 
-  // Müşteri verilerini haftalara göre gruplama
   const weeklyData = customers
     .filter((c) => c.kayitTarihi)
     .reduce((acc, customer) => {
       const date = new Date(customer.kayitTarihi);
       const monday = new Date(date);
       const day = monday.getDay();
-      const diff = (day === 0 ? -6 : 1) - day; // Pazartesi'ye kaydır
+      const diff = (day === 0 ? -6 : 1) - day;
       monday.setDate(monday.getDate() + diff);
 
       const mondayStr = monday.toISOString().split("T")[0];
@@ -56,7 +55,7 @@ const Dashboard = () => {
       return acc;
     }, [])
     .sort((a, b) => new Date(a.weekStart) - new Date(b.weekStart))
-    .slice(-4); // Son 4 haftayı göster
+    .slice(-4);
 
   const accountTypeData = [
     {
@@ -69,7 +68,7 @@ const Dashboard = () => {
     },
   ];
 
-  const COLORS = ["#0088FE", "#FF8042"];
+  const COLORS = ["#0088FE", "#FF8042", "#00C49F", "#FFBB28"];
 
   return (
     <div style={{ padding: "20px", color: "#fff", textAlign: "center" }}>
@@ -168,6 +167,9 @@ const Card = ({ title, value }) => (
 );
 
 export default Dashboard;
+
+
+
 
 
 

@@ -110,6 +110,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
         gap: "16px"
       }}>
         {[
+          { label: "Müşteri No", name: "customerId", type: "select", dynamicOptions: true }, 
           { label: "İş Yeri No", name: "workplaceNo" },
           { label: "İş Yeri Adı", name: "name" },
           { label: "Kayıt Tarihi", name: "registrationDate", type: "date" },
@@ -128,8 +129,7 @@ const WorkplaceForm = ({ onRefresh, selectedWorkplace, setSelectedWorkplace }) =
           { label: "Vergi No", name: "taxNo" },
           { label: "TC Kimlik No", name: "nationalId" },
           { label: "İş Yeri Tipi", name: "workplaceType", type: "select", options: ["normal", "sanal"] },
-          { label: "Komisyon Oranı (%)", name: "commissionRate" },
-          { label: "Müşteri", name: "customerId", type: "select", dynamicOptions: true },
+          { label: "Komisyon Oranı (%)", name: "commissionRate" }
         ].map(({ label, name, type = "text", options }) => {
           const isDisabledForSanal = [
             "address", "district", "city", "postalCode",
@@ -255,6 +255,7 @@ const submitButtonStyle = {
 };
 
 export default WorkplaceForm;
+
 
 
 
