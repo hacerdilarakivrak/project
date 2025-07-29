@@ -35,21 +35,26 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
       if (!/^\d*\.?\d*$/.test(value)) return;
     }
 
-    setForm({ ...form, [name]: value });
+    let updatedForm = { ...form, [name]: value };
+
+    // Faizli Bakiye Hesaplama
+    const bakiye = parseFloat(updatedForm.bakiye) || 0;
+    const faizOrani = parseFloat(updatedForm.faizOrani) || 0;
+    updatedForm.faizliBakiye = (bakiye + (bakiye * faizOrani) / 100).toFixed(2);
+
+    setForm(updatedForm);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (selectedAccount) {
-        // Güncelleme
         await axios.put(`${API_URL}/${selectedAccount.id}`, form);
         alert("Hesap güncellendi.");
       } else {
-        // Yeni hesap ekleme (createdAt ekleniyor)
         const newAccount = {
           ...form,
-          createdAt: new Date().toISOString(), // Bugün açılan hesap takibi için eklenen alan
+          createdAt: new Date().toISOString(),
         };
 
         await axios.post(API_URL, newAccount);
@@ -81,9 +86,9 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
         }}
       >
         <div style={fieldStyle}>
-          <label style={labelStyle}>Müşteri Seçin:</label>
+          <label style={labelStyle}>Müşteri No:</label>
           <select name="musteriNo" value={form.musteriNo} onChange={handleChange} required>
-            <option value="">Müşteri Seçin</option>
+            <option value="">Seçiniz</option>
             {customers.map((c) => (
               <option key={c.musteriNo} value={c.musteriNo}>
                 {c.ad} {c.soyad} - {c.musteriNo}
@@ -209,8 +214,4 @@ const labelStyle = {
 };
 
 export default AccountForm;
-
-
-
-
 
