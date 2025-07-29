@@ -42,12 +42,20 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
     e.preventDefault();
     try {
       if (selectedAccount) {
+        // Güncelleme
         await axios.put(`${API_URL}/${selectedAccount.id}`, form);
         alert("Hesap güncellendi.");
       } else {
-        await axios.post(API_URL, form);
+        // Yeni hesap ekleme (createdAt ekleniyor)
+        const newAccount = {
+          ...form,
+          createdAt: new Date().toISOString(), // Bugün açılan hesap takibi için eklenen alan
+        };
+
+        await axios.post(API_URL, newAccount);
         alert("Hesap eklendi.");
       }
+
       setForm(initialForm);
       if (onAccountAdd) onAccountAdd();
       if (clearSelection) clearSelection();
@@ -201,6 +209,7 @@ const labelStyle = {
 };
 
 export default AccountForm;
+
 
 
 

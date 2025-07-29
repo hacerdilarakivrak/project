@@ -21,20 +21,23 @@ const Dashboard = () => {
   const [workplaces, setWorkplaces] = useState([]);
 
   useEffect(() => {
-    axios.get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers")
+    axios
+      .get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers")
       .then((res) => setCustomers(res.data));
 
-    axios.get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts")
+    axios
+      .get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts")
       .then((res) => setAccounts(res.data));
 
-    axios.get("https://6881d02966a7eb81224c12c1.mockapi.io/workplaces")
+    axios
+      .get("https://6881d02966a7eb81224c12c1.mockapi.io/workplaces")
       .then((res) => setWorkplaces(res.data));
   }, []);
 
   const today = new Date().toISOString().split("T")[0];
-  const todaysAccounts = accounts.filter(acc => acc.createdAt?.split("T")[0] === today).length;
+  const todaysAccounts = accounts.filter((acc) => acc.kayitTarihi === today).length;
 
-  const customerGrowthData = customers.map(c => ({
+  const customerGrowthData = customers.map((c) => ({
     date: new Date(c.createdAt).toLocaleDateString(),
     count: 1,
   }));
@@ -48,41 +51,51 @@ const Dashboard = () => {
   );
 
   const accountTypeData = [
-    { name: "Vadeli", value: accounts.filter(a => a.hesapTuru?.toLowerCase() === "vadeli").length },
-    { name: "Vadesiz", value: accounts.filter(a => a.hesapTuru?.toLowerCase() === "vadesiz").length },
+    {
+      name: "Vadeli",
+      value: accounts.filter((a) => a.hesapTuru?.toLowerCase() === "vadeli").length,
+    },
+    {
+      name: "Vadesiz",
+      value: accounts.filter((a) => a.hesapTuru?.toLowerCase() === "vadesiz").length,
+    },
   ];
 
   const COLORS = ["#0088FE", "#FF8042"];
 
-  const workplaceAccountData = workplaces.map(work => ({
+  const workplaceAccountData = workplaces.map((work) => ({
     name: work.name,
-    count: accounts.filter(a => a.workplaceId === work.id).length,
+    count: accounts.filter((a) => a.workplaceId === work.id).length,
   }));
 
   return (
     <div style={{ padding: "20px", color: "#fff", textAlign: "center" }}>
       <h2>Dashboard</h2>
 
-      <div style={{
-        display: "flex",
-        gap: "20px",
-        marginTop: "20px",
-        justifyContent: "center",
-        flexWrap: "wrap",
-      }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          marginTop: "20px",
+          justifyContent: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <Card title="Toplam Müşteri" value={customers.length} />
         <Card title="Toplam Hesap" value={accounts.length} />
         <Card title="Toplam İşyeri" value={workplaces.length} />
         <Card title="Bugün Açılan Hesaplar" value={todaysAccounts} />
       </div>
 
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        flexWrap: "wrap",
-        gap: "50px",
-        marginTop: "50px",
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: "50px",
+          marginTop: "50px",
+        }}
+      >
         <div>
           <h3>Müşteri Artışı</h3>
           <LineChart width={400} height={250} data={groupedCustomerData}>
@@ -132,20 +145,23 @@ const Dashboard = () => {
 };
 
 const Card = ({ title, value }) => (
-  <div style={{
-    background: "#222",
-    padding: "20px",
-    borderRadius: "8px",
-    width: "200px",
-    border: "1px solid #444",
-    textAlign: "center",
-  }}>
+  <div
+    style={{
+      background: "#222",
+      padding: "20px",
+      borderRadius: "8px",
+      width: "200px",
+      border: "1px solid #444",
+      textAlign: "center",
+    }}
+  >
     <h3>{title}</h3>
     <p style={{ fontSize: "24px", fontWeight: "bold" }}>{value}</p>
   </div>
 );
 
 export default Dashboard;
+
 
 
 
