@@ -9,7 +9,7 @@ const Header = () => {
         justifyContent: "space-between",
         alignItems: "center",
         padding: "16px 32px",
-        backgroundColor: "#000", 
+        backgroundColor: "#000",
         borderBottom: "1px solid #444",
       }}
     >
@@ -20,6 +20,7 @@ const Header = () => {
       </div>
 
       <nav style={{ display: "flex", gap: "20px" }}>
+        <Link to="/dashboard" style={linkStyle}>Dashboard</Link>
         <Link to="/customers" style={linkStyle}>Müşteri İşlemleri</Link>
         <Link to="/accounts" style={linkStyle}>Hesap Tanımlama</Link>
         <Link to="/workplaces" style={linkStyle}>İşyeri Tanımlama</Link>
@@ -36,6 +37,8 @@ const linkStyle = {
 };
 
 export default Header;
+
+
 
 
 

@@ -4,6 +4,7 @@ import CustomersPage from "./pages/CustomersPage";
 import AccountsPage from "./pages/AccountsPage";
 import WorkplacesPage from "./pages/WorkplacesPage";
 import HomePage from "./pages/HomePage";
+import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout/Layout";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/workplaces" element={<WorkplacesPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Layout>
     </Router>
@@ -22,5 +24,6 @@ function App() {
 }
 
 export default App;
+
 
 
