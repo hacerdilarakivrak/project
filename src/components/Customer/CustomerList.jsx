@@ -18,7 +18,6 @@ const CustomerList = ({ refresh, onEdit }) => {
       const response = await axios.get(`${API_URL}?page=${page}&limit=${limit}`);
       setCustomers(response.data);
 
-      
       const allRes = await axios.get(API_URL);
       const totalCount = allRes.data.length;
       setTotalPages(Math.ceil(totalCount / limit));
@@ -98,7 +97,6 @@ const CustomerList = ({ refresh, onEdit }) => {
             </tbody>
           </table>
 
-          {/* Sayfalama Butonları */}
           <div style={{ marginTop: "20px", textAlign: "center" }}>
             {Array.from({ length: totalPages }, (_, i) => (
               <button
@@ -148,5 +146,6 @@ const btnStyle = (bgColor) => ({
 });
 
 export default CustomerList;
+
 
 

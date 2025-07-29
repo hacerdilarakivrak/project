@@ -37,7 +37,7 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
 
     let updatedForm = { ...form, [name]: value };
 
-    // Faizli Bakiye Hesaplama
+    
     const bakiye = parseFloat(updatedForm.bakiye) || 0;
     const faizOrani = parseFloat(updatedForm.faizOrani) || 0;
     updatedForm.faizliBakiye = (bakiye + (bakiye * faizOrani) / 100).toFixed(2);
