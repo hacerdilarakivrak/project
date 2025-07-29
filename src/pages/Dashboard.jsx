@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -37,18 +35,28 @@ const Dashboard = () => {
   const today = new Date().toISOString().split("T")[0];
   const todaysAccounts = accounts.filter((acc) => acc.kayitTarihi === today).length;
 
-  const customerGrowthData = customers.map((c) => ({
-    date: new Date(c.createdAt).toLocaleDateString(),
-    count: 1,
-  }));
+  // Müşteri verilerini haftalara göre gruplama
+  const weeklyData = customers
+    .filter((c) => c.kayitTarihi)
+    .reduce((acc, customer) => {
+      const date = new Date(customer.kayitTarihi);
+      const monday = new Date(date);
+      const day = monday.getDay();
+      const diff = (day === 0 ? -6 : 1) - day; // Pazartesi'ye kaydır
+      monday.setDate(monday.getDate() + diff);
 
-  const groupedCustomerData = Object.values(
-    customerGrowthData.reduce((acc, cur) => {
-      acc[cur.date] = acc[cur.date] || { date: cur.date, count: 0 };
-      acc[cur.date].count += 1;
+      const mondayStr = monday.toISOString().split("T")[0];
+      const existing = acc.find((d) => d.weekStart === mondayStr);
+
+      if (existing) {
+        existing.count += 1;
+      } else {
+        acc.push({ weekStart: mondayStr, count: 1 });
+      }
       return acc;
-    }, {})
-  );
+    }, [])
+    .sort((a, b) => new Date(a.weekStart) - new Date(b.weekStart))
+    .slice(-4); // Son 4 haftayı göster
 
   const accountTypeData = [
     {
@@ -62,11 +70,6 @@ const Dashboard = () => {
   ];
 
   const COLORS = ["#0088FE", "#FF8042"];
-
-  const workplaceAccountData = workplaces.map((work) => ({
-    name: work.name,
-    count: accounts.filter((a) => a.workplaceId === work.id).length,
-  }));
 
   return (
     <div style={{ padding: "20px", color: "#fff", textAlign: "center" }}>
@@ -97,15 +100,31 @@ const Dashboard = () => {
         }}
       >
         <div>
-          <h3>Müşteri Artışı</h3>
-          <LineChart width={400} height={250} data={groupedCustomerData}>
+          <h3>Haftalık Müşteri Artışı</h3>
+          <BarChart width={400} height={250} data={weeklyData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
+            <XAxis
+              dataKey="weekStart"
+              tickFormatter={(date) => {
+                const d = new Date(date);
+                const end = new Date(d);
+                end.setDate(end.getDate() + 6);
+                return `${d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit" })} - ${end.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit" })}`;
+              }}
+            />
+            <YAxis domain={[0, "dataMax + 1"]} allowDecimals={false} />
+            <Tooltip
+              formatter={(value) => [`${value} müşteri`, "Haftalık"]}
+              labelFormatter={(date) => {
+                const d = new Date(date);
+                const end = new Date(d);
+                end.setDate(end.getDate() + 6);
+                return `${d.toLocaleDateString("tr-TR")} - ${end.toLocaleDateString("tr-TR")}`;
+              }}
+            />
             <Legend />
-            <Line type="monotone" dataKey="count" stroke="#8884d8" />
-          </LineChart>
+            <Bar dataKey="count" fill="#8884d8" />
+          </BarChart>
         </div>
 
         <div>
@@ -126,18 +145,6 @@ const Dashboard = () => {
             <Tooltip />
             <Legend />
           </PieChart>
-        </div>
-
-        <div>
-          <h3>İşyeri Bazlı Hesaplar</h3>
-          <BarChart width={400} height={250} data={workplaceAccountData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="count" fill="#82ca9d" />
-          </BarChart>
         </div>
       </div>
     </div>
@@ -161,6 +168,21 @@ const Card = ({ title, value }) => (
 );
 
 export default Dashboard;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
