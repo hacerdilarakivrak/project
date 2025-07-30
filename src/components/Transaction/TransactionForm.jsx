@@ -1,60 +1,99 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_URL = "https://6881d02966a7eb81224c12c1.mockapi.io/transactions";
+const API_URL = "https://6881d02966a7eb81224c12c1.mockapi.io";
 
 const TransactionForm = ({ onTransactionAdded }) => {
-  const [tutar, setTutar] = useState("");
-  const [aciklama, setAciklama] = useState("");
-  const [tur, setTur] = useState("Para Yatırma");
+  const [customers, setCustomers] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [amount, setAmount] = useState("");
+  const [type, setType] = useState("Para Yatırma");
+  const [description, setDescription] = useState("");
+  const [customerId, setCustomerId] = useState("");
+  const [accountId, setAccountId] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!tutar || !aciklama) return;
+  useEffect(() => {
+    fetchCustomers();
+    fetchAccounts();
+  }, []);
 
-    await axios.post(API_URL, {
-      amount: tutar,
-      description: aciklama,
-      type: tur,
-      date: new Date().toLocaleString(),
-    });
+  const fetchCustomers = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/customers`);
+      setCustomers(response.data);
+    } catch (error) {
+      console.error("Müşteriler alınamadı:", error);
+    }
+  };
 
-    setTutar("");
-    setAciklama("");
-    setTur("Para Yatırma");
-    onTransactionAdded();
+  const fetchAccounts = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/accounts`);
+      setAccounts(response.data);
+    } catch (error) {
+      console.error("Hesaplar alınamadı:", error);
+    }
+  };
+
+  const handleAddTransaction = async () => {
+    if (!amount || !customerId || !accountId) {
+      alert("Lütfen tüm alanları doldurun!");
+      return;
+    }
+
+    try {
+      await axios.post(`${API_URL}/transactions`, {
+        amount,
+        type,
+        description,
+        customerId,
+        accountId,
+        date: new Date().toLocaleDateString(),
+      });
+
+      setAmount("");
+      setType("Para Yatırma");
+      setDescription("");
+      setCustomerId("");
+      setAccountId("");
+
+      if (onTransactionAdded) onTransactionAdded();
+    } catch (error) {
+      console.error("İşlem eklenemedi:", error);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
+    <div>
       <input
         type="number"
         placeholder="Tutar"
-        value={tutar}
-        onChange={(e) => setTutar(e.target.value)}
-        style={{ marginRight: "10px" }}
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
       />
-      <input
-        type="text"
-        placeholder="Açıklama"
-        value={aciklama}
-        onChange={(e) => setAciklama(e.target.value)}
-        style={{ marginRight: "10px" }}
-      />
-      <select
-        value={tur}
-        onChange={(e) => setTur(e.target.value)}
-        style={{ marginRight: "10px" }}
-      >
+      <select value={type} onChange={(e) => setType(e.target.value)}>
         <option value="Para Yatırma">Para Yatırma</option>
         <option value="Para Çekme">Para Çekme</option>
       </select>
-      <button type="submit">İşlem Ekle</button>
-    </form>
+      <select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+        <option value="">Hesap Seç</option>
+        {accounts.map((acc) => (
+          <option key={acc.id} value={acc.id}>
+            {acc.accountNumber}
+          </option>
+        ))}
+      </select>
+      <select value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
+        <option value="">Müşteri Seç</option>
+        {customers.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+      <button onClick={handleAddTransaction}>İşlem Ekle</button>
+    </div>
   );
 };
 
 export default TransactionForm;
-
-
-

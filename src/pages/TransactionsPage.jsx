@@ -12,7 +12,10 @@ const TransactionsPage = () => {
   return (
     <div>
       <h1>İşlemler</h1>
+      
       <TransactionForm onTransactionAdded={handleTransactionAdded} />
+      
+      
       <h2>İşlem Listesi</h2>
       <TransactionList refresh={refresh} />
     </div>
@@ -20,6 +23,3 @@ const TransactionsPage = () => {
 };
 
 export default TransactionsPage;
-
-
-
