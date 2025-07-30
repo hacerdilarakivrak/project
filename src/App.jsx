@@ -5,6 +5,7 @@ import AccountsPage from "./pages/AccountsPage";
 import WorkplacesPage from "./pages/WorkplacesPage";
 import HomePage from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
+import TransactionsPage from "./pages/TransactionsPage"; // ✅ Yeni ekleme
 import Layout from "./components/Layout/Layout";
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/workplaces" element={<WorkplacesPage />} />
+          <Route path="/transactions" element={<TransactionsPage />} /> {/* ✅ Yeni ekleme */}
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Layout>
@@ -24,6 +26,7 @@ function App() {
 }
 
 export default App;
+
 
 
 
