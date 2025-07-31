@@ -331,4 +331,3 @@ const CustomerForm = ({ onCustomerAdded, selectedCustomer, clearSelection }) => 
 };
 
 export default CustomerForm;
-

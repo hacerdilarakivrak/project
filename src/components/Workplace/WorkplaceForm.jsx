@@ -255,17 +255,3 @@ const submitButtonStyle = {
 };
 
 export default WorkplaceForm;
-
-
-
-
-
-
-
-
-
-
-
-
-
-

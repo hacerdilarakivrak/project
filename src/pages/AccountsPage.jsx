@@ -61,4 +61,3 @@ const AccountsPage = () => {
 };
 
 export default AccountsPage;
-

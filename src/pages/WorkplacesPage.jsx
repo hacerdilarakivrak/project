@@ -31,6 +31,3 @@ const WorkplacesPage = () => {
 };
 
 export default WorkplacesPage;
-
-
-

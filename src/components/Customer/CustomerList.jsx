@@ -146,6 +146,3 @@ const btnStyle = (bgColor) => ({
 });
 
 export default CustomerList;
-
-
-

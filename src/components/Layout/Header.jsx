@@ -38,4 +38,3 @@ const linkStyle = {
 };
 
 export default Header;
-

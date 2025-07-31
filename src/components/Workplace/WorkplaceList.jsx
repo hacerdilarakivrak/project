@@ -326,14 +326,3 @@ const sortBtnStyle = (active) => ({
 });
 
 export default WorkplaceList;
-
-
-
-
-
-
-
-
-
-
-
