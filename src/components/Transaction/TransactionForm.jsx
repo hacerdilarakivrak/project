@@ -1,90 +1,101 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1";
+const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/transactions";
 
 const TransactionForm = ({ onTransactionAdded }) => {
-  const [accounts, setAccounts] = useState([]);
-  const [accountID, setAccountID] = useState("");
-  const [type, setType] = useState("deposit"); // deposit veya withdraw
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("");
+  const [hesaplar, setHesaplar] = useState([]);
+  const [musteriler, setMusteriler] = useState([]);
+  const [hesapID, setHesapAdi] = useState("");
+  const [tur, setTur] = useState("paraYatirma");
+  const [tutar, setTutar] = useState("");
+  const [tarih, setTarih] = useState("");
+  const [aciklama, setAciklama] = useState("");
 
   useEffect(() => {
-    fetchAccounts();
+    axios.get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts")
+      .then((res) => setHesaplar(res.data))
+      .catch((err) => console.error(err));
+
+    axios.get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers")
+      .then((res) => setMusteriler(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
-  const fetchAccounts = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/accounts`);
-      console.log("API'den gelen hesaplar:", response.data); // <-- Debug için eklendi
-      setAccounts(response.data);
-    } catch (error) {
-      console.error("Hesaplar alınırken hata oluştu:", error);
-    }
-  };
+  const seciliHesap = hesaplar.find((h) => h.id === hesapID);
+  const musteriID = seciliHesap ? seciliHesap.musteriNo : "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!accountID || !type || !amount || !date) {
-      alert("Lütfen tüm alanları doldurun!");
-      return;
-    }
+    const yeniIslem = {
+      hesapID: Number(hesapID),
+      tur,
+      tutar: Number(tutar),
+      tarih,
+      musteriID: Number(musteriID),
+      aciklama,
+      bakiyeSonrasi: 0
+    };
 
-    try {
-      const newTransaction = { accountID, type, amount: parseFloat(amount), date };
-      await axios.post(`${API_URL}/transactions`, newTransaction);
-      onTransactionAdded();
-      setAccountID("");
-      setType("deposit");
-      setAmount("");
-      setDate("");
-    } catch (error) {
-      console.error("İşlem eklenirken hata oluştu:", error);
-    }
+    await axios.post(API_URL, yeniIslem);
+    onTransactionAdded();
+
+    setHesapID("");
+    setTur("paraYatirma");
+    setTutar("");
+    setTarih("");
+    setAciklama("");
   };
 
   return (
-    <form onSubmit={handleSubmit} className="transaction-form">
+    <div>
       <h2>Yeni İşlem Ekle</h2>
-      
-      <label>Hesap Seç</label>
-      <select value={accountID} onChange={(e) => setAccountID(e.target.value)}>
-        <option value="">Hesap Seçin</option>
-        {accounts.map((acc) => (
-          <option key={acc.id} value={acc.id}>
-            {acc.accountNumber || acc.id} - {acc.balance}₺
-          </option>
-        ))}
-      </select>
+      <form onSubmit={handleSubmit}>
+        <select
+          value={hesapID}
+          onChange={(e) => setHesapID(e.target.value)}
+          required
+        >
+          <option value="">Hesap Seçin</option>
+          {hesaplar.map((h) => (
+            <option key={h.id} value={h.id}>
+              {h.hesapAdi}
+            </option>
+          ))}
+        </select>
 
-      <label>İşlem Türü</label>
-      <select value={type} onChange={(e) => setType(e.target.value)}>
-        <option value="deposit">Para Yatırma</option>
-        <option value="withdraw">Para Çekme</option>
-      </select>
+        <select value={tur} onChange={(e) => setTur(e.target.value)}>
+          <option value="paraYatirma">Para Yatırma</option>
+          <option value="paraCekme">Para Çekme</option>
+        </select>
 
-      <label>Tutar</label>
-      <input
-        type="number"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
+        <input
+          type="number"
+          placeholder="Tutar"
+          value={tutar}
+          onChange={(e) => setTutar(e.target.value)}
+          required
+        />
 
-      <label>Tarih</label>
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-      />
+        <input
+          type="date"
+          value={tarih}
+          onChange={(e) => setTarih(e.target.value)}
+          required
+        />
 
-      <button type="submit">İşlemi Kaydet</button>
-    </form>
+        <input
+          type="text"
+          placeholder="Açıklama"
+          value={aciklama}
+          onChange={(e) => setAciklama(e.target.value)}
+        />
+
+        <button type="submit">İşlemi Kaydet</button>
+      </form>
+    </div>
   );
 };
 
 export default TransactionForm;
-
-
-

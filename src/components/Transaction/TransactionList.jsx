@@ -1,43 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1";
+const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/transactions";
 
 const TransactionList = ({ refresh }) => {
-  const [transactions, setTransactions] = useState([]);
+  const [islemler, setIslemler] = useState([]);
 
   useEffect(() => {
-    fetchTransactions();
+    axios.get(API_URL)
+      .then((res) => setIslemler(res.data))
+      .catch((err) => console.error(err));
   }, [refresh]);
 
-  const fetchTransactions = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/transactions`);
-      setTransactions(response.data);
-    } catch (error) {
-      console.error("İşlemler alınırken hata oluştu:", error);
-    }
-  };
-
   return (
-    <div className="transaction-list">
+    <div>
       <h2>İşlem Listesi</h2>
       <table>
         <thead>
           <tr>
             <th>Hesap ID</th>
-            <th>İşlem Türü</th>
+            <th>Tür</th>
             <th>Tutar</th>
             <th>Tarih</th>
+            <th>Müşteri ID</th>
+            <th>Açıklama</th>
+            <th>Bakiye Sonrası</th>
           </tr>
         </thead>
         <tbody>
-          {transactions.map((transaction) => (
-            <tr key={transaction.id}>
-              <td>{transaction.accountID}</td>
-              <td>{transaction.type}</td>
-              <td>{transaction.amount} ₺</td>
-              <td>{transaction.date}</td>
+          {islemler.map((islem) => (
+            <tr key={islem.id}>
+              <td>{islem.hesapID}</td>
+              <td>{islem.tur}</td>
+              <td>{islem.tutar} ₺</td>
+              <td>{islem.tarih}</td>
+              <td>{islem.musteriID}</td>
+              <td>{islem.aciklama}</td>
+              <td>{islem.bakiyeSonrasi} ₺</td>
             </tr>
           ))}
         </tbody>
@@ -47,8 +46,4 @@ const TransactionList = ({ refresh }) => {
 };
 
 export default TransactionList;
-
-
-
-
 

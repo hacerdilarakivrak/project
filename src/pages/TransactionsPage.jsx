@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import TransactionForm from "../components/Transaction/TransactionForm";
 import TransactionList from "../components/Transaction/TransactionList";
 
-const TransactionPage = () => {
+const TransactionsPage = () => {
   const [refresh, setRefresh] = useState(false);
 
   const handleTransactionAdded = () => {
@@ -17,6 +17,4 @@ const TransactionPage = () => {
   );
 };
 
-export default TransactionPage;
-
-
+export default TransactionsPage;
