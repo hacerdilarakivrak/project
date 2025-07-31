@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/transactions";
+const ACCOUNTS_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts";
 
 const TransactionForm = ({ onTransactionAdded }) => {
   const [hesaplar, setHesaplar] = useState([]);
@@ -12,30 +13,63 @@ const TransactionForm = ({ onTransactionAdded }) => {
   const [aciklama, setAciklama] = useState("");
 
   useEffect(() => {
-    axios
-      .get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts")
-      .then((res) => setHesaplar(res.data))
-      .catch((err) => console.error(err));
+    fetchAccounts();
   }, []);
 
-  const seciliHesap = hesaplar.find((h) => h.id === hesapID);
-  const musteriID = seciliHesap ? seciliHesap.musteriNo : "";
+  const fetchAccounts = async () => {
+    try {
+      const res = await axios.get(ACCOUNTS_API);
+      setHesaplar(res.data);
+    } catch (err) {
+      console.error("Hesaplar alınırken hata:", err);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const seciliHesap = hesaplar.find((h) => String(h.id) === String(hesapID));
+    if (!seciliHesap) {
+      alert("Hesap bulunamadı!");
+      return;
+    }
+
+    const islemTutar = Number(tutar);
+    if (isNaN(islemTutar) || islemTutar <= 0) {
+      alert("Geçerli bir tutar giriniz!");
+      return;
+    }
+
+    let yeniBakiye = Number(seciliHesap.bakiye) || 0;
+
+    if (tur === "paraYatirma") {
+      yeniBakiye += islemTutar;
+    } else if (tur === "paraCekme") {
+      if (islemTutar > yeniBakiye) {
+        alert("Yetersiz bakiye!");
+        return;
+      }
+      yeniBakiye -= islemTutar;
+    }
+
     const yeniIslem = {
-      hesapID: Number(hesapID),
+      hesapID: seciliHesap.id,
+      hesapAdi: seciliHesap.hesapAdi,
       tur,
-      tutar: Number(tutar),
+      tutar: islemTutar,
       tarih,
-      musteriID: Number(musteriID),
+      musteriID: seciliHesap.musteriNo,
       aciklama,
-      bakiyeSonrasi: 0
+      bakiyeSonrasi: yeniBakiye,
     };
 
     try {
       await axios.post(API_URL, yeniIslem);
+      await axios.put(`${ACCOUNTS_API}/${hesapID}`, {
+        ...seciliHesap,
+        bakiye: yeniBakiye,
+      });
+      await fetchAccounts();
       onTransactionAdded();
       setHesapID("");
       setTur("paraYatirma");

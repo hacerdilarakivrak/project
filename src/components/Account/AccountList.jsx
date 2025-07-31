@@ -31,15 +31,12 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
       try {
         await axios.delete(`${API_URL}/${id}`);
         fetchAccounts();
+        if (accounts.length === 1 && page > 1) setPage(page - 1); 
       } catch (error) {
         console.error("Silme işlemi başarısız:", error);
       }
     }
   };
-
-  useEffect(() => {
-    console.log("API'den gelen hesaplar:", accounts);
-  }, [accounts]);
 
   return (
     <div style={{ marginTop: "40px", overflowX: "auto", paddingBottom: "30px" }}>
@@ -104,12 +101,14 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
                   </td>
                   <td style={cellStyle}>{acc.hesapAdi}</td>
                   <td style={cellStyle}>{acc.dovizKodu}</td>
-                  <td style={cellStyle}>{acc.bakiyeTutar}</td>
+                  <td style={cellStyle}>{acc.bakiye}</td>
                   <td style={cellStyle}>{acc.blokeTutar}</td>
                   <td style={cellStyle}>{acc.faizOrani}</td>
                   <td style={cellStyle}>{acc.iban}</td>
                   <td style={cellStyle}>{acc.hesapTuru || "-"}</td>
-                  <td style={cellStyle}>{acc.kapanmaTarihi || "-"}</td>
+                  <td style={cellStyle}>
+                    {acc.kayitDurumu === "Kapalı" ? acc.kapanmaTarihi || "-" : "-"}
+                  </td>
                   <td style={cellStyle}>{acc.faizliBakiye}</td>
                   <td style={cellStyle}>
                     <button onClick={() => onEdit(acc)} style={buttonStyle("dodgerblue")}>
@@ -172,8 +171,3 @@ const buttonStyle = (bgColor) => ({
 });
 
 export default AccountList;
-
-
-
-
-

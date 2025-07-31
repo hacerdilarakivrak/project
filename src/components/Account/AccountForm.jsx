@@ -24,22 +24,31 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
 
   useEffect(() => {
     if (selectedAccount) {
-      setForm(selectedAccount);
+      const bakiye = parseFloat(selectedAccount.bakiye) || 0;
+      const faizOrani = parseFloat(selectedAccount.faizOrani) || 0;
+      setForm({
+        ...initialForm,
+        ...selectedAccount,
+        bakiye: bakiye.toString(),
+        blokeTutar: (parseFloat(selectedAccount.blokeTutar) || 0).toString(),
+        faizOrani: faizOrani.toString(),
+        faizliBakiye: (bakiye + (bakiye * faizOrani) / 100).toFixed(2),
+      });
+    } else {
+      setForm(initialForm);
     }
   }, [selectedAccount]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (["bakiye", "blokeTutar", "faizOrani", "faizliBakiye"].includes(name)) {
-      if (!/^\d*\.?\d*$/.test(value)) return;
+    if (["bakiye", "blokeTutar", "faizOrani"].includes(name) && !/^\d*\.?\d*$/.test(value)) {
+      return;
     }
 
     let updatedForm = { ...form, [name]: value };
-
-    
-    const bakiye = parseFloat(updatedForm.bakiye) || 0;
-    const faizOrani = parseFloat(updatedForm.faizOrani) || 0;
+    const bakiye = parseFloat(updatedForm.bakiye || 0);
+    const faizOrani = parseFloat(updatedForm.faizOrani || 0);
     updatedForm.faizliBakiye = (bakiye + (bakiye * faizOrani) / 100).toFixed(2);
 
     setForm(updatedForm);
@@ -48,16 +57,19 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...form,
+        bakiye: parseFloat(form.bakiye || 0),
+        blokeTutar: parseFloat(form.blokeTutar || 0),
+        faizOrani: parseFloat(form.faizOrani || 0),
+        faizliBakiye: parseFloat(form.faizliBakiye || 0),
+      };
+
       if (selectedAccount) {
-        await axios.put(`${API_URL}/${selectedAccount.id}`, form);
+        await axios.put(`${API_URL}/${selectedAccount.id}`, payload);
         alert("Hesap güncellendi.");
       } else {
-        const newAccount = {
-          ...form,
-          createdAt: new Date().toISOString(),
-        };
-
-        await axios.post(API_URL, newAccount);
+        await axios.post(API_URL, { ...payload, createdAt: new Date().toISOString() });
         alert("Hesap eklendi.");
       }
 
@@ -163,23 +175,13 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
         {isKapali && (
           <div style={fieldStyle}>
             <label style={labelStyle}>Kapanma Tarihi:</label>
-            <input
-              type="date"
-              name="kapanmaTarihi"
-              value={form.kapanmaTarihi}
-              onChange={handleChange}
-            />
+            <input type="date" name="kapanmaTarihi" value={form.kapanmaTarihi} onChange={handleChange} />
           </div>
         )}
 
         <div style={fieldStyle}>
           <label style={labelStyle}>Faizli Bakiye:</label>
-          <input
-            name="faizliBakiye"
-            value={form.faizliBakiye}
-            onChange={handleChange}
-            disabled
-          />
+          <input name="faizliBakiye" value={form.faizliBakiye} disabled />
         </div>
       </div>
 
@@ -214,4 +216,3 @@ const labelStyle = {
 };
 
 export default AccountForm;
-
