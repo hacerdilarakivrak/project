@@ -52,7 +52,7 @@ const TransactionList = ({ refresh }) => {
             <th>Tür</th>
             <th>Tutar</th>
             <th>Tarih</th>
-            <th>Müşteri ID</th>
+            <th>Müşteri No</th> {/* Burada değişiklik yapıldı */}
             <th>Açıklama</th>
             <th>Bakiye Sonrası</th>
             <th>İşlem</th>
