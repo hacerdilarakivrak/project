@@ -3,15 +3,12 @@ import axios from "axios";
 import "./TransactionList.css";
 
 const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/transactions";
-const ACCOUNTS_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts";
 
 const TransactionList = ({ refresh }) => {
   const [islemler, setIslemler] = useState([]);
-  const [hesaplar, setHesaplar] = useState([]);
 
   useEffect(() => {
     fetchTransactions();
-    fetchAccounts();
   }, [refresh]);
 
   const fetchTransactions = async () => {
@@ -20,15 +17,6 @@ const TransactionList = ({ refresh }) => {
       setIslemler(res.data);
     } catch (err) {
       console.error("İşlemler alınırken hata:", err);
-    }
-  };
-
-  const fetchAccounts = async () => {
-    try {
-      const res = await axios.get(ACCOUNTS_API);
-      setHesaplar(res.data);
-    } catch (err) {
-      console.error("Hesaplar alınırken hata:", err);
     }
   };
 
@@ -43,14 +31,21 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
-  const getBakiyeSonrasi = (islem) => {
-    return islem.bakiyeSonrasi ?? 0;
+  const getIslemTurText = (tur) => {
+    switch (tur) {
+      case "paraYatirma":
+        return "Para Yatırma";
+      case "paraCekme":
+        return "Para Çekme";
+      default:
+        return tur || "-";
+    }
   };
 
   return (
-    <div>
+    <div className="transaction-list-container">
       <h2>İşlem Listesi</h2>
-      <table>
+      <table className="transaction-table">
         <thead>
           <tr>
             <th>Hesap Adı</th>
@@ -64,31 +59,33 @@ const TransactionList = ({ refresh }) => {
           </tr>
         </thead>
         <tbody>
-          {islemler.map((islem) => (
-            <tr key={islem.id}>
-              <td>{islem.hesapAdi?.trim() || "Bilinmiyor"}</td>
-              <td>
-                {islem.tur === "paraYatirma"
-                  ? "Para Yatırma"
-                  : islem.tur === "paraCekme"
-                  ? "Para Çekme"
-                  : islem.tur}
-              </td>
-              <td>{islem.tutar} ₺</td>
-              <td>{islem.tarih}</td>
-              <td>{islem.musteriID || "-"}</td>
-              <td>{islem.aciklama || "-"}</td>
-              <td>{getBakiyeSonrasi(islem)} ₺</td>
-              <td>
-                <button
-                  className="delete-button"
-                  onClick={() => handleDelete(islem.id)}
-                >
-                  Sil
-                </button>
+          {islemler.length === 0 ? (
+            <tr>
+              <td colSpan="8" style={{ textAlign: "center", padding: "12px" }}>
+                Kayıtlı işlem yok.
               </td>
             </tr>
-          ))}
+          ) : (
+            islemler.map((islem) => (
+              <tr key={islem.id}>
+                <td>{islem.hesapAdi?.trim() || "Bilinmiyor"}</td>
+                <td>{getIslemTurText(islem.tur)}</td>
+                <td>{islem.tutar} ₺</td>
+                <td>{islem.tarih}</td>
+                <td>{islem.musteriID || "-"}</td>
+                <td>{islem.aciklama || "-"}</td>
+                <td>{islem.bakiyeSonrasi ?? 0} ₺</td>
+                <td>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDelete(islem.id)}
+                  >
+                    Sil
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

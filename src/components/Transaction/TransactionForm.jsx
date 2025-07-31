@@ -109,6 +109,8 @@ const TransactionForm = ({ onTransactionAdded }) => {
           value={tutar}
           onChange={(e) => setTutar(e.target.value)}
           required
+          min="0.01"
+          step="0.01"
         />
 
         <input

@@ -19,11 +19,7 @@ const TransactionsPage = () => {
     <div style={pageStyle}>
       <h1 style={titleStyle}>💳 İşlemler</h1>
 
-      {notification && (
-        <div style={notificationStyle}>
-          {notification}
-        </div>
-      )}
+      {notification && <div style={notificationStyle}>{notification}</div>}
 
       <div style={formContainerStyle}>
         <TransactionForm onTransactionAdded={handleTransactionAdded} />
