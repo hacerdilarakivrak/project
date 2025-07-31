@@ -1,99 +1,90 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "https://6881d02966a7eb81224c12c1.mockapi.io";
+const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1";
 
 const TransactionForm = ({ onTransactionAdded }) => {
-  const [customers, setCustomers] = useState([]);
   const [accounts, setAccounts] = useState([]);
+  const [accountID, setAccountID] = useState("");
+  const [type, setType] = useState("deposit"); // deposit veya withdraw
   const [amount, setAmount] = useState("");
-  const [type, setType] = useState("Para Yatırma");
-  const [description, setDescription] = useState("");
-  const [customerId, setCustomerId] = useState("");
-  const [accountId, setAccountId] = useState("");
+  const [date, setDate] = useState("");
 
   useEffect(() => {
-    fetchCustomers();
     fetchAccounts();
   }, []);
-
-  const fetchCustomers = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/customers`);
-      setCustomers(response.data);
-    } catch (error) {
-      console.error("Müşteriler alınamadı:", error);
-    }
-  };
 
   const fetchAccounts = async () => {
     try {
       const response = await axios.get(`${API_URL}/accounts`);
+      console.log("API'den gelen hesaplar:", response.data); // <-- Debug için eklendi
       setAccounts(response.data);
     } catch (error) {
-      console.error("Hesaplar alınamadı:", error);
+      console.error("Hesaplar alınırken hata oluştu:", error);
     }
   };
 
-  const handleAddTransaction = async () => {
-    if (!amount || !customerId || !accountId) {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!accountID || !type || !amount || !date) {
       alert("Lütfen tüm alanları doldurun!");
       return;
     }
 
     try {
-      await axios.post(`${API_URL}/transactions`, {
-        amount,
-        type,
-        description,
-        customerId,
-        accountId,
-        date: new Date().toLocaleDateString(),
-      });
-
+      const newTransaction = { accountID, type, amount: parseFloat(amount), date };
+      await axios.post(`${API_URL}/transactions`, newTransaction);
+      onTransactionAdded();
+      setAccountID("");
+      setType("deposit");
       setAmount("");
-      setType("Para Yatırma");
-      setDescription("");
-      setCustomerId("");
-      setAccountId("");
-
-      if (onTransactionAdded) onTransactionAdded();
+      setDate("");
     } catch (error) {
-      console.error("İşlem eklenemedi:", error);
+      console.error("İşlem eklenirken hata oluştu:", error);
     }
   };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit} className="transaction-form">
+      <h2>Yeni İşlem Ekle</h2>
+      
+      <label>Hesap Seç</label>
+      <select value={accountID} onChange={(e) => setAccountID(e.target.value)}>
+        <option value="">Hesap Seçin</option>
+        {accounts.map((acc) => (
+          <option key={acc.id} value={acc.id}>
+            {acc.accountNumber || acc.id} - {acc.balance}₺
+          </option>
+        ))}
+      </select>
+
+      <label>İşlem Türü</label>
+      <select value={type} onChange={(e) => setType(e.target.value)}>
+        <option value="deposit">Para Yatırma</option>
+        <option value="withdraw">Para Çekme</option>
+      </select>
+
+      <label>Tutar</label>
       <input
         type="number"
-        placeholder="Tutar"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-      <select value={type} onChange={(e) => setType(e.target.value)}>
-        <option value="Para Yatırma">Para Yatırma</option>
-        <option value="Para Çekme">Para Çekme</option>
-      </select>
-      <select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
-        <option value="">Hesap Seç</option>
-        {accounts.map((acc) => (
-          <option key={acc.id} value={acc.id}>
-            {acc.accountNumber}
-          </option>
-        ))}
-      </select>
-      <select value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
-        <option value="">Müşteri Seç</option>
-        {customers.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-      <button onClick={handleAddTransaction}>İşlem Ekle</button>
-    </div>
+
+      <label>Tarih</label>
+      <input
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+      />
+
+      <button type="submit">İşlemi Kaydet</button>
+    </form>
   );
 };
 
 export default TransactionForm;
+
+
+
