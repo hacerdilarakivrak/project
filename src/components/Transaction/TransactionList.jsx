@@ -12,13 +12,24 @@ const TransactionList = ({ refresh }) => {
       .catch((err) => console.error(err));
   }, [refresh]);
 
+  const getTurLabel = (tur) => {
+    switch (tur) {
+      case "paraYatirma":
+        return "Para Yatırma";
+      case "paraCekme":
+        return "Para Çekme";
+      default:
+        return tur;
+    }
+  };
+
   return (
     <div>
       <h2>İşlem Listesi</h2>
       <table>
         <thead>
           <tr>
-            <th>Hesap ID</th>
+            <th>Hesap Adı</th>
             <th>Tür</th>
             <th>Tutar</th>
             <th>Tarih</th>
@@ -30,8 +41,8 @@ const TransactionList = ({ refresh }) => {
         <tbody>
           {islemler.map((islem) => (
             <tr key={islem.id}>
-              <td>{islem.hesapID}</td>
-              <td>{islem.tur}</td>
+              <td>{islem.hesapAdi || "Bilinmiyor"}</td>
+              <td>{getTurLabel(islem.tur)}</td>
               <td>{islem.tutar} ₺</td>
               <td>{islem.tarih}</td>
               <td>{islem.musteriID}</td>
@@ -46,4 +57,7 @@ const TransactionList = ({ refresh }) => {
 };
 
 export default TransactionList;
+
+
+
 

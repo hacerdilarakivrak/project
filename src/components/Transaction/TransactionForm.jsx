@@ -5,20 +5,16 @@ const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/transactions
 
 const TransactionForm = ({ onTransactionAdded }) => {
   const [hesaplar, setHesaplar] = useState([]);
-  const [musteriler, setMusteriler] = useState([]);
-  const [hesapID, setHesapAdi] = useState("");
+  const [hesapID, setHesapID] = useState("");
   const [tur, setTur] = useState("paraYatirma");
   const [tutar, setTutar] = useState("");
   const [tarih, setTarih] = useState("");
   const [aciklama, setAciklama] = useState("");
 
   useEffect(() => {
-    axios.get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts")
+    axios
+      .get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts")
       .then((res) => setHesaplar(res.data))
-      .catch((err) => console.error(err));
-
-    axios.get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers")
-      .then((res) => setMusteriler(res.data))
       .catch((err) => console.error(err));
   }, []);
 
@@ -38,14 +34,17 @@ const TransactionForm = ({ onTransactionAdded }) => {
       bakiyeSonrasi: 0
     };
 
-    await axios.post(API_URL, yeniIslem);
-    onTransactionAdded();
-
-    setHesapID("");
-    setTur("paraYatirma");
-    setTutar("");
-    setTarih("");
-    setAciklama("");
+    try {
+      await axios.post(API_URL, yeniIslem);
+      onTransactionAdded();
+      setHesapID("");
+      setTur("paraYatirma");
+      setTutar("");
+      setTarih("");
+      setAciklama("");
+    } catch (err) {
+      console.error("İşlem eklenirken hata oluştu:", err);
+    }
   };
 
   return (

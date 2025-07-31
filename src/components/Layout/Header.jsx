@@ -24,7 +24,7 @@ const Header = () => {
         <Link to="/customers" style={linkStyle}>Müşteri İşlemleri</Link>
         <Link to="/accounts" style={linkStyle}>Hesap Tanımlama</Link>
         <Link to="/workplaces" style={linkStyle}>İşyeri Tanımlama</Link>
-        <Link to="/transactions" style={linkStyle}>İşlemler</Link> {/* ✅ Yeni ekleme */}
+        <Link to="/transactions" style={linkStyle}>İşlemler</Link>
       </nav>
     </header>
   );
@@ -38,12 +38,4 @@ const linkStyle = {
 };
 
 export default Header;
-
-
-
-
-
-
-
-
 
