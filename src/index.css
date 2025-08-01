@@ -57,15 +57,49 @@ img {
   padding: 0 !important;
 }
 
+.customer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 1200px;
+  background-color: #1e1e1e;
+  color: #f1f1f1;
+}
 
+.customer-table th,
+.customer-table td {
+  white-space: nowrap;
+  vertical-align: middle;
+  text-align: center;
+  padding: 6px 10px;
+  border: 1px solid #555;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
+.customer-table th {
+  background-color: #333;
+  white-space: nowrap;
+}
 
+.customer-table td.address-column {
+  white-space: normal;
+  text-align: left;
+  max-width: 250px;
+  word-wrap: break-word;
+}
 
+@media print {
+  .customer-table td,
+  .customer-table th {
+    white-space: normal !important;
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
 
-
-
-
-
-
-
-
+  .customer-table td.address-column {
+    white-space: normal !important;
+  }
+}

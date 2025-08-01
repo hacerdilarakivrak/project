@@ -96,3 +96,5 @@ const CurrencyCard = ({ currency, rate }) => {
 };
 
 export default ExchangeRatesPage;
+
+
