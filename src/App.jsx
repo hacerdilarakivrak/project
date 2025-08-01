@@ -6,7 +6,7 @@ import WorkplacesPage from "./pages/WorkplacesPage";
 import HomePage from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
 import TransactionsPage from "./pages/TransactionsPage";
-import ExchangeRatesPage from "./pages/ExchangeRatesPage"; // ✅ Döviz kurları sayfası
+import ExchangeRatesPage from "./pages/ExchangeRatesPage";
 import Layout from "./components/Layout/Layout";
 
 function App() {
@@ -20,7 +20,7 @@ function App() {
           <Route path="/workplaces" element={<WorkplacesPage />} />
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/exchange-rates" element={<ExchangeRatesPage />} /> {/* ✅ Yeni ekleme */}
+          <Route path="/exchange-rates" element={<ExchangeRatesPage />} />
         </Routes>
       </Layout>
     </Router>
@@ -28,8 +28,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
