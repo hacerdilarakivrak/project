@@ -120,8 +120,8 @@ const CustomerList = ({ refresh, onEdit }) => {
           4: { cellWidth: 15 },
           5: { cellWidth: 25 },
           6: { cellWidth: 28 },
-          15: { cellWidth: 35 }, // Email
-          16: { cellWidth: 40 }, // Adres
+          15: { cellWidth: 35 }, 
+          16: { cellWidth: 40 }, 
         },
         theme: "striped"
       });
