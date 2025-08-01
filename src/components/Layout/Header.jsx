@@ -25,6 +25,7 @@ const Header = () => {
         <Link to="/accounts" style={linkStyle}>Hesap Tanımlama</Link>
         <Link to="/workplaces" style={linkStyle}>İşyeri Tanımlama</Link>
         <Link to="/transactions" style={linkStyle}>İşlemler</Link>
+        <Link to="/exchange-rates" style={linkStyle}>Döviz Kurları</Link>
       </nav>
     </header>
   );
