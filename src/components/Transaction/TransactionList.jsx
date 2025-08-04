@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
 import "./TransactionList.css";
 
@@ -27,6 +29,7 @@ const TransactionList = ({ refresh }) => {
       setCurrentPage(1);
     } catch (err) {
       console.error("İşlemler alınırken hata:", err);
+      toast.error("İşlemler alınırken bir hata oluştu!");
     }
   };
 
@@ -34,9 +37,11 @@ const TransactionList = ({ refresh }) => {
     if (window.confirm("Bu işlemi silmek istediğinize emin misiniz?")) {
       try {
         await axios.delete(`${API_URL}/${id}`);
+        toast.success("İşlem başarıyla silindi!");
         fetchTransactions();
       } catch (err) {
         console.error("İşlem silinirken hata oluştu:", err);
+        toast.error("İşlem silinirken bir hata oluştu!");
       }
     }
   };
@@ -94,6 +99,9 @@ const TransactionList = ({ refresh }) => {
               onChange={(date) => setStartDate(date)}
               dateFormat="dd/MM/yyyy"
               isClearable
+              className="date-picker-input"
+              calendarClassName="date-picker-calendar"
+              placeholderText="Tarih seçiniz"
             />
           </div>
           <div>
@@ -103,6 +111,9 @@ const TransactionList = ({ refresh }) => {
               onChange={(date) => setEndDate(date)}
               dateFormat="dd/MM/yyyy"
               isClearable
+              className="date-picker-input"
+              calendarClassName="date-picker-calendar"
+              placeholderText="Tarih seçiniz"
             />
           </div>
         </div>
