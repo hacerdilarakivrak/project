@@ -1,45 +1,77 @@
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #2c2c2c;
-  color: #f1f1f1;
-  font-size: 14px;
-  min-width: 800px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-}
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-thead {
-  background-color: #444;
-}
+const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/transactions";
 
-th, td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #555;
-  text-align: center;
-}
+const TransactionList = ({ refreshKey }) => {
+  const [transactions, setTransactions] = useState([]);
 
-th {
-  font-weight: bold;
-  color: #fff;
-}
+  useEffect(() => {
+    fetchTransactions();
+  }, [refreshKey]);
 
-tbody tr:hover {
-  background-color: #3a3a3a;
-}
+  const fetchTransactions = async () => {
+    try {
+      const res = await axios.get(API_URL);
+      setTransactions(res.data);
+    } catch (err) {
+      console.error("İşlemler alınırken hata:", err);
+    }
+  };
 
-.delete-button {
-  background-color: #e53935; 
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
+  const handleDelete = async (id) => {
+    if (window.confirm("Bu işlemi silmek istediğinize emin misiniz?")) {
+      try {
+        await axios.delete(`${API_URL}/${id}`);
+        fetchTransactions();
+      } catch (err) {
+        console.error("Silme hatası:", err);
+      }
+    }
+  };
 
-.delete-button:hover {
-  background-color: #c62828; 
-}
+  return (
+    <div>
+      <h2>İşlem Listesi</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>İşlem</th>
+            <th>Tutar</th>
+            <th>Tarih</th>
+            <th>Açıklama</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {transactions.length > 0 ? (
+            transactions.map((tx) => (
+              <tr key={tx.id}>
+                <td>
+                  {tx.tur === "transfer"
+                    ? `${tx.gonderenHesapID} → ${tx.aliciHesapID}`
+                    : `${tx.hesapAdi} (${tx.tur === "paraYatirma" ? "Yatırma" : "Çekme"})`}
+                </td>
+                <td>{tx.tutar} ₺</td>
+                <td>{tx.tarih}</td>
+                <td>{tx.aciklama || "-"}</td>
+                <td>
+                  <button className="delete-button" onClick={() => handleDelete(tx.id)}>
+                    Sil
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5">Henüz işlem bulunmamaktadır.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default TransactionList;
+

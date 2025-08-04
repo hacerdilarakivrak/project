@@ -6,7 +6,8 @@ const ACCOUNTS_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/account
 
 const TransactionForm = ({ onTransactionAdded }) => {
   const [hesaplar, setHesaplar] = useState([]);
-  const [hesapID, setHesapID] = useState("");
+  const [gonderenHesapID, setGonderenHesapID] = useState("");
+  const [aliciHesapID, setAliciHesapID] = useState("");
   const [tur, setTur] = useState("paraYatirma");
   const [tutar, setTutar] = useState("");
   const [tarih, setTarih] = useState("");
@@ -28,20 +29,82 @@ const TransactionForm = ({ onTransactionAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const seciliHesap = hesaplar.find((h) => String(h.id) === String(hesapID));
-    if (!seciliHesap) {
-      alert("Hesap bulunamadı!");
-      return;
-    }
-
     const islemTutar = Number(tutar);
     if (isNaN(islemTutar) || islemTutar <= 0) {
       alert("Geçerli bir tutar giriniz!");
       return;
     }
 
-    let yeniBakiye = Number(seciliHesap.bakiye) || 0;
+    if (tur === "transfer") {
+      if (!gonderenHesapID || !aliciHesapID || gonderenHesapID === aliciHesapID) {
+        alert("Geçerli gönderen ve alıcı hesap seçiniz!");
+        return;
+      }
 
+      const gonderen = hesaplar.find((h) => String(h.id) === String(gonderenHesapID));
+      const alici = hesaplar.find((h) => String(h.id) === String(aliciHesapID));
+
+      if (!gonderen || !alici) {
+        alert("Hesap bulunamadı!");
+        return;
+      }
+
+      if (islemTutar > gonderen.bakiye) {
+        alert("Gönderen hesapta yeterli bakiye yok!");
+        return;
+      }
+
+      const gonderenYeniBakiye = gonderen.bakiye - islemTutar;
+      const aliciYeniBakiye = (alici.bakiye || 0) + islemTutar;
+
+      const gonderenIslem = {
+        hesapID: gonderen.id,
+        hesapAdi: gonderen.hesapAdi,
+        tur: "transferGonderen",
+        tutar: islemTutar,
+        tarih,
+        aciklama,
+        bakiyeSonrasi: gonderenYeniBakiye,
+        musteriID: gonderen.musteriNo,
+      };
+
+      const aliciIslem = {
+        hesapID: alici.id,
+        hesapAdi: alici.hesapAdi,
+        tur: "transferAlici",
+        tutar: islemTutar,
+        tarih,
+        aciklama,
+        bakiyeSonrasi: aliciYeniBakiye,
+        musteriID: alici.musteriNo,
+      };
+
+      try {
+        await axios.post(API_URL, gonderenIslem);
+        await axios.post(API_URL, aliciIslem);
+        await axios.put(`${ACCOUNTS_API}/${gonderen.id}`, { ...gonderen, bakiye: gonderenYeniBakiye });
+        await axios.put(`${ACCOUNTS_API}/${alici.id}`, { ...alici, bakiye: aliciYeniBakiye });
+        await fetchAccounts();
+        onTransactionAdded();
+        setGonderenHesapID("");
+        setAliciHesapID("");
+        setTur("paraYatirma");
+        setTutar("");
+        setTarih("");
+        setAciklama("");
+      } catch (err) {
+        console.error("Transfer işlemi sırasında hata:", err);
+      }
+      return;
+    }
+
+    const seciliHesap = hesaplar.find((h) => String(h.id) === String(gonderenHesapID));
+    if (!seciliHesap) {
+      alert("Hesap bulunamadı!");
+      return;
+    }
+
+    let yeniBakiye = Number(seciliHesap.bakiye) || 0;
     if (tur === "paraYatirma") {
       yeniBakiye += islemTutar;
     } else if (tur === "paraCekme") {
@@ -65,13 +128,13 @@ const TransactionForm = ({ onTransactionAdded }) => {
 
     try {
       await axios.post(API_URL, yeniIslem);
-      await axios.put(`${ACCOUNTS_API}/${hesapID}`, {
+      await axios.put(`${ACCOUNTS_API}/${gonderenHesapID}`, {
         ...seciliHesap,
         bakiye: yeniBakiye,
       });
       await fetchAccounts();
       onTransactionAdded();
-      setHesapID("");
+      setGonderenHesapID("");
       setTur("paraYatirma");
       setTutar("");
       setTarih("");
@@ -85,23 +148,54 @@ const TransactionForm = ({ onTransactionAdded }) => {
     <div>
       <h2>Yeni İşlem Ekle</h2>
       <form onSubmit={handleSubmit}>
-        <select
-          value={hesapID}
-          onChange={(e) => setHesapID(e.target.value)}
-          required
-        >
-          <option value="">Hesap Seçin</option>
-          {hesaplar.map((h) => (
-            <option key={h.id} value={h.id}>
-              {h.hesapAdi}
-            </option>
-          ))}
-        </select>
-
         <select value={tur} onChange={(e) => setTur(e.target.value)}>
           <option value="paraYatirma">Para Yatırma</option>
           <option value="paraCekme">Para Çekme</option>
+          <option value="transfer">Transfer</option>
         </select>
+
+        {tur === "transfer" ? (
+          <>
+            <select
+              value={gonderenHesapID}
+              onChange={(e) => setGonderenHesapID(e.target.value)}
+              required
+            >
+              <option value="">Gönderen Hesap</option>
+              {hesaplar.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.hesapAdi}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={aliciHesapID}
+              onChange={(e) => setAliciHesapID(e.target.value)}
+              required
+            >
+              <option value="">Alıcı Hesap</option>
+              {hesaplar.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.hesapAdi}
+                </option>
+              ))}
+            </select>
+          </>
+        ) : (
+          <select
+            value={gonderenHesapID}
+            onChange={(e) => setGonderenHesapID(e.target.value)}
+            required
+          >
+            <option value="">Hesap Seçin</option>
+            {hesaplar.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.hesapAdi}
+              </option>
+            ))}
+          </select>
+        )}
 
         <input
           type="number"

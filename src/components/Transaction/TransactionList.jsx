@@ -31,14 +31,18 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
-  const getIslemTurText = (tur) => {
-    switch (tur) {
+  const getIslemTurText = (islem) => {
+    switch (islem.tur) {
       case "paraYatirma":
-        return "Para Yatırma";
+        return `Para Yatırma (${islem.hesapAdi})`;
       case "paraCekme":
-        return "Para Çekme";
+        return `Para Çekme (${islem.hesapAdi})`;
+      case "transferGonderen":
+        return `Transfer (Gönderen) - ${islem.hesapAdi}`;
+      case "transferAlici":
+        return `Transfer (Alıcı) - ${islem.hesapAdi}`;
       default:
-        return tur || "-";
+        return islem.tur || "-";
     }
   };
 
@@ -48,8 +52,7 @@ const TransactionList = ({ refresh }) => {
       <table className="transaction-table">
         <thead>
           <tr>
-            <th>Hesap Adı</th>
-            <th>Tür</th>
+            <th>İşlem</th>
             <th>Tutar</th>
             <th>Tarih</th>
             <th>Müşteri No</th>
@@ -61,15 +64,14 @@ const TransactionList = ({ refresh }) => {
         <tbody>
           {islemler.length === 0 ? (
             <tr>
-              <td colSpan="8" style={{ textAlign: "center", padding: "12px" }}>
+              <td colSpan="7" style={{ textAlign: "center", padding: "12px" }}>
                 Kayıtlı işlem yok.
               </td>
             </tr>
           ) : (
             islemler.map((islem) => (
               <tr key={islem.id}>
-                <td>{islem.hesapAdi?.trim() || "Bilinmiyor"}</td>
-                <td>{getIslemTurText(islem.tur)}</td>
+                <td>{getIslemTurText(islem)}</td>
                 <td>{islem.tutar} ₺</td>
                 <td>{islem.tarih}</td>
                 <td>{islem.musteriID || "-"}</td>

@@ -7,6 +7,7 @@ const app = express();
 const PORT = 5000;
 
 app.use(cors());
+app.use(express.json());
 
 app.get("/api/exchange-rates", async (req, res) => {
   try {
@@ -31,6 +32,50 @@ app.get("/api/exchange-rates", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Veri çekme hatası" });
   }
+});
+
+let accounts = [
+  { id: 1, name: "Hesap 1", balance: 1000 },
+  { id: 2, name: "Hesap 2", balance: 500 }
+];
+
+let transactions = [];
+
+app.get("/api/transactions", (req, res) => {
+  res.json(transactions);
+});
+
+app.post("/api/transactions", (req, res) => {
+  const { fromAccountId, toAccountId, amount } = req.body;
+
+  const from = accounts.find(acc => acc.id === fromAccountId);
+  const to = accounts.find(acc => acc.id === toAccountId);
+
+  if (!from || !to) {
+    return res.status(400).json({ message: "Hesap bulunamadı" });
+  }
+
+  if (from.balance < amount) {
+    return res.status(400).json({ message: "Yetersiz bakiye" });
+  }
+
+  from.balance -= amount;
+  to.balance += amount;
+
+  const newTransaction = {
+    id: transactions.length + 1,
+    from: from.name,
+    to: to.name,
+    amount,
+    date: new Date()
+  };
+
+  transactions.push(newTransaction);
+  res.json(newTransaction);
+});
+
+app.get("/api/accounts", (req, res) => {
+  res.json(accounts);
 });
 
 app.listen(PORT, () => {
