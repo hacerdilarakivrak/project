@@ -74,6 +74,44 @@ app.post("/api/transactions", (req, res) => {
   res.json(newTransaction);
 });
 
+app.put("/api/transactions/:id", (req, res) => {
+  const transactionId = parseInt(req.params.id);
+  const { fromAccountId, toAccountId, amount } = req.body;
+
+  const transaction = transactions.find(t => t.id === transactionId);
+  if (!transaction) {
+    return res.status(404).json({ message: "İşlem bulunamadı" });
+  }
+
+  const from = accounts.find(acc => acc.id === fromAccountId);
+  const to = accounts.find(acc => acc.id === toAccountId);
+
+  if (!from || !to) {
+    return res.status(400).json({ message: "Hesap bulunamadı" });
+  }
+
+  if (from.balance < amount) {
+    return res.status(400).json({ message: "Yetersiz bakiye" });
+  }
+
+  const oldFrom = accounts.find(acc => acc.name === transaction.from);
+  const oldTo = accounts.find(acc => acc.name === transaction.to);
+  if (oldFrom && oldTo) {
+    oldFrom.balance += transaction.amount;
+    oldTo.balance -= transaction.amount;
+  }
+
+  from.balance -= amount;
+  to.balance += amount;
+
+  transaction.from = from.name;
+  transaction.to = to.name;
+  transaction.amount = amount;
+  transaction.date = new Date();
+
+  res.json(transaction);
+});
+
 app.get("/api/accounts", (req, res) => {
   res.json(accounts);
 });

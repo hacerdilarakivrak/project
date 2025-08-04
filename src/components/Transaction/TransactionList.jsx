@@ -15,6 +15,9 @@ const TransactionList = ({ refresh }) => {
   const [musteriNo, setMusteriNo] = useState("");
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [editAciklama, setEditAciklama] = useState("");
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -46,6 +49,28 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
+  const handleEditClick = (transaction) => {
+    setEditingTransaction(transaction);
+    setEditAmount(transaction.tutar);
+    setEditAciklama(transaction.aciklama || "");
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await axios.put(`${API_URL}/${editingTransaction.id}`, {
+        ...editingTransaction,
+        tutar: editAmount,
+        aciklama: editAciklama,
+      });
+      toast.success("İşlem başarıyla güncellendi!");
+      setEditingTransaction(null);
+      fetchTransactions();
+    } catch (err) {
+      console.error("İşlem güncellenirken hata:", err);
+      toast.error("İşlem güncellenirken hata oluştu!");
+    }
+  };
+
   const getIslemTurText = (islem) => {
     switch (islem.tur) {
       case "paraYatirma":
@@ -66,7 +91,8 @@ const TransactionList = ({ refresh }) => {
       const islemTarihi = new Date(islem.tarih);
       if (startDate && islemTarihi < startDate) return false;
       if (endDate && islemTarihi > endDate) return false;
-      if (musteriNo && !islem.musteriID?.toString().includes(musteriNo)) return false;
+      if (musteriNo && !islem.musteriID?.toString().includes(musteriNo))
+        return false;
       return true;
     });
     setFilteredTransactions(filtered);
@@ -83,7 +109,10 @@ const TransactionList = ({ refresh }) => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem);
+  const currentTransactions = filteredTransactions.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
 
   return (
@@ -165,6 +194,12 @@ const TransactionList = ({ refresh }) => {
                 <td>{islem.bakiyeSonrasi ?? 0} ₺</td>
                 <td>
                   <button
+                    className="edit-button"
+                    onClick={() => handleEditClick(islem)}
+                  >
+                    Düzenle
+                  </button>
+                  <button
                     className="delete-button"
                     onClick={() => handleDelete(islem.id)}
                   >
@@ -176,6 +211,35 @@ const TransactionList = ({ refresh }) => {
           )}
         </tbody>
       </table>
+
+      {editingTransaction && (
+        <div className="edit-form">
+          <h3>İşlem Düzenle</h3>
+          <label>Tutar:</label>
+          <input
+            type="number"
+            value={editAmount}
+            onChange={(e) => setEditAmount(e.target.value)}
+          />
+          <label>Açıklama:</label>
+          <input
+            type="text"
+            value={editAciklama}
+            onChange={(e) => setEditAciklama(e.target.value)}
+          />
+          <div className="edit-buttons">
+            <button onClick={handleSaveEdit} className="save-button">
+              Kaydet
+            </button>
+            <button
+              onClick={() => setEditingTransaction(null)}
+              className="cancel-button"
+            >
+              İptal
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="pagination">
         {Array.from({ length: totalPages || 1 }, (_, index) => (
