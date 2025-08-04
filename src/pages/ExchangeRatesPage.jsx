@@ -17,14 +17,25 @@ const ExchangeRatesPage = () => {
     axios
       .get("http://localhost:5000/api/exchange-rates")
       .then((res) => {
-        setPrevRates(exchangeRates);
-        setExchangeRates(res.data);
+        const data = {
+          USD: parseFloat(res.data.USD),
+          EUR: parseFloat(res.data.EUR),
+          GBP: parseFloat(res.data.GBP),
+        };
+
+        if (exchangeRates.USD === 0 && exchangeRates.EUR === 0 && exchangeRates.GBP === 0) {
+          setPrevRates(data);
+        } else {
+          setPrevRates(exchangeRates);
+        }
+
+        setExchangeRates(data);
 
         const now = new Date();
         const newEntry = {
           time: now.toLocaleTimeString(),
           timestamp: now.getTime(),
-          ...res.data,
+          ...data,
         };
 
         setRateHistory((prev) => {
