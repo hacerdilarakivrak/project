@@ -11,6 +11,9 @@ const TransactionList = ({ refresh }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [musteriNo, setMusteriNo] = useState("");
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchTransactions();
@@ -20,6 +23,8 @@ const TransactionList = ({ refresh }) => {
     try {
       const res = await axios.get(API_URL);
       setIslemler(res.data);
+      setFilteredTransactions(res.data);
+      setCurrentPage(1);
     } catch (err) {
       console.error("İşlemler alınırken hata:", err);
     }
@@ -51,13 +56,30 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
-  const filteredTransactions = islemler.filter((islem) => {
-    const islemTarihi = new Date(islem.tarih);
-    if (startDate && islemTarihi < startDate) return false;
-    if (endDate && islemTarihi > endDate) return false;
-    if (musteriNo && !islem.musteriID?.toString().includes(musteriNo)) return false;
-    return true;
-  });
+  useEffect(() => {
+    const filtered = islemler.filter((islem) => {
+      const islemTarihi = new Date(islem.tarih);
+      if (startDate && islemTarihi < startDate) return false;
+      if (endDate && islemTarihi > endDate) return false;
+      if (musteriNo && !islem.musteriID?.toString().includes(musteriNo)) return false;
+      return true;
+    });
+    setFilteredTransactions(filtered);
+    setCurrentPage(1);
+  }, [startDate, endDate, musteriNo, islemler]);
+
+  const clearFilters = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setMusteriNo("");
+    setFilteredTransactions(islemler);
+    setCurrentPage(1);
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
 
   return (
     <div className="transaction-list-container">
@@ -74,7 +96,6 @@ const TransactionList = ({ refresh }) => {
               isClearable
             />
           </div>
-
           <div>
             <label>Bitiş Tarihi: </label>
             <DatePicker
@@ -95,6 +116,12 @@ const TransactionList = ({ refresh }) => {
             placeholder="Müşteri numarası giriniz"
           />
         </div>
+
+        <div className="filter-buttons">
+          <button className="clear-button" onClick={clearFilters}>
+            Temizle
+          </button>
+        </div>
       </div>
 
       <table className="transaction-table">
@@ -110,14 +137,14 @@ const TransactionList = ({ refresh }) => {
           </tr>
         </thead>
         <tbody>
-          {filteredTransactions.length === 0 ? (
+          {currentTransactions.length === 0 ? (
             <tr>
               <td colSpan="7" style={{ textAlign: "center", padding: "12px" }}>
                 Kayıtlı işlem yok.
               </td>
             </tr>
           ) : (
-            filteredTransactions.map((islem) => (
+            currentTransactions.map((islem) => (
               <tr key={islem.id}>
                 <td>{getIslemTurText(islem)}</td>
                 <td>{islem.tutar} ₺</td>
@@ -138,6 +165,18 @@ const TransactionList = ({ refresh }) => {
           )}
         </tbody>
       </table>
+
+      <div className="pagination">
+        {Array.from({ length: totalPages || 1 }, (_, index) => (
+          <button
+            key={index + 1}
+            onClick={() => setCurrentPage(index + 1)}
+            className={currentPage === index + 1 ? "active" : ""}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

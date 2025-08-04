@@ -21,7 +21,8 @@ thead {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
-th, td {
+th,
+td {
   padding: 12px 14px;
   border-bottom: 1px solid #555;
   text-align: center;
@@ -87,5 +88,59 @@ td:last-child {
   border-radius: 4px;
   background-color: #2b2b2b;
   color: white;
-  width: 250px;
+  width: 180px;
+  max-width: 100%;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.apply-button,
+.clear-button {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.apply-button:hover {
+  background-color: #28a745;
+}
+
+.clear-button:hover {
+  background-color: #e53935;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+  gap: 8px;
+}
+
+.pagination button {
+  background-color: #444;
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px; 
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+  background-color: #555;
+}
+
+.pagination button.active {
+  background-color: #28a745;
+  color: white;
 }
