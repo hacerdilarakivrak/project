@@ -63,9 +63,11 @@ const BillPayment = () => {
   };
 
   const deletePayment = (id) => {
-    const updatedPayments = payments.filter((payment) => payment.id !== id);
-    setPayments(updatedPayments);
-    localStorage.setItem("payments", JSON.stringify(updatedPayments));
+    if (window.confirm("Bu ödemeyi silmek istediğinize emin misiniz?")) {
+      const updatedPayments = payments.filter((payment) => payment.id !== id);
+      setPayments(updatedPayments);
+      localStorage.setItem("payments", JSON.stringify(updatedPayments));
+    }
   };
 
   return (
