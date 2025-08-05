@@ -56,4 +56,3 @@ const getLinkStyle = ({ isActive }) => ({
 });
 
 export default Header;
-

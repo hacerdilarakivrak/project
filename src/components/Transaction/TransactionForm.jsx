@@ -49,7 +49,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
       return;
     }
 
-    // FATURA ÖDEME
     if (tur === "faturaOdeme") {
       if (!seciliMusteri || !gonderenHesapID) {
         alert("Lütfen müşteri ve hesabı seçiniz!");
@@ -103,7 +102,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
       return;
     }
 
-    // DİĞER İŞLEMLER (Para Yatırma, Para Çekme, Transfer)
     if (tur === "transfer") {
       if (!gonderenHesapID || !aliciHesapID || gonderenHesapID === aliciHesapID) {
         alert("Geçerli gönderen ve alıcı hesap seçiniz!");
