@@ -26,7 +26,7 @@ const TransactionsPage = () => {
       </div>
 
       <div style={listContainerStyle}>
-        <TransactionList refresh={refresh} />
+        <TransactionList refresh={refresh} type="fatura" />
       </div>
     </div>
   );

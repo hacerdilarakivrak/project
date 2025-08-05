@@ -38,9 +38,6 @@ const Header = () => {
         <NavLink to="/exchange-rates" style={getLinkStyle}>
           Döviz Kurları
         </NavLink>
-        <NavLink to="/bill-payment" style={getLinkStyle}>
-          Fatura Ödeme
-        </NavLink>
       </nav>
     </header>
   );

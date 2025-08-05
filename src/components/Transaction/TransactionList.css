@@ -203,3 +203,53 @@ td:last-child {
 .react-datepicker-popper {
   z-index: 9999 !important;
 }
+
+.transaction-table .fatura-row {
+  background-color: rgba(255, 215, 0, 0.08);
+}
+
+.transaction-table .fatura-status {
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: inline-block;
+}
+
+.fatura-status.paid {
+  background-color: #28a745;
+  color: white;
+}
+
+.fatura-status.pending {
+  background-color: #ffc107;
+  color: black;
+}
+
+.transaction-table .fatura-edit-button {
+  background-color: #007bff;
+  color: white;
+  margin-right: 6px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.transaction-table .fatura-delete-button {
+  background-color: #dc3545;
+  color: white;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.transaction-table .fatura-edit-button:hover {
+  background-color: #0056b3;
+}
+
+.transaction-table .fatura-delete-button:hover {
+  background-color: #a71d2a;
+}
+

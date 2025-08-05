@@ -3,11 +3,15 @@ import axios from "axios";
 
 const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/transactions";
 const ACCOUNTS_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts";
+const CUSTOMERS_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
 
 const TransactionForm = ({ onTransactionAdded }) => {
   const [hesaplar, setHesaplar] = useState([]);
+  const [musteriler, setMusteriler] = useState([]);
   const [gonderenHesapID, setGonderenHesapID] = useState("");
   const [aliciHesapID, setAliciHesapID] = useState("");
+  const [seciliMusteri, setSeciliMusteri] = useState("");
+  const [faturaTuru, setFaturaTuru] = useState("electricity");
   const [tur, setTur] = useState("paraYatirma");
   const [tutar, setTutar] = useState("");
   const [tarih, setTarih] = useState("");
@@ -15,6 +19,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
 
   useEffect(() => {
     fetchAccounts();
+    fetchCustomers();
   }, []);
 
   const fetchAccounts = async () => {
@@ -23,6 +28,15 @@ const TransactionForm = ({ onTransactionAdded }) => {
       setHesaplar(res.data);
     } catch (err) {
       console.error("Hesaplar alınırken hata:", err);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const res = await axios.get(CUSTOMERS_API);
+      setMusteriler(res.data);
+    } catch (err) {
+      console.error("Müşteriler alınırken hata:", err);
     }
   };
 
@@ -35,6 +49,61 @@ const TransactionForm = ({ onTransactionAdded }) => {
       return;
     }
 
+    // FATURA ÖDEME
+    if (tur === "faturaOdeme") {
+      if (!seciliMusteri || !gonderenHesapID) {
+        alert("Lütfen müşteri ve hesabı seçiniz!");
+        return;
+      }
+
+      const seciliHesap = hesaplar.find((h) => String(h.id) === String(gonderenHesapID));
+      if (!seciliHesap) {
+        alert("Hesap bulunamadı!");
+        return;
+      }
+
+      if (islemTutar > seciliHesap.bakiye) {
+        alert("Yetersiz bakiye!");
+        return;
+      }
+
+      const yeniBakiye = seciliHesap.bakiye - islemTutar;
+
+      const faturaIslem = {
+        hesapID: seciliHesap.id,
+        hesapAdi: seciliHesap.hesapAdi,
+        tur: "faturaOdeme",
+        faturaTuru,
+        musteriID: seciliMusteri,
+        tutar: islemTutar,
+        tarih,
+        aciklama: aciklama || `${faturaTuru} faturası ödemesi`,
+        bakiyeSonrasi: yeniBakiye,
+      };
+
+      try {
+        await axios.post(API_URL, faturaIslem);
+        await axios.put(`${ACCOUNTS_API}/${gonderenHesapID}`, {
+          ...seciliHesap,
+          bakiye: yeniBakiye,
+        });
+
+        await fetchAccounts();
+        onTransactionAdded();
+        setGonderenHesapID("");
+        setSeciliMusteri("");
+        setFaturaTuru("electricity");
+        setTur("paraYatirma");
+        setTutar("");
+        setTarih("");
+        setAciklama("");
+      } catch (err) {
+        console.error("Fatura ödeme sırasında hata:", err);
+      }
+      return;
+    }
+
+    // DİĞER İŞLEMLER (Para Yatırma, Para Çekme, Transfer)
     if (tur === "transfer") {
       if (!gonderenHesapID || !aliciHesapID || gonderenHesapID === aliciHesapID) {
         alert("Geçerli gönderen ve alıcı hesap seçiniz!");
@@ -152,47 +221,55 @@ const TransactionForm = ({ onTransactionAdded }) => {
           <option value="paraYatirma">Para Yatırma</option>
           <option value="paraCekme">Para Çekme</option>
           <option value="transfer">Transfer</option>
+          <option value="faturaOdeme">Fatura Ödeme</option>
         </select>
 
         {tur === "transfer" ? (
           <>
-            <select
-              value={gonderenHesapID}
-              onChange={(e) => setGonderenHesapID(e.target.value)}
-              required
-            >
+            <select value={gonderenHesapID} onChange={(e) => setGonderenHesapID(e.target.value)} required>
               <option value="">Gönderen Hesap</option>
               {hesaplar.map((h) => (
-                <option key={h.id} value={h.id}>
-                  {h.hesapAdi}
+                <option key={h.id} value={h.id}>{h.hesapAdi}</option>
+              ))}
+            </select>
+
+            <select value={aliciHesapID} onChange={(e) => setAliciHesapID(e.target.value)} required>
+              <option value="">Alıcı Hesap</option>
+              {hesaplar.map((h) => (
+                <option key={h.id} value={h.id}>{h.hesapAdi}</option>
+              ))}
+            </select>
+          </>
+        ) : tur === "faturaOdeme" ? (
+          <>
+            <select value={gonderenHesapID} onChange={(e) => setGonderenHesapID(e.target.value)} required>
+              <option value="">Hesap Seçin</option>
+              {hesaplar.map((h) => (
+                <option key={h.id} value={h.id}>{h.hesapAdi}</option>
+              ))}
+            </select>
+
+            <select value={seciliMusteri} onChange={(e) => setSeciliMusteri(e.target.value)} required>
+              <option value="">Müşteri Seçiniz</option>
+              {musteriler.map((m) => (
+                <option key={m.id} value={m.musteriNo}>
+                  {m.musteriNo} - {m.ad} {m.soyad}
                 </option>
               ))}
             </select>
 
-            <select
-              value={aliciHesapID}
-              onChange={(e) => setAliciHesapID(e.target.value)}
-              required
-            >
-              <option value="">Alıcı Hesap</option>
-              {hesaplar.map((h) => (
-                <option key={h.id} value={h.id}>
-                  {h.hesapAdi}
-                </option>
-              ))}
+            <select value={faturaTuru} onChange={(e) => setFaturaTuru(e.target.value)}>
+              <option value="electricity">Elektrik</option>
+              <option value="water">Su</option>
+              <option value="gas">Doğalgaz</option>
+              <option value="internet">İnternet</option>
             </select>
           </>
         ) : (
-          <select
-            value={gonderenHesapID}
-            onChange={(e) => setGonderenHesapID(e.target.value)}
-            required
-          >
+          <select value={gonderenHesapID} onChange={(e) => setGonderenHesapID(e.target.value)} required>
             <option value="">Hesap Seçin</option>
             {hesaplar.map((h) => (
-              <option key={h.id} value={h.id}>
-                {h.hesapAdi}
-              </option>
+              <option key={h.id} value={h.id}>{h.hesapAdi}</option>
             ))}
           </select>
         )}
@@ -207,12 +284,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
           step="0.01"
         />
 
-        <input
-          type="date"
-          value={tarih}
-          onChange={(e) => setTarih(e.target.value)}
-          required
-        />
+        <input type="date" value={tarih} onChange={(e) => setTarih(e.target.value)} required />
 
         <input
           type="text"
