@@ -7,7 +7,10 @@ import HomePage from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
 import TransactionsPage from "./pages/TransactionsPage";
 import ExchangeRatesPage from "./pages/ExchangeRatesPage";
+import BillPayment from "./pages/BillPayment";
 import Layout from "./components/Layout/Layout";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -21,7 +24,9 @@ function App() {
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/exchange-rates" element={<ExchangeRatesPage />} />
+          <Route path="/bill-payment" element={<BillPayment />} />
         </Routes>
+        <ToastContainer position="top-right" autoClose={3000} />
       </Layout>
     </Router>
   );
