@@ -1,52 +1,71 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
 
 const BillPayment = () => {
   const [billType, setBillType] = useState("electricity");
-  const [subscriberNo, setSubscriberNo] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState("");
   const [amount, setAmount] = useState("");
   const [payments, setPayments] = useState([]);
+  const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
-    const savedPayments = localStorage.getItem("payments");
-    if (savedPayments) {
-      setPayments(JSON.parse(savedPayments));
-    }
+    const fetchCustomers = async () => {
+      try {
+        const response = await axios.get(API_URL);
+        setCustomers(response.data);
+      } catch (error) {
+        console.error("Müşteri listesi alınamadı:", error);
+      }
+    };
+    fetchCustomers();
   }, []);
 
-  const savePaymentsToStorage = (updatedPayments) => {
-    setPayments(updatedPayments);
-    localStorage.setItem("payments", JSON.stringify(updatedPayments));
-  };
+  useEffect(() => {
+    const savedPayments = JSON.parse(localStorage.getItem("payments")) || [];
+    setPayments(savedPayments);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!subscriberNo || !amount) {
-      alert("Lütfen tüm alanları doldurun!");
+    if (!selectedCustomer || !amount) {
+      alert("Lütfen müşteri ve tutarı seçiniz!");
       return;
     }
 
     const newPayment = {
       id: Date.now(),
       billType,
-      subscriberNo,
+      subscriberNo: selectedCustomer,
       amount,
       date: new Date().toLocaleString(),
     };
 
     const updatedPayments = [newPayment, ...payments];
-    savePaymentsToStorage(updatedPayments);
+    setPayments(updatedPayments);
+    localStorage.setItem("payments", JSON.stringify(updatedPayments));
 
-    alert(`${billType.toUpperCase()} faturası için ${amount} TL ödeme başarıyla gerçekleştirildi.`);
+    alert(
+      `${billType.toUpperCase()} faturası için ${amount} TL ödeme başarıyla gerçekleştirildi.`
+    );
 
-    setSubscriberNo("");
+    setSelectedCustomer("");
     setAmount("");
   };
 
-  const handleClearPayments = () => {
+  const clearPayments = () => {
     if (window.confirm("Tüm ödeme geçmişini silmek istediğinize emin misiniz?")) {
-      savePaymentsToStorage([]);
+      setPayments([]);
+      localStorage.removeItem("payments");
     }
+  };
+
+  const deletePayment = (id) => {
+    const updatedPayments = payments.filter((payment) => payment.id !== id);
+    setPayments(updatedPayments);
+    localStorage.setItem("payments", JSON.stringify(updatedPayments));
   };
 
   return (
@@ -76,14 +95,19 @@ const BillPayment = () => {
         </label>
 
         <label>
-          Abone No:
-          <input
-            type="text"
-            value={subscriberNo}
-            onChange={(e) => setSubscriberNo(e.target.value)}
+          Müşteri No:
+          <select
+            value={selectedCustomer}
+            onChange={(e) => setSelectedCustomer(e.target.value)}
             style={{ width: "100%", padding: "8px" }}
-            required
-          />
+          >
+            <option value="">Müşteri seçiniz</option>
+            {customers.map((customer) => (
+              <option key={customer.id} value={customer.musteriNo}>
+                {customer.musteriNo} - {customer.ad} {customer.soyad}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label>
@@ -117,19 +141,19 @@ const BillPayment = () => {
         <div style={{ marginTop: "30px" }}>
           <h3>Ödeme Geçmişi</h3>
           <button
-            onClick={handleClearPayments}
+            onClick={clearPayments}
             style={{
               marginBottom: "10px",
-              padding: "8px 12px",
-              backgroundColor: "#FF4C4C",
+              padding: "8px",
+              backgroundColor: "#FF4D4D",
               color: "#fff",
               border: "none",
-              borderRadius: "4px",
               cursor: "pointer",
               fontWeight: "bold",
+              borderRadius: "4px",
             }}
           >
-            Ödeme Geçmişini Temizle
+            Ödeme Geçmişini Sil
           </button>
           <table
             style={{
@@ -141,9 +165,10 @@ const BillPayment = () => {
             <thead>
               <tr>
                 <th style={thStyle}>Fatura Türü</th>
-                <th style={thStyle}>Abone No</th>
+                <th style={thStyle}>Müşteri No</th>
                 <th style={thStyle}>Tutar (TL)</th>
                 <th style={thStyle}>Tarih</th>
+                <th style={thStyle}>İşlem</th>
               </tr>
             </thead>
             <tbody>
@@ -153,6 +178,21 @@ const BillPayment = () => {
                   <td style={tdStyle}>{payment.subscriberNo}</td>
                   <td style={tdStyle}>{payment.amount}</td>
                   <td style={tdStyle}>{payment.date}</td>
+                  <td style={tdStyle}>
+                    <button
+                      onClick={() => deletePayment(payment.id)}
+                      style={{
+                        backgroundColor: "#FF4D4D",
+                        color: "#fff",
+                        border: "none",
+                        padding: "5px 10px",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Sil
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -178,4 +218,3 @@ const tdStyle = {
 };
 
 export default BillPayment;
-
