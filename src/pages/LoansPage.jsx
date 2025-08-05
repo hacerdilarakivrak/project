@@ -3,6 +3,7 @@ import LoanForm from "../components/Loans/LoanForm";
 
 const LoansPage = () => {
   const [loans, setLoans] = useState([]);
+  const [editingLoan, setEditingLoan] = useState(null);
 
   useEffect(() => {
     const savedLoans = JSON.parse(localStorage.getItem("loans")) || [];
@@ -10,7 +11,16 @@ const LoansPage = () => {
   }, []);
 
   const handleLoanAdded = (newLoan) => {
-    const updatedLoans = [...loans, { ...newLoan, id: Date.now() }];
+    let updatedLoans;
+    if (editingLoan) {
+      updatedLoans = loans.map((loan) =>
+        loan.id === editingLoan.id ? { ...newLoan, id: editingLoan.id } : loan
+      );
+      setEditingLoan(null);
+    } else {
+      updatedLoans = [...loans, { ...newLoan, id: Date.now() }];
+    }
+
     setLoans(updatedLoans);
     localStorage.setItem("loans", JSON.stringify(updatedLoans));
   };
@@ -24,9 +34,13 @@ const LoansPage = () => {
     }
   };
 
+  const handleEditLoan = (loan) => {
+    setEditingLoan(loan);
+  };
+
   return (
     <div style={pageStyle}>
-      <LoanForm onLoanAdded={handleLoanAdded} />
+      <LoanForm onLoanAdded={handleLoanAdded} editingLoan={editingLoan} />
 
       <h2 style={{ marginTop: "30px" }}>Kredi Listesi</h2>
       <table style={tableStyle}>
@@ -49,7 +63,13 @@ const LoansPage = () => {
                 <td>{loan.amount}</td>
                 <td>{loan.term}</td>
                 <td>{loan.interestRate}</td>
-                <td>
+                <td style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                  <button
+                    onClick={() => handleEditLoan(loan)}
+                    style={updateButtonStyle}
+                  >
+                    Güncelle
+                  </button>
                   <button
                     onClick={() => handleDeleteLoan(loan.id)}
                     style={deleteButtonStyle}
@@ -82,6 +102,18 @@ const tableStyle = {
   borderCollapse: "collapse",
   backgroundColor: "#2c2c2c",
   color: "#fff",
+};
+
+const updateButtonStyle = {
+  backgroundColor: "#1abc9c",
+  color: "#fff",
+  border: "none",
+  borderRadius: "4px",
+  padding: "8px 14px",
+  fontSize: "14px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  whiteSpace: "nowrap",
 };
 
 const deleteButtonStyle = {

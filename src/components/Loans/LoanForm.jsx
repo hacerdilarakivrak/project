@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const LoanForm = ({ onLoanAdded }) => {
+const LoanForm = ({ onLoanAdded, editingLoan }) => {
   const [customers, setCustomers] = useState([]);
   const [formData, setFormData] = useState({
     customerId: "",
@@ -16,6 +16,26 @@ const LoanForm = ({ onLoanAdded }) => {
       .then((data) => setCustomers(data))
       .catch((err) => console.error("Müşteri listesi alınamadı:", err));
   }, []);
+
+  useEffect(() => {
+    if (editingLoan) {
+      setFormData({
+        customerId: editingLoan.customerId || "",
+        customerName: editingLoan.customerName || "",
+        amount: editingLoan.amount || "",
+        term: editingLoan.term || "",
+        interestRate: editingLoan.interestRate || "",
+      });
+    } else {
+      setFormData({
+        customerId: "",
+        customerName: "",
+        amount: "",
+        term: "",
+        interestRate: "",
+      });
+    }
+  }, [editingLoan]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,10 +62,9 @@ const LoanForm = ({ onLoanAdded }) => {
       return;
     }
 
-    const newLoan = {
-      ...formData,
-      id: Date.now(),
-    };
+    const newLoan = editingLoan
+      ? { ...editingLoan, ...formData }
+      : { ...formData, id: Date.now() };
 
     onLoanAdded(newLoan);
 
@@ -60,7 +79,9 @@ const LoanForm = ({ onLoanAdded }) => {
 
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
-      <h2 style={{ marginBottom: "10px" }}>Kredi Başvurusu</h2>
+      <h2 style={{ marginBottom: "10px" }}>
+        {editingLoan ? "Kredi Güncelle" : "Kredi Başvurusu"}
+      </h2>
 
       <select
         name="customerId"
@@ -104,7 +125,7 @@ const LoanForm = ({ onLoanAdded }) => {
       />
 
       <button type="submit" style={buttonStyle}>
-        Kredi Ekle
+        {editingLoan ? "Kredi Güncelle" : "Kredi Ekle"}
       </button>
     </form>
   );
