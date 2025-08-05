@@ -104,25 +104,27 @@ const tableStyle = {
   color: "#fff",
 };
 
-const updateButtonStyle = {
-  backgroundColor: "#1abc9c",
+const buttonBaseStyle = {
   color: "#fff",
   border: "none",
-  borderRadius: "4px",
+  borderRadius: "6px",
   padding: "8px 14px",
   fontSize: "14px",
   fontWeight: "bold",
   cursor: "pointer",
   whiteSpace: "nowrap",
+  minWidth: "90px",
+  textAlign: "center",
+};
+
+const updateButtonStyle = {
+  ...buttonBaseStyle,
+  backgroundColor: "#1abc9c",
 };
 
 const deleteButtonStyle = {
+  ...buttonBaseStyle,
   backgroundColor: "#e74c3c",
-  color: "#fff",
-  border: "none",
-  borderRadius: "4px",
-  padding: "5px 10px",
-  cursor: "pointer",
 };
 
 export default LoansPage;
