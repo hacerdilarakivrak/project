@@ -1,10 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const BillPayment = () => {
   const [billType, setBillType] = useState("electricity");
   const [subscriberNo, setSubscriberNo] = useState("");
   const [amount, setAmount] = useState("");
   const [payments, setPayments] = useState([]);
+
+  useEffect(() => {
+    const savedPayments = localStorage.getItem("payments");
+    if (savedPayments) {
+      setPayments(JSON.parse(savedPayments));
+    }
+  }, []);
+
+  const savePaymentsToStorage = (updatedPayments) => {
+    setPayments(updatedPayments);
+    localStorage.setItem("payments", JSON.stringify(updatedPayments));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,12 +34,19 @@ const BillPayment = () => {
       date: new Date().toLocaleString(),
     };
 
-    setPayments([newPayment, ...payments]);
+    const updatedPayments = [newPayment, ...payments];
+    savePaymentsToStorage(updatedPayments);
 
     alert(`${billType.toUpperCase()} faturası için ${amount} TL ödeme başarıyla gerçekleştirildi.`);
 
     setSubscriberNo("");
     setAmount("");
+  };
+
+  const handleClearPayments = () => {
+    if (window.confirm("Tüm ödeme geçmişini silmek istediğinize emin misiniz?")) {
+      savePaymentsToStorage([]);
+    }
   };
 
   return (
@@ -97,6 +116,21 @@ const BillPayment = () => {
       {payments.length > 0 && (
         <div style={{ marginTop: "30px" }}>
           <h3>Ödeme Geçmişi</h3>
+          <button
+            onClick={handleClearPayments}
+            style={{
+              marginBottom: "10px",
+              padding: "8px 12px",
+              backgroundColor: "#FF4C4C",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            Ödeme Geçmişini Temizle
+          </button>
           <table
             style={{
               width: "100%",
@@ -144,3 +178,4 @@ const tdStyle = {
 };
 
 export default BillPayment;
+
