@@ -38,6 +38,9 @@ const Header = () => {
         <NavLink to="/exchange-rates" style={getLinkStyle}>
           Döviz Kurları
         </NavLink>
+        <NavLink to="/loans" style={getLinkStyle}>
+          Kredi ve Mevduat
+        </NavLink>
       </nav>
     </header>
   );
@@ -53,3 +56,4 @@ const getLinkStyle = ({ isActive }) => ({
 });
 
 export default Header;
+
