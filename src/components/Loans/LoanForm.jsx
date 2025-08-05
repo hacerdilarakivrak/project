@@ -41,7 +41,7 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
     const { name, value } = e.target;
 
     if (name === "customerId") {
-      const selectedCustomer = customers.find((c) => c.id === value);
+      const selectedCustomer = customers.find((c) => c.musteriNo === value);
       setFormData((prev) => ({
         ...prev,
         customerId: value,
@@ -91,7 +91,7 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
       >
         <option value="">Müşteri Seçiniz</option>
         {customers.map((customer) => (
-          <option key={customer.id} value={customer.id}>
+          <option key={customer.id} value={customer.musteriNo}>
             {customer.musteriNo} - {customer.ad} {customer.soyad}
           </option>
         ))}

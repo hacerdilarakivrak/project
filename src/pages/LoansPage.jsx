@@ -18,7 +18,7 @@ const LoansPage = () => {
       );
       setEditingLoan(null);
     } else {
-      updatedLoans = [...loans, { ...newLoan, id: Date.now() }];
+      updatedLoans = [...loans, { ...newLoan, id: Date.now(), status: "Onay Bekliyor" }];
     }
 
     setLoans(updatedLoans);
@@ -38,6 +38,14 @@ const LoansPage = () => {
     setEditingLoan(loan);
   };
 
+  const handleStatusChange = (loanId, newStatus) => {
+    const updatedLoans = loans.map((loan) =>
+      loan.id === loanId ? { ...loan, status: newStatus } : loan
+    );
+    setLoans(updatedLoans);
+    localStorage.setItem("loans", JSON.stringify(updatedLoans));
+  };
+
   return (
     <div style={pageStyle}>
       <LoanForm onLoanAdded={handleLoanAdded} editingLoan={editingLoan} />
@@ -51,6 +59,7 @@ const LoansPage = () => {
             <th>Kredi Tutarı</th>
             <th>Vade (Ay)</th>
             <th>Faiz Oranı (%)</th>
+            <th>Durum</th>
             <th>İşlem</th>
           </tr>
         </thead>
@@ -63,6 +72,17 @@ const LoansPage = () => {
                 <td>{loan.amount}</td>
                 <td>{loan.term}</td>
                 <td>{loan.interestRate}</td>
+                <td>
+                  <select
+                    value={loan.status || "Onay Bekliyor"}
+                    onChange={(e) => handleStatusChange(loan.id, e.target.value)}
+                    style={statusSelectStyle}
+                  >
+                    <option value="Onay Bekliyor">Onay Bekliyor</option>
+                    <option value="Onaylandı">Onaylandı</option>
+                    <option value="Reddedildi">Reddedildi</option>
+                  </select>
+                </td>
                 <td style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                   <button
                     onClick={() => handleEditLoan(loan)}
@@ -81,7 +101,7 @@ const LoansPage = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="6" style={{ textAlign: "center", padding: "10px" }}>
+              <td colSpan="7" style={{ textAlign: "center", padding: "10px" }}>
                 Henüz kredi başvurusu yapılmadı.
               </td>
             </tr>
@@ -125,6 +145,15 @@ const updateButtonStyle = {
 const deleteButtonStyle = {
   ...buttonBaseStyle,
   backgroundColor: "#e74c3c",
+};
+
+const statusSelectStyle = {
+  padding: "5px",
+  borderRadius: "4px",
+  border: "1px solid #ccc",
+  backgroundColor: "#fff",
+  color: "#333",
+  fontWeight: "bold",
 };
 
 export default LoansPage;
