@@ -145,7 +145,7 @@ const HomePage = () => {
           marginTop: "80px",
         }}
       >
-        © 2025 X Bankası Projesi
+        © 2025 X Bankası Projesi by Hacer Dilara Kıvrak
       </footer>
     </div>
   );
