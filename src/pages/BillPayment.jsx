@@ -9,6 +9,7 @@ const BillPayment = () => {
   const [amount, setAmount] = useState("");
   const [payments, setPayments] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [editingPaymentId, setEditingPaymentId] = useState(null);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -35,21 +36,33 @@ const BillPayment = () => {
       return;
     }
 
-    const newPayment = {
-      id: Date.now(),
-      billType,
-      subscriberNo: selectedCustomer,
-      amount,
-      date: new Date().toLocaleString(),
-    };
+    if (editingPaymentId) {
+      const updatedPayments = payments.map((payment) =>
+        payment.id === editingPaymentId
+          ? { ...payment, billType, subscriberNo: selectedCustomer, amount }
+          : payment
+      );
+      setPayments(updatedPayments);
+      localStorage.setItem("payments", JSON.stringify(updatedPayments));
+      alert("Ödeme başarıyla güncellendi.");
+      setEditingPaymentId(null);
+    } else {
+      const newPayment = {
+        id: Date.now(),
+        billType,
+        subscriberNo: selectedCustomer,
+        amount,
+        date: new Date().toLocaleString(),
+      };
 
-    const updatedPayments = [newPayment, ...payments];
-    setPayments(updatedPayments);
-    localStorage.setItem("payments", JSON.stringify(updatedPayments));
+      const updatedPayments = [newPayment, ...payments];
+      setPayments(updatedPayments);
+      localStorage.setItem("payments", JSON.stringify(updatedPayments));
 
-    alert(
-      `${billType.toUpperCase()} faturası için ${amount} TL ödeme başarıyla gerçekleştirildi.`
-    );
+      alert(
+        `${billType.toUpperCase()} faturası için ${amount} TL ödeme başarıyla gerçekleştirildi.`
+      );
+    }
 
     setSelectedCustomer("");
     setAmount("");
@@ -68,6 +81,13 @@ const BillPayment = () => {
       setPayments(updatedPayments);
       localStorage.setItem("payments", JSON.stringify(updatedPayments));
     }
+  };
+
+  const editPayment = (payment) => {
+    setBillType(payment.billType);
+    setSelectedCustomer(payment.subscriberNo);
+    setAmount(payment.amount);
+    setEditingPaymentId(payment.id);
   };
 
   return (
@@ -127,7 +147,7 @@ const BillPayment = () => {
           type="submit"
           style={{
             padding: "10px",
-            backgroundColor: "#00C49F",
+            backgroundColor: editingPaymentId ? "#FFA500" : "#00C49F",
             color: "#fff",
             border: "none",
             cursor: "pointer",
@@ -135,7 +155,7 @@ const BillPayment = () => {
             borderRadius: "4px",
           }}
         >
-          Ödeme Yap
+          {editingPaymentId ? "Güncelle" : "Ödeme Yap"}
         </button>
       </form>
 
@@ -170,7 +190,7 @@ const BillPayment = () => {
                 <th style={thStyle}>Müşteri No</th>
                 <th style={thStyle}>Tutar (TL)</th>
                 <th style={thStyle}>Tarih</th>
-                <th style={thStyle}>İşlem</th>
+                <th style={thStyle}>İşlemler</th>
               </tr>
             </thead>
             <tbody>
@@ -181,6 +201,20 @@ const BillPayment = () => {
                   <td style={tdStyle}>{payment.amount}</td>
                   <td style={tdStyle}>{payment.date}</td>
                   <td style={tdStyle}>
+                    <button
+                      onClick={() => editPayment(payment)}
+                      style={{
+                        backgroundColor: "#007BFF",
+                        color: "#fff",
+                        border: "none",
+                        padding: "5px 10px",
+                        borderRadius: "4px",
+                        marginRight: "5px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Güncelle
+                    </button>
                     <button
                       onClick={() => deletePayment(payment.id)}
                       style={{
@@ -220,3 +254,4 @@ const tdStyle = {
 };
 
 export default BillPayment;
+
