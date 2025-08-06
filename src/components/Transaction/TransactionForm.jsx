@@ -12,6 +12,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
   const [aliciHesapID, setAliciHesapID] = useState("");
   const [seciliMusteri, setSeciliMusteri] = useState("");
   const [faturaTuru, setFaturaTuru] = useState("electricity");
+  const [faturaNo, setFaturaNo] = useState(""); // YENİ EKLENDİ
   const [tur, setTur] = useState("paraYatirma");
   const [tutar, setTutar] = useState("");
   const [tarih, setTarih] = useState("");
@@ -50,8 +51,8 @@ const TransactionForm = ({ onTransactionAdded }) => {
     }
 
     if (tur === "faturaOdeme") {
-      if (!seciliMusteri || !gonderenHesapID) {
-        alert("Lütfen müşteri ve hesabı seçiniz!");
+      if (!seciliMusteri || !gonderenHesapID || !faturaNo) {
+        alert("Lütfen müşteri, hesap ve fatura numarasını giriniz!");
         return;
       }
 
@@ -73,6 +74,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
         hesapAdi: seciliHesap.hesapAdi,
         tur: "faturaOdeme",
         faturaTuru,
+        faturaNo,
         musteriID: seciliMusteri,
         tutar: islemTutar,
         tarih,
@@ -92,6 +94,7 @@ const TransactionForm = ({ onTransactionAdded }) => {
         setGonderenHesapID("");
         setSeciliMusteri("");
         setFaturaTuru("electricity");
+        setFaturaNo("");
         setTur("paraYatirma");
         setTutar("");
         setTarih("");
@@ -262,6 +265,14 @@ const TransactionForm = ({ onTransactionAdded }) => {
               <option value="gas">Doğalgaz</option>
               <option value="internet">İnternet</option>
             </select>
+
+            <input
+              type="text"
+              placeholder="Fatura No"
+              value={faturaNo}
+              onChange={(e) => setFaturaNo(e.target.value)}
+              required
+            />
           </>
         ) : (
           <select value={gonderenHesapID} onChange={(e) => setGonderenHesapID(e.target.value)} required>
@@ -298,3 +309,4 @@ const TransactionForm = ({ onTransactionAdded }) => {
 };
 
 export default TransactionForm;
+

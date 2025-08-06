@@ -13,12 +13,21 @@ const TransactionList = ({ refresh }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [musteriNo, setMusteriNo] = useState("");
+  const [faturaNo, setFaturaNo] = useState("");
+  const [faturaTuru, setFaturaTuru] = useState("");
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [editAmount, setEditAmount] = useState("");
   const [editAciklama, setEditAciklama] = useState("");
   const itemsPerPage = 10;
+
+  const faturaTurMap = {
+    electricity: "Elektrik",
+    water: "Su",
+    gas: "Doğalgaz",
+    internet: "İnternet",
+  };
 
   useEffect(() => {
     fetchTransactions();
@@ -81,6 +90,8 @@ const TransactionList = ({ refresh }) => {
         return `Transfer (Gönderen) - ${islem.hesapAdi}`;
       case "transferAlici":
         return `Transfer (Alıcı) - ${islem.hesapAdi}`;
+      case "faturaOdeme":
+        return "Fatura Ödeme";
       default:
         return islem.tur || "-";
     }
@@ -93,16 +104,22 @@ const TransactionList = ({ refresh }) => {
       if (endDate && islemTarihi > endDate) return false;
       if (musteriNo && !islem.musteriID?.toString().includes(musteriNo))
         return false;
+      if (faturaNo && islem.tur === "faturaOdeme" && !islem.faturaNo?.toString().includes(faturaNo))
+        return false;
+      if (faturaTuru && islem.tur === "faturaOdeme" && faturaTurMap[islem.faturaTuru] !== faturaTuru)
+        return false;
       return true;
     });
     setFilteredTransactions(filtered);
     setCurrentPage(1);
-  }, [startDate, endDate, musteriNo, islemler]);
+  }, [startDate, endDate, musteriNo, faturaNo, faturaTuru, islemler]);
 
   const clearFilters = () => {
     setStartDate(null);
     setEndDate(null);
     setMusteriNo("");
+    setFaturaNo("");
+    setFaturaTuru("");
     setFilteredTransactions(islemler);
     setCurrentPage(1);
   };
@@ -157,6 +174,27 @@ const TransactionList = ({ refresh }) => {
           />
         </div>
 
+        <div className="musteri-filter">
+          <label>Fatura No: </label>
+          <input
+            type="text"
+            value={faturaNo}
+            onChange={(e) => setFaturaNo(e.target.value)}
+            placeholder="Fatura numarası giriniz"
+          />
+        </div>
+
+        <div className="musteri-filter">
+          <label>Fatura Türü: </label>
+          <select value={faturaTuru} onChange={(e) => setFaturaTuru(e.target.value)}>
+            <option value="">Tümü</option>
+            <option value="Elektrik">Elektrik</option>
+            <option value="Su">Su</option>
+            <option value="Doğalgaz">Doğalgaz</option>
+            <option value="İnternet">İnternet</option>
+          </select>
+        </div>
+
         <div className="filter-buttons">
           <button className="clear-button" onClick={clearFilters}>
             Temizle
@@ -171,6 +209,8 @@ const TransactionList = ({ refresh }) => {
             <th>Tutar</th>
             <th>Tarih</th>
             <th>Müşteri No</th>
+            <th>Fatura No</th>
+            <th>Fatura Türü</th>
             <th>Açıklama</th>
             <th>Bakiye Sonrası</th>
             <th>İşlem</th>
@@ -179,7 +219,7 @@ const TransactionList = ({ refresh }) => {
         <tbody>
           {currentTransactions.length === 0 ? (
             <tr>
-              <td colSpan="7" style={{ textAlign: "center", padding: "12px" }}>
+              <td colSpan="9" style={{ textAlign: "center", padding: "12px" }}>
                 Kayıtlı işlem yok.
               </td>
             </tr>
@@ -190,6 +230,8 @@ const TransactionList = ({ refresh }) => {
                 <td>{islem.tutar} ₺</td>
                 <td>{islem.tarih}</td>
                 <td>{islem.musteriID || "-"}</td>
+                <td>{islem.faturaNo || "-"}</td>
+                <td>{faturaTurMap[islem.faturaTuru] || "-"}</td>
                 <td>{islem.aciklama || "-"}</td>
                 <td>{islem.bakiyeSonrasi ?? 0} ₺</td>
                 <td>
@@ -257,3 +299,5 @@ const TransactionList = ({ refresh }) => {
 };
 
 export default TransactionList;
+
+
