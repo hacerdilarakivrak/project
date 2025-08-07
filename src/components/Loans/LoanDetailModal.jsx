@@ -83,15 +83,16 @@ const overlayStyle = {
 
 const modalStyle = {
   background: "#fff",
-  padding: "20px",
+  padding: "30px",
   borderRadius: "10px",
-  width: "500px",
-  maxWidth: "95%",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-  color: "#333",
-  maxHeight: "90vh",
+  width: "90vw",
+  height: "90vh",
   overflowY: "auto",
+  boxShadow: "0 2px 15px rgba(0,0,0,0.3)",
+  color: "#333",
 };
+
+
 
 const tableStyle = {
   width: "100%",
