@@ -76,6 +76,7 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
 
     if (
       !formData.customerId ||
+      !formData.customerName ||
       !formData.amount ||
       !formData.term ||
       !formData.interestRate ||
@@ -88,7 +89,12 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
 
     const newLoan = editingLoan
       ? { ...editingLoan, ...formData }
-      : { ...formData, id: Date.now(), status: "Onay Bekliyor" };
+      : {
+          ...formData,
+          id: Date.now(),
+          status: "Onay Bekliyor",
+          startDate: new Date().toISOString(),
+        };
 
     onLoanAdded(newLoan);
 

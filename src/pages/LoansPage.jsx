@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import LoanForm from "../components/Loans/LoanForm";
+import LoanDetailModal from "../components/Loans/LoanDetailModal";
 
 const LoansPage = () => {
   const [activeTab, setActiveTab] = useState("loans");
   const [loans, setLoans] = useState([]);
   const [editingLoan, setEditingLoan] = useState(null);
+  const [selectedLoan, setSelectedLoan] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [deposits, setDeposits] = useState([]);
   const [editingDeposit, setEditingDeposit] = useState(null);
   const [depositForm, setDepositForm] = useState({
@@ -17,6 +20,7 @@ const LoansPage = () => {
     interest: "",
   });
   const [customers, setCustomers] = useState([]);
+  const [notification, setNotification] = useState("");
 
   useEffect(() => {
     const savedLoans = JSON.parse(localStorage.getItem("loans")) || [];
@@ -39,6 +43,38 @@ const LoansPage = () => {
     fetchCustomers();
   }, []);
 
+  useEffect(() => {
+    const today = new Date();
+    const reminders = [];
+
+    loans.forEach((loan) => {
+      if (!loan.startDate || !loan.term) return;
+
+      const startDate = new Date(loan.startDate);
+      for (let i = 1; i <= loan.term; i++) {
+        const dueDate = new Date(startDate);
+        dueDate.setMonth(dueDate.getMonth() + i);
+
+        const diffTime = dueDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 3) {
+          reminders.push(`📅 ${loan.customerName} adlı müşterinin kredi ödemesi 3 gün içinde.`);
+        }
+      }
+    });
+
+    if (reminders.length > 0) {
+      setNotification(reminders[0]);
+      setTimeout(() => setNotification(""), 5000);
+    }
+  }, [loans]);
+
+  const handleNotify = () => {
+    setNotification("🔔 Yeni kredi başvurusu yapıldı.");
+    setTimeout(() => setNotification(""), 4000);
+  };
+
   const handleLoanAdded = (newLoan) => {
     let updatedLoans;
     if (editingLoan) {
@@ -47,10 +83,19 @@ const LoansPage = () => {
       );
       setEditingLoan(null);
     } else {
-      updatedLoans = [...loans, { ...newLoan, id: Date.now(), status: "Onay Bekliyor" }];
+      updatedLoans = [
+        ...loans,
+        {
+          ...newLoan,
+          id: Date.now(),
+          status: "Onay Bekliyor",
+          startDate: new Date().toISOString(),
+        },
+      ];
     }
     setLoans(updatedLoans);
     localStorage.setItem("loans", JSON.stringify(updatedLoans));
+    handleNotify();
   };
 
   const handleDeleteLoan = (loanId) => {
@@ -71,63 +116,14 @@ const LoansPage = () => {
     localStorage.setItem("loans", JSON.stringify(updatedLoans));
   };
 
-  const isTermVisible = depositForm.type === "Vadeli";
-
-  const handleDepositChange = (e) => {
-    const { name, value } = e.target;
-    setDepositForm({ ...depositForm, [name]: value });
-  };
-
-  const handleAddDeposit = () => {
-    if (!depositForm.customerId || !depositForm.amount) {
-      alert("Lütfen müşteri seçin ve tutarı girin.");
-      return;
-    }
-
-    if (editingDeposit) {
-      const updatedDeposits = deposits.map((deposit) =>
-        deposit.id === editingDeposit.id ? { ...depositForm, id: editingDeposit.id } : deposit
-      );
-      setDeposits(updatedDeposits);
-      localStorage.setItem("deposits", JSON.stringify(updatedDeposits));
-      setEditingDeposit(null);
-    } else {
-      const newDeposit = {
-        id: Date.now(),
-        customerId: depositForm.customerId,
-        customerName: depositForm.customerName,
-        amount: depositForm.amount,
-        type: depositForm.type,
-        term: isTermVisible ? depositForm.term : null,
-        interest: isTermVisible ? depositForm.interest : null,
-      };
-      const updatedDeposits = [...deposits, newDeposit];
-      setDeposits(updatedDeposits);
-      localStorage.setItem("deposits", JSON.stringify(updatedDeposits));
-    }
-
-    setDepositForm({ customerId: "", customerName: "", amount: "", type: "Vadesiz", term: "", interest: "" });
-  };
-
-  const handleEditDeposit = (deposit) => {
-    setEditingDeposit(deposit);
-    setDepositForm(deposit);
-  };
-
-  const handleDeleteDeposit = (depositId) => {
-    if (window.confirm("Bu mevduatı silmek istediğinize emin misiniz?")) {
-      const updatedDeposits = deposits.filter((deposit) => deposit.id !== depositId);
-      setDeposits(updatedDeposits);
-      localStorage.setItem("deposits", JSON.stringify(updatedDeposits));
-    }
-  };
-
   const totalLoans = loans.length;
   const totalDeposits = deposits.length;
   const pendingLoans = loans.filter((loan) => loan.status === "Onay Bekliyor").length;
 
   return (
     <div style={pageStyle}>
+      {notification && <div style={notificationStyle}>{notification}</div>}
+
       <div style={summaryContainer}>
         <div style={summaryCard}>Toplam Krediler: {totalLoans}</div>
         <div style={summaryCard}>Toplam Mevduatlar: {totalDeposits}</div>
@@ -161,9 +157,9 @@ const LoansPage = () => {
                 <th>Müşteri Adı</th>
                 <th>Kredi Türü</th>
                 <th>Alt Tür</th>
-                <th>Kredi Tutarı</th>
-                <th>Vade (Ay)</th>
-                <th>Faiz Oranı (%)</th>
+                <th>Tutar</th>
+                <th>Vade</th>
+                <th>Faiz</th>
                 <th>Durum</th>
                 <th>İşlem</th>
               </tr>
@@ -171,7 +167,14 @@ const LoansPage = () => {
             <tbody>
               {loans.length > 0 ? (
                 loans.map((loan) => (
-                  <tr key={loan.id}>
+                  <tr
+                    key={loan.id}
+                    onClick={() => {
+                      setSelectedLoan(loan);
+                      setIsModalOpen(true);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
                     <td>{loan.customerId}</td>
                     <td>{loan.customerName}</td>
                     <td>{loan.loanType}</td>
@@ -184,17 +187,30 @@ const LoansPage = () => {
                         value={loan.status || "Onay Bekliyor"}
                         onChange={(e) => handleStatusChange(loan.id, e.target.value)}
                         style={statusSelectStyle}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <option value="Onay Bekliyor">Onay Bekliyor</option>
                         <option value="Onaylandı">Onaylandı</option>
                         <option value="Reddedildi">Reddedildi</option>
                       </select>
                     </td>
-                    <td style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-                      <button onClick={() => handleEditLoan(loan)} style={updateButtonStyle}>
+                    <td>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditLoan(loan);
+                        }}
+                        style={updateButtonStyle}
+                      >
                         Güncelle
                       </button>
-                      <button onClick={() => handleDeleteLoan(loan.id)} style={deleteButtonStyle}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteLoan(loan.id);
+                        }}
+                        style={deleteButtonStyle}
+                      >
                         Sil
                       </button>
                     </td>
@@ -209,115 +225,16 @@ const LoansPage = () => {
               )}
             </tbody>
           </table>
-        </>
-      )}
 
-      {activeTab === "deposits" && (
-        <>
-          <h2 style={{ marginTop: "40px" }}>Mevduat İşlemleri</h2>
-          <div style={{ marginBottom: "20px", background: "#222", padding: "20px", borderRadius: "8px" }}>
-            <select
-              name="customerId"
-              value={depositForm.customerId}
-              onChange={(e) => {
-                const selectedCustomer = customers.find((c) => c.musteriNo === e.target.value);
-                setDepositForm({
-                  ...depositForm,
-                  customerId: selectedCustomer?.musteriNo || "",
-                  customerName: `${selectedCustomer?.ad || ""} ${selectedCustomer?.soyad || ""}`,
-                });
+          {isModalOpen && (
+            <LoanDetailModal
+              loan={selectedLoan}
+              onClose={() => {
+                setIsModalOpen(false);
+                setSelectedLoan(null);
               }}
-              style={inputStyle}
-            >
-              <option value="">Müşteri Seçiniz</option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.musteriNo}>
-                  {customer.musteriNo} - {customer.ad} {customer.soyad}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="number"
-              name="amount"
-              placeholder="Mevduat Tutarı"
-              value={depositForm.amount}
-              onChange={handleDepositChange}
-              style={inputStyle}
             />
-            <select name="type" value={depositForm.type} onChange={handleDepositChange} style={inputStyle}>
-              <option value="Vadesiz">Vadesiz</option>
-              <option value="Vadeli">Vadeli</option>
-            </select>
-
-            {isTermVisible && (
-              <>
-                <input
-                  type="number"
-                  name="term"
-                  placeholder="Vade (Ay)"
-                  value={depositForm.term}
-                  onChange={handleDepositChange}
-                  style={inputStyle}
-                />
-                <input
-                  type="number"
-                  name="interest"
-                  placeholder="Faiz Oranı (%)"
-                  value={depositForm.interest}
-                  onChange={handleDepositChange}
-                  style={inputStyle}
-                />
-              </>
-            )}
-
-            <button onClick={handleAddDeposit} style={addButtonStyle}>
-              {editingDeposit ? "Mevduatı Güncelle" : "Mevduat Ekle"}
-            </button>
-          </div>
-
-          <h3>Mevduat Listesi</h3>
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th>Müşteri No</th>
-                <th>Müşteri Adı</th>
-                <th>Mevduat Tutarı</th>
-                <th>Tür</th>
-                <th>Vade (Ay)</th>
-                <th>Faiz Oranı (%)</th>
-                <th>İşlem</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deposits.length > 0 ? (
-                deposits.map((deposit) => (
-                  <tr key={deposit.id}>
-                    <td>{deposit.customerId}</td>
-                    <td>{deposit.customerName}</td>
-                    <td>{deposit.amount}</td>
-                    <td>{deposit.type}</td>
-                    <td>{deposit.term || "-"}</td>
-                    <td>{deposit.interest || "-"}</td>
-                    <td style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-                      <button onClick={() => handleEditDeposit(deposit)} style={updateButtonStyle}>
-                        Güncelle
-                      </button>
-                      <button onClick={() => handleDeleteDeposit(deposit.id)} style={deleteButtonStyle}>
-                        Sil
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" style={{ textAlign: "center", padding: "10px" }}>
-                    Henüz mevduat eklenmedi.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          )}
         </>
       )}
     </div>
@@ -325,6 +242,16 @@ const LoansPage = () => {
 };
 
 const pageStyle = { padding: "20px" };
+
+const notificationStyle = {
+  backgroundColor: "#ffe58f",
+  padding: "10px",
+  marginBottom: "15px",
+  borderRadius: "6px",
+  color: "#000",
+  fontWeight: "bold",
+  textAlign: "center",
+};
 
 const summaryContainer = {
   display: "flex",
@@ -368,42 +295,26 @@ const tableStyle = {
   color: "#fff",
 };
 
-const inputStyle = {
-  display: "block",
-  marginBottom: "10px",
-  width: "100%",
-  padding: "8px",
-  borderRadius: "4px",
-  border: "1px solid #444",
-  background: "#333",
-  color: "#fff",
-};
-
-const addButtonStyle = {
-  background: "#00d09c",
-  color: "#fff",
-  padding: "10px",
-  border: "none",
-  borderRadius: "4px",
-  cursor: "pointer",
-  width: "100%",
-};
-
-const buttonBaseStyle = {
+const updateButtonStyle = {
+  backgroundColor: "#1abc9c",
   color: "#fff",
   border: "none",
   borderRadius: "6px",
   padding: "8px 14px",
-  fontSize: "14px",
   fontWeight: "bold",
   cursor: "pointer",
-  whiteSpace: "nowrap",
-  minWidth: "90px",
-  textAlign: "center",
+  marginBottom: "5px",
 };
 
-const updateButtonStyle = { ...buttonBaseStyle, backgroundColor: "#1abc9c" };
-const deleteButtonStyle = { ...buttonBaseStyle, backgroundColor: "#e74c3c" };
+const deleteButtonStyle = {
+  backgroundColor: "#e74c3c",
+  color: "#fff",
+  border: "none",
+  borderRadius: "6px",
+  padding: "8px 14px",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
 
 const statusSelectStyle = {
   padding: "5px",
