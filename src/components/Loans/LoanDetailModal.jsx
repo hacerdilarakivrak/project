@@ -1,9 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { calcRiskScore } from "../../utils/riskScore";
 import RiskBadge from "./RiskBadge";
 
+const THEME_MAP = {
+  "İhtiyaç Kredisi": { accent: "#3b82f6", soft: "#eff6ff", icon: "🧾" },
+  "Taşıt Kredisi": { accent: "#f59e0b", soft: "#fff7ed", icon: "🚗" },
+  "Konut Kredisi": { accent: "#10b981", soft: "#ecfdf5", icon: "🏠" },
+  "Bireysel": { accent: "#6366f1", soft: "#eef2ff", icon: "👤" },
+  "Ticari": { accent: "#0ea5e9", soft: "#e0f2fe", icon: "🏢" },
+  default: { accent: "#27ae60", soft: "#e8f5e9", icon: "💳" },
+};
+
 const LoanDetailModal = ({ loan, onClose }) => {
   if (!loan) return null;
+
+  const typeKey =
+    (loan?.subLoanType || "").trim() ||
+    (loan?.loanType || "").trim() ||
+    "default";
+
+  const theme =
+    THEME_MAP[typeKey] ||
+    THEME_MAP[
+      Object.keys(THEME_MAP).find((k) =>
+        typeKey.toLowerCase().includes(k.toLowerCase())
+      ) || "default"
+    ];
 
   const [paidInstallments, setPaidInstallments] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
@@ -76,7 +98,12 @@ const LoanDetailModal = ({ loan, onClose }) => {
     return installments;
   };
 
-  const installments = calculateInstallments();
+  const installments = useMemo(calculateInstallments, [
+    loan.amount,
+    loan.interestRate,
+    loan.term,
+    loan.startDate,
+  ]);
 
   const getStatusColor = (status) => {
     if (status === "Ödendi") return "#2ecc71";
@@ -184,21 +211,46 @@ const LoanDetailModal = ({ loan, onClose }) => {
     return 0;
   });
 
+  // Para format helper
+  const fmtTRY = (v) =>
+    new Intl.NumberFormat("tr-TR", {
+      style: "currency",
+      currency: "TRY",
+      minimumFractionDigits: 2,
+    }).format(Number(v) || 0);
+
   return (
     <div style={overlayStyle}>
-      <div style={modalStyle}>
-        <h2>Kredi Detayları</h2>
+      {/* Responsive CSS & Tooltip CSS */}
+      <style>{responsiveCss(theme.accent)}</style>
+
+      <div style={{ ...modalStyle, borderTop: `6px solid ${theme.accent}` }}>
+        <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {theme.icon} Kredi Detayları
+        </h2>
+
         <p>
           <strong>Müşteri:</strong> {loan.customerName}
         </p>
-        <p>
-          <strong>Kredi Türü:</strong> {loan.loanType}
+        <p style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <strong>Kredi Türü:</strong>{" "}
+          <span
+            style={{
+              padding: "2px 8px",
+              borderRadius: 999,
+              background: theme.soft,
+              color: theme.accent,
+              fontWeight: 600,
+            }}
+          >
+            {loan.subLoanType || loan.loanType}
+          </span>
         </p>
         <p>
           <strong>Alt Tür:</strong> {loan.subLoanType || "-"}
         </p>
         <p>
-          <strong>Tutar:</strong> {loan.amount} ₺
+          <strong>Tutar:</strong> {fmtTRY(loan.amount)}
         </p>
         <p>
           <strong>Vade:</strong> {loan.term} ay
@@ -229,22 +281,59 @@ const LoanDetailModal = ({ loan, onClose }) => {
           )}
         </p>
 
+        {/* RENKLİ ÖZET KUTULARI */}
         <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
-          <div style={summaryBoxStyle}>
+          <div
+            style={{
+              ...summaryBoxStyle,
+              background: "#e0f7fa",
+              color: "#006064",
+            }}
+          >
             <strong>Toplam Tutar</strong>
-            <div>₺{totalAmount.toFixed(2)}</div>
+            <div>{fmtTRY(totalAmount)}</div>
           </div>
-          <div style={summaryBoxStyle}>
+
+          <div
+            style={{
+              ...summaryBoxStyle,
+              background: "#e8f5e9",
+              color: "#1b5e20",
+            }}
+          >
             <strong>Ödenen Toplam</strong>
-            <div>₺{paidAmount.toFixed(2)}</div>
+            <div>{fmtTRY(paidAmount)}</div>
           </div>
-          <div style={summaryBoxStyle}>
+
+          <div
+            style={{
+              ...summaryBoxStyle,
+              background: "#fff3e0",
+              color: "#e65100",
+            }}
+          >
             <strong>Kalan Anapara</strong>
-            <div>₺{remainingAmount.toFixed(2)}</div>
+            <div>{fmtTRY(remainingAmount)}</div>
           </div>
-          <div style={summaryBoxStyle}>
-            <strong>Toplam Faiz</strong>
-            <div>₺{totalInterest.toFixed(2)}</div>
+
+          <div
+            style={{
+              ...summaryBoxStyle,
+              background: "#fce4ec",
+              color: "#880e4f",
+              position: "relative",
+            }}
+          >
+            <strong style={{ display: "inline-flex", alignItems: "center" }}>
+              Toplam Faiz
+              <span className="tt" aria-label="toplam-faiz">
+                ?
+                <span className="tt-content">
+                  Toplam faiz = (Aylık ödeme × vade) − kredi tutarı
+                </span>
+              </span>
+            </strong>
+            <div>{fmtTRY(totalInterest)}</div>
           </div>
         </div>
 
@@ -274,7 +363,7 @@ const LoanDetailModal = ({ loan, onClose }) => {
           <div
             style={{
               width: `${progress}%`,
-              background: "#27ae60",
+              background: theme.accent,
               height: "100%",
               transition: "width 0.3s ease",
             }}
@@ -300,74 +389,81 @@ const LoanDetailModal = ({ loan, onClose }) => {
         </div>
 
         <h3 style={{ marginTop: "24px" }}>📅 Ödeme Planı</h3>
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th>Taksit</th>
-              <th>Ödeme Tarihi</th>
-              <th>Taksit Tutarı</th>
-              <th>Faiz</th>
-              <th>Anapara</th>
-              <th>Kalan Anapara</th>
-              <th>Durum</th>
-              <th>Ödendi mi?</th>
-            </tr>
-          </thead>
-          <tbody>
-            {installments.map((item) => {
-              const effectiveStatus = paidInstallments.includes(item.number)
-                ? "Ödendi"
-                : item.status;
-              return (
-                <tr key={item.number}>
-                  <td>{item.number}</td>
-                  <td>{item.date}</td>
-                  <td>{item.amount} ₺</td>
-                  <td>{item.interest} ₺</td>
-                  <td>{item.principal} ₺</td>
-                  <td>{item.remaining} ₺</td>
-                  <td
-                    style={{
-                      color: getStatusColor(effectiveStatus),
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {effectiveStatus}
-                  </td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={paidInstallments.includes(item.number)}
-                      onChange={() => handleCheckboxChange(item.number)}
-                      disabled={isClosed}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        <h3 style={{ marginTop: "24px" }}>🧾 Ödeme Geçmişi</h3>
-        {paymentHistorySorted.length > 0 ? (
-          <table style={tableStyle}>
+        <div className="table-wrap">
+          <table style={tableStyle} className="rtable">
             <thead>
               <tr>
                 <th>Taksit</th>
-                <th>Ödenen Tutar</th>
-                <th>Ödenme Zamanı</th>
+                <th>Ödeme Tarihi</th>
+                <th>Taksit Tutarı</th>
+                <th>Faiz</th>
+                <th>Anapara</th>
+                <th>Kalan Anapara</th>
+                <th>Durum</th>
+                <th>Ödendi mi?</th>
               </tr>
             </thead>
             <tbody>
-              {paymentHistorySorted.map((h) => (
-                <tr key={h.number}>
-                  <td>{h.number}</td>
-                  <td>{h.amount.toFixed(2)} ₺</td>
-                  <td>{new Date(h.paidAt).toLocaleString()}</td>
-                </tr>
-              ))}
+              {installments.map((item) => {
+                const effectiveStatus = paidInstallments.includes(item.number)
+                  ? "Ödendi"
+                  : item.status;
+                return (
+                  <tr key={item.number}>
+                    <td data-label="Taksit">{item.number}</td>
+                    <td data-label="Ödeme Tarihi">{item.date}</td>
+                    <td data-label="Taksit Tutarı">{item.amount} ₺</td>
+                    <td data-label="Faiz">{item.interest} ₺</td>
+                    <td data-label="Anapara">{item.principal} ₺</td>
+                    <td data-label="Kalan Anapara">{item.remaining} ₺</td>
+                    <td
+                      data-label="Durum"
+                      style={{
+                        color: getStatusColor(effectiveStatus),
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {effectiveStatus}
+                    </td>
+                    <td data-label="Ödendi mi?">
+                      <input
+                        type="checkbox"
+                        checked={paidInstallments.includes(item.number)}
+                        onChange={() => handleCheckboxChange(item.number)}
+                        disabled={isClosed}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
+        </div>
+
+        <h3 style={{ marginTop: "24px" }}>🧾 Ödeme Geçmişi</h3>
+        {paymentHistorySorted.length > 0 ? (
+          <div className="table-wrap">
+            <table style={tableStyle} className="rtable">
+              <thead>
+                <tr>
+                  <th>Taksit</th>
+                  <th>Ödenen Tutar</th>
+                  <th>Ödenme Zamanı</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paymentHistorySorted.map((h) => (
+                  <tr key={h.number}>
+                    <td data-label="Taksit">{h.number}</td>
+                    <td data-label="Ödenen Tutar">{h.amount.toFixed(2)} ₺</td>
+                    <td data-label="Ödenme Zamanı">
+                      {new Date(h.paidAt).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <div style={{ color: "#666", marginTop: 6 }}>
             Henüz ödeme kaydı yok.
@@ -433,4 +529,94 @@ const buttonStyle = {
   fontWeight: "bold",
 };
 
+// CSS-in-JS: mobilde tabloyu karta çevir + tooltip
+function responsiveCss(accent) {
+  return `
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .rtable th, .rtable td {
+    border-bottom: 1px solid #eee;
+    padding: 10px;
+    text-align: left;
+  }
+
+  /* Tooltip */
+  .tt {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:18px;
+    height:18px;
+    margin-left:6px;
+    border-radius:999px;
+    background:${accent};
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    cursor:help;
+    position:relative;
+  }
+  .tt .tt-content{
+    position:absolute;
+    bottom:130%;
+    left:50%;
+    transform:translateX(-50%);
+    background:#111827;
+    color:#fff;
+    padding:8px 10px;
+    border-radius:8px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease;
+    font-size:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+  }
+  .tt:hover .tt-content{ opacity:1; }
+
+  /* <= 768px: kart görünüm */
+  @media (max-width: 768px) {
+    .rtable thead {
+      display: none;
+    }
+    .rtable, .rtable tbody, .rtable tr, .rtable td {
+      display: block;
+      width: 100%;
+    }
+    .rtable tr {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid ${accent};
+      border-radius: 12px;
+      margin-bottom: 12px;
+      padding: 8px 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .rtable td {
+      border: none;
+      border-bottom: 1px dashed #eee;
+      position: relative;
+      padding-left: 120px;
+      min-height: 40px;
+    }
+    .rtable td:last-child { border-bottom: none; }
+    .rtable td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 600;
+      color: #6b7280;
+      width: 100px;
+      white-space: nowrap;
+    }
+  }
+  `;
+}
+
 export default LoanDetailModal;
+
