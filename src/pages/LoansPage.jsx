@@ -4,6 +4,13 @@ import LoanForm from "../components/Loans/LoanForm";
 import LoanDetailModal from "../components/Loans/LoanDetailModal";
 import { calcRiskScore } from "../utils/riskScore";
 import RiskBadge from "../components/Loans/RiskBadge";
+import { getAutoDecision } from "../utils/autoDecision";
+
+const trCurrency = new Intl.NumberFormat("tr-TR", {
+  style: "currency",
+  currency: "TRY",
+  maximumFractionDigits: 2,
+});
 
 const LoansPage = () => {
   const [activeTab, setActiveTab] = useState("loans");
@@ -78,10 +85,21 @@ const LoansPage = () => {
   };
 
   const handleLoanAdded = (newLoan) => {
+    const { status, reason } = getAutoDecision(newLoan);
+
     let updatedLoans;
     if (editingLoan) {
+      const merged = { ...editingLoan, ...newLoan };
+      const decision = getAutoDecision(merged);
       updatedLoans = loans.map((loan) =>
-        loan.id === editingLoan.id ? { ...newLoan, id: editingLoan.id } : loan
+        loan.id === editingLoan.id
+          ? {
+              ...merged,
+              id: editingLoan.id,
+              status: decision.status,
+              decisionReason: decision.reason,
+            }
+          : loan
       );
       setEditingLoan(null);
     } else {
@@ -90,7 +108,8 @@ const LoansPage = () => {
         {
           ...newLoan,
           id: Date.now(),
-          status: "Onay Bekliyor",
+          status,
+          decisionReason: reason,
           startDate: new Date().toISOString(),
         },
       ];
@@ -121,6 +140,21 @@ const LoansPage = () => {
   const totalLoans = loans.length;
   const totalDeposits = deposits.length;
   const pendingLoans = loans.filter((loan) => loan.status === "Onay Bekliyor").length;
+
+  const renderOzelBilgi = (loan) => {
+    if (loan.subLoanType === "Konut Kredisi") {
+      const exp = loan.ekspertizDegeri ? trCurrency.format(Number(loan.ekspertizDegeri)) : "-";
+      const ipt = loan.ipotekBilgisi || "-";
+      return `Ekspertiz: ${exp} • İpotek: ${ipt}`;
+    }
+    if (loan.subLoanType === "Taşıt Kredisi") {
+      const marka = loan.aracMarka || "-";
+      const model = loan.aracModel || "";
+      const yil = loan.aracYil ? ` (${loan.aracYil})` : "";
+      return `${marka} ${model}${yil}`;
+    }
+    return "-";
+  };
 
   return (
     <div style={pageStyle}>
@@ -159,10 +193,12 @@ const LoansPage = () => {
                 <th>Müşteri Adı</th>
                 <th>Kredi Türü</th>
                 <th>Alt Tür</th>
+                <th>Özel Bilgi</th>
                 <th>Tutar</th>
                 <th>Vade</th>
-                <th>Faiz</th>
-                <th>Risk</th>
+                <th>FAİZ</th>
+                <th>SİGORTA</th>
+                <th>RİSK</th>
                 <th>Durum</th>
                 <th>İşlem</th>
               </tr>
@@ -192,11 +228,33 @@ const LoansPage = () => {
                       <td>{loan.customerName}</td>
                       <td>{loan.loanType}</td>
                       <td>{loan.subLoanType || "-"}</td>
-                      <td>{loan.amount}</td>
+                      <td>{renderOzelBilgi(loan)}</td>
+                      <td>{loan.amount ? trCurrency.format(Number(loan.amount)) : "-"}</td>
                       <td>{loan.term}</td>
                       <td>{loan.interestRate}</td>
                       <td>
-                        <RiskBadge score={rs.score} label={rs.label} compact />
+                        <span
+                          style={{
+                            padding: "2px 6px",
+                            borderRadius: 6,
+                            fontWeight: "bold",
+                            background:
+                              (loan.insurance || "").toLowerCase() === "var"
+                                ? "#e3fcef"
+                                : "#ffecec",
+                            color:
+                              (loan.insurance || "").toLowerCase() === "var"
+                                ? "#057a55"
+                                : "#a30000",
+                          }}
+                        >
+                          {loan.insurance || "-"}
+                        </span>
+                      </td>
+                      <td>
+                        <span title={rs.breakdown ? rs.breakdown.join(" • ") : ""}>
+                          <RiskBadge score={rs.score} label={rs.label} compact />
+                        </span>
                       </td>
                       <td>
                         <select
@@ -204,11 +262,19 @@ const LoansPage = () => {
                           onChange={(e) => handleStatusChange(loan.id, e.target.value)}
                           style={statusSelectStyle}
                           onClick={(e) => e.stopPropagation()}
+                          title={loan.decisionReason || ""}
                         >
+                          <option value="Ön Onay">Ön Onay</option>
+                          <option value="İnceleme">İnceleme</option>
+                          <option value="Reddedildi">Reddedildi</option>
                           <option value="Onay Bekliyor">Onay Bekliyor</option>
                           <option value="Onaylandı">Onaylandı</option>
-                          <option value="Reddedildi">Reddedildi</option>
                         </select>
+                        {loan.decisionReason && (
+                          <div style={{ fontSize: 11, color: "#bbb", marginTop: 4 }}>
+                            {loan.decisionReason}
+                          </div>
+                        )}
                       </td>
                       <td>
                         <button
@@ -235,7 +301,7 @@ const LoansPage = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="10" style={{ textAlign: "center", padding: "10px" }}>
+                  <td colSpan="12" style={{ textAlign: "center", padding: "10px" }}>
                     Henüz kredi başvurusu yapılmadı.
                   </td>
                 </tr>
@@ -343,3 +409,4 @@ const statusSelectStyle = {
 };
 
 export default LoansPage;
+

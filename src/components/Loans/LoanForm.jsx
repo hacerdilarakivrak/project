@@ -15,6 +15,12 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
     income: "",
     otherDebts: "",
     lateCount: "",
+    insurance: "",
+    ekspertizDegeri: "",
+    ipotekBilgisi: "Yok",
+    aracMarka: "",
+    aracModel: "",
+    aracYil: "",
   });
 
   useEffect(() => {
@@ -37,6 +43,12 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
         income: editingLoan.income ?? "",
         otherDebts: editingLoan.otherDebts ?? "",
         lateCount: editingLoan.lateCount ?? "",
+        insurance: editingLoan.insurance || "",
+        ekspertizDegeri: editingLoan.ekspertizDegeri ?? "",
+        ipotekBilgisi: editingLoan.ipotekBilgisi ?? "Yok",
+        aracMarka: editingLoan.aracMarka ?? "",
+        aracModel: editingLoan.aracModel ?? "",
+        aracYil: editingLoan.aracYil ?? "",
       });
       setShowSubLoanType(editingLoan.loanType === "Bireysel");
     } else {
@@ -51,6 +63,12 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
         income: "",
         otherDebts: "",
         lateCount: "",
+        insurance: "",
+        ekspertizDegeri: "",
+        ipotekBilgisi: "Yok",
+        aracMarka: "",
+        aracModel: "",
+        aracYil: "",
       });
       setShowSubLoanType(false);
     }
@@ -90,9 +108,22 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
       !formData.term ||
       !formData.interestRate ||
       !formData.loanType ||
-      (formData.loanType === "Bireysel" && !formData.subLoanType)
+      (formData.loanType === "Bireysel" && !formData.subLoanType) ||
+      !formData.insurance
     ) {
-      alert("Lütfen tüm alanları doldurun!");
+      alert("Lütfen tüm alanları (Sigorta dahil) doldurun!");
+      return;
+    }
+
+    if (formData.subLoanType === "Konut Kredisi" && !formData.ekspertizDegeri) {
+      alert("Konut kredisi için ekspertiz değerini girin.");
+      return;
+    }
+    if (
+      formData.subLoanType === "Taşıt Kredisi" &&
+      (!formData.aracMarka || !formData.aracModel || !formData.aracYil)
+    ) {
+      alert("Taşıt kredisi için marka, model ve yılı girin.");
       return;
     }
 
@@ -118,6 +149,12 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
       income: "",
       otherDebts: "",
       lateCount: "",
+      insurance: "",
+      ekspertizDegeri: "",
+      ipotekBilgisi: "Yok",
+      aracMarka: "",
+      aracModel: "",
+      aracYil: "",
     });
     setShowSubLoanType(false);
   };
@@ -223,6 +260,66 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
           style={inputStyle}
         />
 
+        <select
+          name="insurance"
+          value={formData.insurance}
+          onChange={handleChange}
+          style={inputStyle}
+        >
+          <option value="">Sigorta Durumu Seçiniz</option>
+          <option value="Var">Var</option>
+          <option value="Yok">Yok</option>
+        </select>
+
+        {formData.subLoanType === "Konut Kredisi" && (
+          <>
+            <input
+              type="number"
+              name="ekspertizDegeri"
+              placeholder="Ekspertiz Değeri (₺)"
+              value={formData.ekspertizDegeri}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+            <select
+              name="ipotekBilgisi"
+              value={formData.ipotekBilgisi}
+              onChange={handleChange}
+              style={inputStyle}
+            >
+              <option value="Yok">İpotek: Yok</option>
+              <option value="Var">İpotek: Var</option>
+            </select>
+          </>
+        )}
+
+        {formData.subLoanType === "Taşıt Kredisi" && (
+          <>
+            <input
+              name="aracMarka"
+              placeholder="Araç Marka"
+              value={formData.aracMarka}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+            <input
+              name="aracModel"
+              placeholder="Araç Model"
+              value={formData.aracModel}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+            <input
+              type="number"
+              name="aracYil"
+              placeholder="Araç Yıl"
+              value={formData.aracYil}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+          </>
+        )}
+
         <button type="submit" style={buttonStyle}>
           {editingLoan ? "Kredi Güncelle" : "Kredi Ekle"}
         </button>
@@ -261,3 +358,6 @@ const buttonStyle = {
 };
 
 export default LoanForm;
+
+
+
