@@ -122,7 +122,11 @@ const LoanDetailModal = ({ loan, onClose }) => {
     const now = new Date().toISOString();
     const missing = installments
       .filter((i) => !paymentHistory.some((h) => h.number === i.number))
-      .map((i) => ({ number: i.number, amount: parseFloat(i.amount), paidAt: now }));
+      .map((i) => ({
+        number: i.number,
+        amount: parseFloat(i.amount),
+        paidAt: now,
+      }));
     if (missing.length > 0) {
       savePaymentHistory([...paymentHistory, ...missing]);
     }
@@ -131,7 +135,8 @@ const LoanDetailModal = ({ loan, onClose }) => {
 
   const totalInstallments = installments.length;
   const paidCount = paidInstallments.length;
-  const monthlyPayment = installments.length > 0 ? parseFloat(installments[0].amount) : 0;
+  const monthlyPayment =
+    installments.length > 0 ? parseFloat(installments[0].amount) : 0;
   const totalAmount = monthlyPayment * totalInstallments;
   const paidAmount = monthlyPayment * paidCount;
   const totalInterest = totalAmount - parseFloat(loan.amount);
@@ -152,10 +157,17 @@ const LoanDetailModal = ({ loan, onClose }) => {
     }
   });
 
-  const isClosed = paidCount === totalInstallments || localStorage.getItem(`loanClosed_${loan.id}`) === "1";
+  const isClosed =
+    paidCount === totalInstallments ||
+    localStorage.getItem(`loanClosed_${loan.id}`) === "1";
   const remainingAmount = Math.max(totalAmount - paidAmount, 0);
   const remainingWithLateFee = isClosed ? 0 : remainingAmount + lateFee;
-  const progress = totalAmount > 0 ? (isClosed ? 100 : (paidAmount / totalAmount) * 100) : 0;
+  const progress =
+    totalAmount > 0
+      ? isClosed
+        ? 100
+        : (paidAmount / totalAmount) * 100
+      : 0;
 
   const rs = calcRiskScore({
     income: Number(loan.income) || 0,
@@ -176,23 +188,47 @@ const LoanDetailModal = ({ loan, onClose }) => {
     <div style={overlayStyle}>
       <div style={modalStyle}>
         <h2>Kredi Detayları</h2>
-        <p><strong>Müşteri:</strong> {loan.customerName}</p>
-        <p><strong>Kredi Türü:</strong> {loan.loanType}</p>
-        <p><strong>Alt Tür:</strong> {loan.subLoanType || "-"}</p>
-        <p><strong>Tutar:</strong> {loan.amount} ₺</p>
-        <p><strong>Vade:</strong> {loan.term} ay</p>
-        <p><strong>Faiz Oranı:</strong> %{loan.interestRate}</p>
-        <p><strong>Başvuru Tarihi:</strong> {new Date(loan.startDate).toLocaleDateString()}</p>
+        <p>
+          <strong>Müşteri:</strong> {loan.customerName}
+        </p>
+        <p>
+          <strong>Kredi Türü:</strong> {loan.loanType}
+        </p>
+        <p>
+          <strong>Alt Tür:</strong> {loan.subLoanType || "-"}
+        </p>
+        <p>
+          <strong>Tutar:</strong> {loan.amount} ₺
+        </p>
+        <p>
+          <strong>Vade:</strong> {loan.term} ay
+        </p>
+        <p>
+          <strong>Faiz Oranı:</strong> %{loan.interestRate}
+        </p>
+        <p>
+          <strong>Başvuru Tarihi:</strong>{" "}
+          {new Date(loan.startDate).toLocaleDateString()}
+        </p>
         <p style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <strong>Durum:</strong> {loan.status}
           {isClosed && (
-            <span style={{ marginLeft: 8, padding: "2px 8px", borderRadius: 8, background: "#e3fcef", color: "#057a55", fontWeight: "bold", fontSize: 12 }}>
+            <span
+              style={{
+                marginLeft: 8,
+                padding: "2px 8px",
+                borderRadius: 8,
+                background: "#e3fcef",
+                color: "#057a55",
+                fontWeight: "bold",
+                fontSize: 12,
+              }}
+            >
               Kapandı
             </span>
           )}
         </p>
 
-        {/* Özet Kutuları */}
         <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
           <div style={summaryBoxStyle}>
             <strong>Toplam Tutar</strong>
@@ -214,22 +250,51 @@ const LoanDetailModal = ({ loan, onClose }) => {
 
         <h4 style={{ marginTop: "30px" }}>📊 Ödeme Durumu</h4>
         <p>
-          {paidCount}/{totalInstallments} taksit ({(isClosed ? totalAmount : paidAmount).toFixed(2)} ₺ / {totalAmount.toFixed(2)} ₺ ödendi)
+          {paidCount}/{totalInstallments} taksit (
+          {(isClosed ? totalAmount : paidAmount).toFixed(2)} ₺ /{" "}
+          {totalAmount.toFixed(2)} ₺ ödendi)
         </p>
         <p style={{ fontWeight: "bold", color: "#c0392b" }}>
           Kalan Borç: {remainingWithLateFee.toFixed(2)} ₺
           {!isClosed && lateFee > 0 && (
             <span style={{ color: "#e74c3c" }}>
-              {" "}(+ {lateFee.toFixed(2)} ₺ gecikme faizi)
+              {" "}
+              (+ {lateFee.toFixed(2)} ₺ gecikme faizi)
             </span>
           )}
         </p>
-        <div style={{ background: "#ddd", borderRadius: "10px", overflow: "hidden", height: "20px" }}>
-          <div style={{ width: `${progress}%`, background: "#27ae60", height: "100%", transition: "width 0.3s ease" }} />
+        <div
+          style={{
+            background: "#ddd",
+            borderRadius: "10px",
+            overflow: "hidden",
+            height: "20px",
+          }}
+        >
+          <div
+            style={{
+              width: `${progress}%`,
+              background: "#27ae60",
+              height: "100%",
+              transition: "width 0.3s ease",
+            }}
+          />
         </div>
 
         <div style={{ marginTop: 12 }}>
-          <button onClick={handleEarlyClose} style={{ padding: "10px 14px", backgroundColor: "#16a34a", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }} disabled={isClosed}>
+          <button
+            onClick={handleEarlyClose}
+            style={{
+              padding: "10px 14px",
+              backgroundColor: "#16a34a",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+            disabled={isClosed}
+          >
             Erken Kapat
           </button>
         </div>
@@ -250,7 +315,9 @@ const LoanDetailModal = ({ loan, onClose }) => {
           </thead>
           <tbody>
             {installments.map((item) => {
-              const effectiveStatus = paidInstallments.includes(item.number) ? "Ödendi" : item.status;
+              const effectiveStatus = paidInstallments.includes(item.number)
+                ? "Ödendi"
+                : item.status;
               return (
                 <tr key={item.number}>
                   <td>{item.number}</td>
@@ -259,9 +326,21 @@ const LoanDetailModal = ({ loan, onClose }) => {
                   <td>{item.interest} ₺</td>
                   <td>{item.principal} ₺</td>
                   <td>{item.remaining} ₺</td>
-                  <td style={{ color: getStatusColor(effectiveStatus), fontWeight: "bold" }}>{effectiveStatus}</td>
+                  <td
+                    style={{
+                      color: getStatusColor(effectiveStatus),
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {effectiveStatus}
+                  </td>
                   <td>
-                    <input type="checkbox" checked={paidInstallments.includes(item.number)} onChange={() => handleCheckboxChange(item.number)} disabled={isClosed} />
+                    <input
+                      type="checkbox"
+                      checked={paidInstallments.includes(item.number)}
+                      onChange={() => handleCheckboxChange(item.number)}
+                      disabled={isClosed}
+                    />
                   </td>
                 </tr>
               );
@@ -290,11 +369,15 @@ const LoanDetailModal = ({ loan, onClose }) => {
             </tbody>
           </table>
         ) : (
-          <div style={{ color: "#666", marginTop: 6 }}>Henüz ödeme kaydı yok.</div>
+          <div style={{ color: "#666", marginTop: 6 }}>
+            Henüz ödeme kaydı yok.
+          </div>
         )}
 
         <div style={{ textAlign: "center", marginTop: "30px" }}>
-          <button onClick={onClose} style={buttonStyle}>Kapat</button>
+          <button onClick={onClose} style={buttonStyle}>
+            Kapat
+          </button>
         </div>
       </div>
     </div>
@@ -307,7 +390,7 @@ const summaryBoxStyle = {
   borderRadius: "8px",
   padding: "12px",
   textAlign: "center",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
 };
 
 const overlayStyle = {
@@ -351,4 +434,3 @@ const buttonStyle = {
 };
 
 export default LoanDetailModal;
-
