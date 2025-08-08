@@ -12,6 +12,9 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
     interestRate: "",
     loanType: "",
     subLoanType: "",
+    income: "",
+    otherDebts: "",
+    lateCount: "",
   });
 
   useEffect(() => {
@@ -31,6 +34,9 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
         interestRate: editingLoan.interestRate || "",
         loanType: editingLoan.loanType || "",
         subLoanType: editingLoan.subLoanType || "",
+        income: editingLoan.income ?? "",
+        otherDebts: editingLoan.otherDebts ?? "",
+        lateCount: editingLoan.lateCount ?? "",
       });
       setShowSubLoanType(editingLoan.loanType === "Bireysel");
     } else {
@@ -42,6 +48,9 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
         interestRate: "",
         loanType: "",
         subLoanType: "",
+        income: "",
+        otherDebts: "",
+        lateCount: "",
       });
       setShowSubLoanType(false);
     }
@@ -106,6 +115,9 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
       interestRate: "",
       loanType: "",
       subLoanType: "",
+      income: "",
+      otherDebts: "",
+      lateCount: "",
     });
     setShowSubLoanType(false);
   };
@@ -180,6 +192,33 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
           name="interestRate"
           placeholder="Faiz Oranı (%)"
           value={formData.interestRate}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+
+        <input
+          type="number"
+          name="income"
+          placeholder="Aylık Gelir (₺)"
+          value={formData.income}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+
+        <input
+          type="number"
+          name="otherDebts"
+          placeholder="Diğer Aylık Borçlar (₺)"
+          value={formData.otherDebts}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+
+        <input
+          type="number"
+          name="lateCount"
+          placeholder="Geçmiş Gecikme (adet)"
+          value={formData.lateCount}
           onChange={handleChange}
           style={inputStyle}
         />

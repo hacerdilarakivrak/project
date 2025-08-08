@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { calcRiskScore } from "../../utils/riskScore";
+import RiskBadge from "./RiskBadge";
 
 const LoanDetailModal = ({ loan, onClose }) => {
   if (!loan) return null;
@@ -58,6 +60,15 @@ const LoanDetailModal = ({ loan, onClose }) => {
   const paidCount = paidInstallments.length;
   const progress = totalInstallments > 0 ? (paidCount / totalInstallments) * 100 : 0;
 
+  const rs = calcRiskScore({
+    income: Number(loan.income) || 0,
+    otherDebts: Number(loan.otherDebts) || 0,
+    loanAmount: Number(loan.amount) || 0,
+    term: parseInt(loan.term, 10) || 0,
+    annualRate: (Number(loan.interestRate) || 0) / 100,
+    lateCount: Number(loan.lateCount) || 0,
+  });
+
   return (
     <div style={overlayStyle}>
       <div style={modalStyle}>
@@ -70,6 +81,24 @@ const LoanDetailModal = ({ loan, onClose }) => {
         <p><strong>Faiz Oranı:</strong> %{loan.interestRate}</p>
         <p><strong>Başvuru Tarihi:</strong> {new Date(loan.startDate).toLocaleDateString()}</p>
         <p><strong>Durum:</strong> {loan.status}</p>
+
+        <div style={{
+          border: "1px solid #eee",
+          padding: "12px",
+          borderRadius: "12px",
+          marginTop: "12px",
+          background: "#f9f9f9"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <strong>Risk Skoru</strong>
+            <RiskBadge score={rs.score} label={rs.label} />
+          </div>
+          <div style={{ marginTop: 8, fontSize: 13, color: "#555" }}>
+            <div>DTI (Borç/Gelir): <b>{(rs.dti * 100).toFixed(1)}%</b></div>
+            <div>Tahmini Aylık Taksit: <b>₺{rs.estInstallment.toFixed(2)}</b></div>
+            <div>Not: DTI %40 üzerindeyse skor düşer, gecikmeler ve uzun vade ek düşüş getirir.</div>
+          </div>
+        </div>
 
         <h4 style={{ marginTop: "30px" }}>📊 Ödeme Durumu</h4>
         <div style={{ background: "#ddd", borderRadius: "10px", overflow: "hidden", height: "20px" }}>

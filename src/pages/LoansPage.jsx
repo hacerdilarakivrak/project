@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import LoanForm from "../components/Loans/LoanForm";
 import LoanDetailModal from "../components/Loans/LoanDetailModal";
+import { calcRiskScore } from "../utils/riskScore";
+import RiskBadge from "../components/Loans/RiskBadge";
 
 const LoansPage = () => {
   const [activeTab, setActiveTab] = useState("loans");
@@ -160,65 +162,80 @@ const LoansPage = () => {
                 <th>Tutar</th>
                 <th>Vade</th>
                 <th>Faiz</th>
+                <th>Risk</th>
                 <th>Durum</th>
                 <th>İşlem</th>
               </tr>
             </thead>
             <tbody>
               {loans.length > 0 ? (
-                loans.map((loan) => (
-                  <tr
-                    key={loan.id}
-                    onClick={() => {
-                      setSelectedLoan(loan);
-                      setIsModalOpen(true);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td>{loan.customerId}</td>
-                    <td>{loan.customerName}</td>
-                    <td>{loan.loanType}</td>
-                    <td>{loan.subLoanType || "-"}</td>
-                    <td>{loan.amount}</td>
-                    <td>{loan.term}</td>
-                    <td>{loan.interestRate}</td>
-                    <td>
-                      <select
-                        value={loan.status || "Onay Bekliyor"}
-                        onChange={(e) => handleStatusChange(loan.id, e.target.value)}
-                        style={statusSelectStyle}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <option value="Onay Bekliyor">Onay Bekliyor</option>
-                        <option value="Onaylandı">Onaylandı</option>
-                        <option value="Reddedildi">Reddedildi</option>
-                      </select>
-                    </td>
-                    <td>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditLoan(loan);
-                        }}
-                        style={updateButtonStyle}
-                      >
-                        Güncelle
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteLoan(loan.id);
-                        }}
-                        style={deleteButtonStyle}
-                      >
-                        Sil
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                loans.map((loan) => {
+                  const rs = calcRiskScore({
+                    income: Number(loan.income) || 0,
+                    otherDebts: Number(loan.otherDebts) || 0,
+                    loanAmount: Number(loan.amount) || 0,
+                    term: parseInt(loan.term, 10) || 0,
+                    annualRate: (Number(loan.interestRate) || 0) / 100,
+                    lateCount: Number(loan.lateCount) || 0,
+                  });
+
+                  return (
+                    <tr
+                      key={loan.id}
+                      onClick={() => {
+                        setSelectedLoan(loan);
+                        setIsModalOpen(true);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <td>{loan.customerId}</td>
+                      <td>{loan.customerName}</td>
+                      <td>{loan.loanType}</td>
+                      <td>{loan.subLoanType || "-"}</td>
+                      <td>{loan.amount}</td>
+                      <td>{loan.term}</td>
+                      <td>{loan.interestRate}</td>
+                      <td>
+                        <RiskBadge score={rs.score} label={rs.label} compact />
+                      </td>
+                      <td>
+                        <select
+                          value={loan.status || "Onay Bekliyor"}
+                          onChange={(e) => handleStatusChange(loan.id, e.target.value)}
+                          style={statusSelectStyle}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <option value="Onay Bekliyor">Onay Bekliyor</option>
+                          <option value="Onaylandı">Onaylandı</option>
+                          <option value="Reddedildi">Reddedildi</option>
+                        </select>
+                      </td>
+                      <td>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditLoan(loan);
+                          }}
+                          style={updateButtonStyle}
+                        >
+                          Güncelle
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteLoan(loan.id);
+                          }}
+                          style={deleteButtonStyle}
+                        >
+                          Sil
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan="9" style={{ textAlign: "center", padding: "10px" }}>
+                  <td colSpan="10" style={{ textAlign: "center", padding: "10px" }}>
                     Henüz kredi başvurusu yapılmadı.
                   </td>
                 </tr>
