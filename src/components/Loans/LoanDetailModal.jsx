@@ -211,7 +211,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
     return 0;
   });
 
-  // Para format helper
   const fmtTRY = (v) =>
     new Intl.NumberFormat("tr-TR", {
       style: "currency",
@@ -221,14 +220,11 @@ const LoanDetailModal = ({ loan, onClose }) => {
 
   return (
     <div style={overlayStyle}>
-      {/* Responsive CSS & Tooltip CSS */}
       <style>{responsiveCss(theme.accent)}</style>
-
       <div style={{ ...modalStyle, borderTop: `6px solid ${theme.accent}` }}>
         <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {theme.icon} Kredi Detayları
         </h2>
-
         <p>
           <strong>Müşteri:</strong> {loan.customerName}
         </p>
@@ -280,8 +276,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             </span>
           )}
         </p>
-
-        {/* RENKLİ ÖZET KUTULARI */}
         <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
           <div
             style={{
@@ -293,7 +287,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             <strong>Toplam Tutar</strong>
             <div>{fmtTRY(totalAmount)}</div>
           </div>
-
           <div
             style={{
               ...summaryBoxStyle,
@@ -304,7 +297,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             <strong>Ödenen Toplam</strong>
             <div>{fmtTRY(paidAmount)}</div>
           </div>
-
           <div
             style={{
               ...summaryBoxStyle,
@@ -315,7 +307,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             <strong>Kalan Anapara</strong>
             <div>{fmtTRY(remainingAmount)}</div>
           </div>
-
           <div
             style={{
               ...summaryBoxStyle,
@@ -336,7 +327,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             <div>{fmtTRY(totalInterest)}</div>
           </div>
         </div>
-
         <h4 style={{ marginTop: "30px" }}>📊 Ödeme Durumu</h4>
         <p>
           {paidCount}/{totalInstallments} taksit (
@@ -369,7 +359,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             }}
           />
         </div>
-
         <div style={{ marginTop: 12 }}>
           <button
             onClick={handleEarlyClose}
@@ -387,7 +376,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             Erken Kapat
           </button>
         </div>
-
         <h3 style={{ marginTop: "24px" }}>📅 Ödeme Planı</h3>
         <div className="table-wrap">
           <table style={tableStyle} className="rtable">
@@ -439,7 +427,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             </tbody>
           </table>
         </div>
-
         <h3 style={{ marginTop: "24px" }}>🧾 Ödeme Geçmişi</h3>
         {paymentHistorySorted.length > 0 ? (
           <div className="table-wrap">
@@ -469,7 +456,6 @@ const LoanDetailModal = ({ loan, onClose }) => {
             Henüz ödeme kaydı yok.
           </div>
         )}
-
         <div style={{ textAlign: "center", marginTop: "30px" }}>
           <button onClick={onClose} style={buttonStyle}>
             Kapat
@@ -529,7 +515,6 @@ const buttonStyle = {
   fontWeight: "bold",
 };
 
-// CSS-in-JS: mobilde tabloyu karta çevir + tooltip
 function responsiveCss(accent) {
   return `
   .table-wrap {
@@ -543,7 +528,6 @@ function responsiveCss(accent) {
     text-align: left;
   }
 
-  /* Tooltip */
   .tt {
     display:inline-flex;
     align-items:center;
@@ -577,7 +561,6 @@ function responsiveCss(accent) {
   }
   .tt:hover .tt-content{ opacity:1; }
 
-  /* <= 768px: kart görünüm */
   @media (max-width: 768px) {
     .rtable thead {
       display: none;
@@ -619,4 +602,3 @@ function responsiveCss(accent) {
 }
 
 export default LoanDetailModal;
-

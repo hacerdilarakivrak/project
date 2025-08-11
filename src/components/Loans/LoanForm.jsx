@@ -358,6 +358,3 @@ const buttonStyle = {
 };
 
 export default LoanForm;
-
-
-
