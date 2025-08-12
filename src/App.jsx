@@ -14,7 +14,6 @@ import Layout from "./components/Layout/Layout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Auth
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { PrivateRoute } from "./components/PrivateRoute.jsx";
 import LoginPage from "./pages/LoginPage";
@@ -23,14 +22,11 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        {/* Toast her sayfada (login dahil) */}
         <ToastContainer position="top-right" autoClose={3000} />
 
         <Routes>
-          {/* Public: Login */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected: Layout içinde tüm sayfalar */}
           <Route
             path="/"
             element={
@@ -119,7 +115,6 @@ function App() {
             }
           />
 
-          {/* olmayan yollar */}
           <Route
             path="*"
             element={
@@ -135,9 +130,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
-

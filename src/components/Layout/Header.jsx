@@ -1,7 +1,18 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { toast } from "react-toastify";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Oturum kapatıldı");
+    navigate("/login", { replace: true });
+  };
+
   return (
     <header
       style={{
@@ -19,7 +30,7 @@ const Header = () => {
         </NavLink>
       </div>
 
-      <nav style={{ display: "flex", gap: "20px" }}>
+      <nav style={{ display: "flex", gap: "20px", alignItems: "center" }}>
         <NavLink to="/dashboard" style={getLinkStyle}>
           Dashboard
         </NavLink>
@@ -41,6 +52,25 @@ const Header = () => {
         <NavLink to="/loans" style={getLinkStyle}>
           Kredi ve Mevduat
         </NavLink>
+
+        {user && (
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: 16 }}>
+            <span style={{ color: "#fff", opacity: 0.9 }}>👤 {user.username}</span>
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "6px 12px",
+                background: "transparent",
+                border: "1px solid #fff",
+                color: "#fff",
+                borderRadius: 8,
+                cursor: "pointer",
+              }}
+            >
+              Çıkış
+            </button>
+          </div>
+        )}
       </nav>
     </header>
   );
