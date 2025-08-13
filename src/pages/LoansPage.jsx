@@ -5,6 +5,8 @@ import LoanDetailModal from "../components/Loans/LoanDetailModal";
 import { calcRiskScore } from "../utils/riskScore";
 import RiskBadge from "../components/Loans/RiskBadge";
 import { getAutoDecision } from "../utils/autoDecision";
+import DepositForm from "../components/Deposits/DepositForm";
+import DepositDetailModal from "../components/Deposits/DepositDetailModal";
 
 const trCurrency = new Intl.NumberFormat("tr-TR", {
   style: "currency",
@@ -19,17 +21,10 @@ const LoansPage = () => {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deposits, setDeposits] = useState([]);
-  const [editingDeposit, setEditingDeposit] = useState(null);
-  const [depositForm, setDepositForm] = useState({
-    customerId: "",
-    customerName: "",
-    amount: "",
-    type: "Vadesiz",
-    term: "",
-    interest: "",
-  });
+  const [selectedDeposit, setSelectedDeposit] = useState(null);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [customers, setCustomers] = useState([]);
-  const [notification, setNotification] = useState("");
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     const savedLoans = JSON.parse(localStorage.getItem("loans")) || [];
@@ -75,13 +70,13 @@ const LoansPage = () => {
 
     if (reminders.length > 0) {
       setNotification(reminders[0]);
-      setTimeout(() => setNotification(""), 5000);
+      setTimeout(() => setNotification(null), 5000);
     }
   }, [loans]);
 
-  const handleNotify = () => {
-    setNotification("🔔 Yeni kredi başvurusu yapıldı.");
-    setTimeout(() => setNotification(""), 4000);
+  const handleNotify = (msg = "🔔 Yeni kredi başvurusu yapıldı.") => {
+    setNotification(msg);
+    setTimeout(() => setNotification(null), 4000);
   };
 
   const handleLoanAdded = (newLoan) => {
@@ -137,6 +132,31 @@ const LoansPage = () => {
     localStorage.setItem("loans", JSON.stringify(updatedLoans));
   };
 
+  const handleDepositAdded = (newDeposit) => {
+    const updated = [...deposits, newDeposit];
+    setDeposits(updated);
+    localStorage.setItem("deposits", JSON.stringify(updated));
+    handleNotify("💰 Yeni mevduat eklendi.");
+  };
+
+  const handleDeleteDeposit = (depositId) => {
+    if (window.confirm("Bu mevduatı silmek istediğinize emin misiniz?")) {
+      const updated = deposits.filter((d) => d.id !== depositId);
+      setDeposits(updated);
+      localStorage.setItem("deposits", JSON.stringify(updated));
+    }
+  };
+
+  const handleCloseDepositAccount = (depositId) => {
+    const updated = deposits.map((d) =>
+      d.id === depositId ? { ...d, status: "Kapalı" } : d
+    );
+    setDeposits(updated);
+    localStorage.setItem("deposits", JSON.stringify(updated));
+    setIsDepositModalOpen(false);
+    handleNotify("✅ Mevduat kapatıldı.");
+  };
+
   const totalLoans = loans.length;
   const totalDeposits = deposits.length;
   const pendingLoans = loans.filter((loan) => loan.status === "Onay Bekliyor").length;
@@ -156,9 +176,12 @@ const LoansPage = () => {
     return "-";
   };
 
+  const notifText =
+    typeof notification === "string" ? notification : notification?.message;
+
   return (
     <div style={pageStyle}>
-      {notification && <div style={notificationStyle}>{notification}</div>}
+      {notifText ? <div style={notificationStyle}>{notifText}</div> : null}
 
       <div style={summaryContainer}>
         <div style={summaryCard}>Toplam Krediler: {totalLoans}</div>
@@ -316,6 +339,79 @@ const LoansPage = () => {
                 setIsModalOpen(false);
                 setSelectedLoan(null);
               }}
+            />
+          )}
+        </>
+      )}
+
+      {activeTab === "deposits" && (
+        <>
+          <DepositForm
+            onAdd={handleDepositAdded}
+            onNotify={(n) => setNotification(typeof n === "string" ? n : n?.message)}
+          />
+
+          <h2 style={{ marginTop: "30px" }}>Mevduat Listesi</h2>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th>Müşteri</th>
+                <th>Tür</th>
+                <th>Tutar</th>
+                <th>Faiz %</th>
+                <th>Başlangıç</th>
+                <th>Vade Sonu</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody>
+              {deposits.length > 0 ? (
+                deposits.map((dep) => (
+                  <tr
+                    key={dep.id}
+                    onClick={() => {
+                      setSelectedDeposit(dep);
+                      setIsDepositModalOpen(true);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <td>{dep.customerName}</td>
+                    <td>{dep.type}</td>
+                    <td>{trCurrency.format(dep.amount)}</td>
+                    <td>{dep.type === "Vadeli" ? dep.interestRate : "-"}</td>
+                    <td>{dep.startDate || "-"}</td>
+                    <td>{dep.maturityDate || "-"}</td>
+                    <td>{dep.status}</td>
+                    <td>
+                      <button
+                        style={deleteButtonStyle}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteDeposit(dep.id);
+                        }}
+                      >
+                        Sil
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" style={{ textAlign: "center", padding: "10px" }}>
+                    Henüz mevduat yok.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {isDepositModalOpen && selectedDeposit && (
+            <DepositDetailModal
+              open={true}
+              deposit={selectedDeposit}
+              onClose={() => setIsDepositModalOpen(false)}
+              onCloseAccount={handleCloseDepositAccount}
             />
           )}
         </>
