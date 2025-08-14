@@ -4,7 +4,7 @@ import TerminalList from "./TerminalList";
 import TerminalEditModal from "./TerminalEditModal";
 import type { Terminal } from "./types";
 import { loadTerminals, updateTerminal } from "./storage";
-import { toast } from "react-toastify"; // ← ekle
+import { toast } from "react-toastify";
 
 export default function TerminalsPage() {
   const [items, setItems] = useState<Terminal[]>([]);
@@ -18,7 +18,7 @@ export default function TerminalsPage() {
 
   const handleCreated = () => {
     refresh();
-    toast.success("Terminal(ler) eklendi"); // ← opsiyonel
+    toast.success("Terminal(ler) eklendi");
   };
 
   const onEditClick = (t: Terminal) => setEditing(t);
@@ -29,7 +29,7 @@ export default function TerminalsPage() {
     refresh();
     toast.success(
       updated.kayitDurum === 0 ? "Terminal kapatıldı" : "Terminal güncellendi"
-    ); // ← ekle
+    );
   };
 
   return (
@@ -46,5 +46,3 @@ export default function TerminalsPage() {
     </div>
   );
 }
-
-

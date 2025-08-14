@@ -21,5 +21,3 @@ export interface Terminal {
   seriNo: string;
   kapanmaNedeni?: string;
 }
-
-

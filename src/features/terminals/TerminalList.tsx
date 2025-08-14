@@ -13,18 +13,15 @@ function durumLabel(d: KayitDurum) {
 }
 
 export default function TerminalList({ items, onEdit }: Props) {
-  // 🔎 Filtre state'leri
   const [isyeriNo, setIsyeriNo] = useState("");
   const [kayitDurum, setKayitDurum] = useState<"" | "0" | "1" | "2">("");
   const [q, setQ] = useState("");
 
-  // İşyeri numaralarını (unique) çıkar
   const uniqueIsyeri = useMemo(
     () => Array.from(new Set(items.map((i) => i.isyeriNo))).sort(),
     [items]
   );
 
-  // Filtrelenmiş liste
   const filtered = useMemo(() => {
     const query = q.trim().toUpperCase();
     return items
@@ -44,7 +41,6 @@ export default function TerminalList({ items, onEdit }: Props) {
 
   return (
     <div className="p-4 rounded-lg border space-y-3">
-      {/* 🔧 Filtre barı */}
       <div className="flex items-end gap-3 flex-wrap">
         <div>
           <label className="block text-sm mb-1">İşyeri No (filtre)</label>
@@ -87,7 +83,6 @@ export default function TerminalList({ items, onEdit }: Props) {
         </div>
       </div>
 
-      {/* 📋 Liste */}
       <div className="overflow-auto">
         <table className="w-full text-sm">
           <thead>
@@ -137,8 +132,6 @@ export default function TerminalList({ items, onEdit }: Props) {
                     >
                       Düzenle
                     </button>
-
-                    {/* ✅ Hızlı kapatma: modalı kapalı ön-seçili aç */}
                     <button
                       className="px-2 py-1 rounded border bg-red-50"
                       onClick={() => onEdit({ ...t, kayitDurum: 0 as KayitDurum })}
@@ -163,8 +156,3 @@ export default function TerminalList({ items, onEdit }: Props) {
     </div>
   );
 }
-
-
-
-
-

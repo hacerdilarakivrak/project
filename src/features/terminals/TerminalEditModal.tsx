@@ -34,7 +34,6 @@ export default function TerminalEditModal({
     form.servisFirmasi !== "" &&
     (form.seriNo ?? "").trim() !== "";
 
-  // 🔧 ÖNEMLİ: Number(...) ile karşılaştır (select'ten string gelebilir)
   const showKapanma = Number(form.kayitDurum) === 0;
 
   const onChange = <K extends keyof Terminal>(key: K, value: Terminal[K]) => {
@@ -45,18 +44,15 @@ export default function TerminalEditModal({
   const handleSave = () => {
     setErrorText("");
 
-    // 1) Üçlü kural
     if (trioAny && !trioAll) {
       setErrorText("Model, Servis ve Seri üçü beraber girilmeli.");
       return;
     }
-    // 2) Kapalı ise kapanma nedeni zorunlu
     if (Number(form.kayitDurum) === 0 && !form.kapanmaNedeni) {
       setErrorText("Kapalı durumunda kapanma nedeni zorunludur.");
       return;
     }
 
-    // Seri no'yu uppercase'e çek
     const candidate: Terminal = {
       ...form,
       seriNo: (form.seriNo ?? "").toUpperCase(),
@@ -81,7 +77,6 @@ export default function TerminalEditModal({
           </button>
         </div>
 
-        {/* Temel alanlar */}
         <div className="grid md:grid-cols-3 gap-3">
           <div>
             <label className="block text-sm mb-1">Kayıt Durumu</label>
@@ -123,7 +118,6 @@ export default function TerminalEditModal({
           </div>
         </div>
 
-        {/* Kontak */}
         <div className="grid md:grid-cols-3 gap-3 mt-3">
           <div>
             <label className="block text-sm mb-1">Kontak Telefon</label>
@@ -143,7 +137,6 @@ export default function TerminalEditModal({
           </div>
         </div>
 
-        {/* Üçlü alanlar */}
         <div className="grid md:grid-cols-3 gap-3 mt-3">
           <div>
             <label className="block text-sm mb-1">Model Kodu</label>
@@ -191,7 +184,6 @@ export default function TerminalEditModal({
           </div>
         </div>
 
-        {/* Kapanma nedeni: sadece kayitDurum=0'da */}
         {showKapanma && (
           <div className="mt-3">
             <label className="block text-sm mb-1">Kapanma Nedeni *</label>
@@ -212,7 +204,6 @@ export default function TerminalEditModal({
           </div>
         )}
 
-        {/* Hata alanı */}
         {errorText && (
           <div className="text-red-600 text-sm whitespace-pre-line border border-red-200 bg-red-50 rounded p-2 mt-3">
             {errorText}
@@ -234,9 +225,3 @@ export default function TerminalEditModal({
     </div>
   );
 }
-
-
-
-
-
-

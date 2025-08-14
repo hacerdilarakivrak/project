@@ -80,17 +80,13 @@ export default function TerminalForm({
   const handleSubmit = () => {
     setErrorText("");
 
-    // Üçlü kural
     if (trioAny && !trioAll) {
       setErrorText("Model, Servis ve Seri üçü beraber girilmeli.");
       return;
     }
 
-    // Toplu ekleme
     if (adetEnabled && form.adet > 1) {
       const n = Math.max(1, Number(form.adet) || 1);
-
-      // Zorunlu alanları örnek kayıtla kontrol et
       const probe: Terminal = {
         ...buildSingle(),
         modelKodu: "",
@@ -102,20 +98,17 @@ export default function TerminalForm({
         setErrorText(probeCheck.error.issues.map((i) => i.message).join("\n"));
         return;
       }
-
       const created: Terminal[] = Array.from({ length: n }).map(() => ({
         ...probe,
         terminalId: uuid(),
         kayitTarihi: new Date().toISOString(),
       }));
-
       addTerminals(created);
       onCreated?.(created);
       resetForm();
       return;
     }
 
-    // Tekil ekleme
     const candidate = buildSingle();
     const result = validateTerminal(candidate);
     if (!result.success) {
@@ -132,7 +125,6 @@ export default function TerminalForm({
     <div className="p-4 rounded-lg border space-y-3">
       <h3 className="font-semibold text-lg">Terminal Ekle</h3>
 
-      {/* İşyeri ve kontak */}
       <div className="grid md:grid-cols-3 gap-3">
         <div>
           <label className="block text-sm mb-1">İşyeri No *</label>
@@ -163,7 +155,6 @@ export default function TerminalForm({
         </div>
       </div>
 
-      {/* Durum & kullanım tipi */}
       <div className="grid md:grid-cols-3 gap-3">
         <div>
           <label className="block text-sm mb-1">Kayıt Durumu</label>
@@ -177,7 +168,6 @@ export default function TerminalForm({
             <option value={0}>Kapalı (0)</option>
           </select>
         </div>
-
         <div>
           <label className="block text-sm mb-1">Kullanım Tipi</label>
           <select
@@ -194,7 +184,6 @@ export default function TerminalForm({
         </div>
       </div>
 
-      {/* Model / Servis / Seri (Üçlü Kural) */}
       <div className="grid md:grid-cols-3 gap-3">
         <div>
           <label className="block text-sm mb-1">
@@ -212,7 +201,6 @@ export default function TerminalForm({
             ))}
           </select>
         </div>
-
         <div>
           <label className="block text-sm mb-1">
             Servis Firması {trioAny ? "*" : "(boş bırakılabilir)"}
@@ -229,7 +217,6 @@ export default function TerminalForm({
             ))}
           </select>
         </div>
-
         <div>
           <label className="block text-sm mb-1">
             Seri No {trioAny ? "*" : "(boş bırakılabilir)"}
@@ -243,7 +230,6 @@ export default function TerminalForm({
         </div>
       </div>
 
-      {/* Adet (toplu) — sadece üçlü tamamen boşsa aktif */}
       <div className="grid md:grid-cols-3 gap-3">
         <div>
           <label className="block text-sm mb-1">Adet (toplu ekleme)</label>
@@ -265,14 +251,12 @@ export default function TerminalForm({
         </div>
       </div>
 
-      {/* Hatalar */}
       {errorText && (
         <div className="text-red-600 text-sm whitespace-pre-line border border-red-200 bg-red-50 rounded p-2">
           {errorText}
         </div>
       )}
 
-      {/* Aksiyonlar */}
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -292,9 +276,3 @@ export default function TerminalForm({
     </div>
   );
 }
-
-
-
-
-
-

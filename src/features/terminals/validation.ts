@@ -7,17 +7,11 @@ import {
   KULLANIM_TIPLERI,
 } from "./constants";
 
-/**
- * Zod şeması — iş kuralları:
- * - Model+Servis+Seri üçü ya birlikte dolu ya da birlikte boş (trio kuralı)
- * - Kayıt durumu 0 (kapalı) ise kapanma nedeni ZORUNLU
- * - Seri no: yalnızca A-Z ve 0-9 (uppercase’ı UI’da veriyoruz)
- */
 export const TerminalSchema = z
   .object({
     terminalId: z.string().min(1),
     kayitDurum: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-    kayitTarihi: z.string().min(1), // ISO string
+    kayitTarihi: z.string().min(1),
     isyeriNo: z.string().min(1, "İşyeri numarası zorunludur."),
     kontakTelefon: z.string().min(5, "Telefon en az 5 karakter olmalı."),
     kontakYetkiliIsmi: z.string().min(1, "Yetkili ismi zorunludur."),
@@ -33,7 +27,6 @@ export const TerminalSchema = z
     const anyOfTrio = !!v.modelKodu || !!v.servisFirmasi || !!v.seriNo;
     const allOfTrio = !!v.modelKodu && !!v.servisFirmasi && !!v.seriNo;
 
-    // Üçlü kuralı
     if (anyOfTrio && !allOfTrio) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -42,7 +35,6 @@ export const TerminalSchema = z
       });
     }
 
-    // Kapalı durumda kapanma nedeni zorunlu
     if (v.kayitDurum === 0 && !v.kapanmaNedeni) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -52,12 +44,10 @@ export const TerminalSchema = z
     }
   });
 
-/** Tek kayıt doğrulama (ekleme/düzenleme) */
 export function validateTerminal(candidate: Terminal) {
   return TerminalSchema.safeParse(candidate);
 }
 
-/** Hata varsa Error fırlatır; try/catch ile kullanışlı */
 export function assertValidTerminal(candidate: Terminal) {
   const res = validateTerminal(candidate);
   if (!res.success) {
@@ -66,11 +56,6 @@ export function assertValidTerminal(candidate: Terminal) {
   }
 }
 
-/**
- * (Opsiyonel) Toplu ekleme için yardımcı:
- * Üçlü alanlar boş bırakılarak (model/servis/seri) geri kalan zorunluları kontrol eder.
- * UI’da `TerminalForm` toplu ekleme prob’unda bunu kullanabilirsin.
- */
 export function validateTerminalForBulk(base: Terminal) {
   const bulkCandidate: Terminal = {
     ...base,
@@ -80,7 +65,3 @@ export function validateTerminalForBulk(base: Terminal) {
   };
   return TerminalSchema.safeParse(bulkCandidate);
 }
-
-
-
-
