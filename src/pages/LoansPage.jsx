@@ -181,6 +181,8 @@ const LoansPage = () => {
 
   return (
     <div style={pageStyle}>
+      <style>{depositCSS}</style>
+
       {notifText ? <div style={notificationStyle}>{notifText}</div> : null}
 
       <div style={summaryContainer}>
@@ -504,5 +506,22 @@ const statusSelectStyle = {
   fontWeight: "bold",
 };
 
+const depositCSS = `
+.deposit-form{max-width:680px;padding:18px 20px;border-radius:12px;background:#2a2a2a;box-shadow:0 4px 18px rgba(0,0,0,.25)}
+.deposit-form h3{margin:0 0 14px 0}
+.deposit-form .row{display:grid;grid-template-columns:170px 1fr;align-items:center;column-gap:14px;row-gap:8px;margin-bottom:14px}
+.deposit-form label{color:#dcdcdc;font-weight:600}
+.deposit-form input,.deposit-form select{width:100%;height:40px;padding:8px 12px;border-radius:8px;border:1px solid #3b3b3b;background:#1f1f1f;color:#fff;outline:none}
+.deposit-form input:focus,.deposit-form select:focus{border-color:#00d09c;box-shadow:0 0 0 3px rgba(0,208,156,.15)}
+.deposit-form .hint{grid-column:1 / -1;margin:4px 0 6px;font-size:14px;color:#cfeee6}
+.deposit-form button[type="submit"]{grid-column:1 / -1;justify-self:start;padding:10px 16px;border:0;border-radius:8px;background:#00d09c;color:#0b0b0b;font-weight:700;cursor:pointer}
+.deposit-form button[type="submit"]:hover{filter:brightness(1.05)}
+@media (max-width:640px){
+  .deposit-form .row{grid-template-columns:1fr}
+  .deposit-form button[type="submit"]{width:100%;justify-self:stretch}
+}
+`;
+
 export default LoansPage;
+
 

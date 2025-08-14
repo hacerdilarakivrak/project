@@ -43,6 +43,12 @@ const Header = () => {
         <NavLink to="/workplaces" style={getLinkStyle}>
           İşyeri Tanımlama
         </NavLink>
+
+        {/* ✅ Yeni: Terminal Yönetimi */}
+        <NavLink to="/terminals" style={getLinkStyle}>
+          Terminal Yönetimi
+        </NavLink>
+
         <NavLink to="/transactions" style={getLinkStyle}>
           İşlemler
         </NavLink>
@@ -86,3 +92,4 @@ const getLinkStyle = ({ isActive }) => ({
 });
 
 export default Header;
+
