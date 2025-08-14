@@ -34,7 +34,8 @@ export default function TerminalEditModal({
     form.servisFirmasi !== "" &&
     (form.seriNo ?? "").trim() !== "";
 
-  const showKapanma = form.kayitDurum === 0;
+  // 🔧 ÖNEMLİ: Number(...) ile karşılaştır (select'ten string gelebilir)
+  const showKapanma = Number(form.kayitDurum) === 0;
 
   const onChange = <K extends keyof Terminal>(key: K, value: Terminal[K]) => {
     setErrorText("");
@@ -50,7 +51,7 @@ export default function TerminalEditModal({
       return;
     }
     // 2) Kapalı ise kapanma nedeni zorunlu
-    if (form.kayitDurum === 0 && !form.kapanmaNedeni) {
+    if (Number(form.kayitDurum) === 0 && !form.kapanmaNedeni) {
       setErrorText("Kapalı durumunda kapanma nedeni zorunludur.");
       return;
     }
@@ -233,6 +234,7 @@ export default function TerminalEditModal({
     </div>
   );
 }
+
 
 
 

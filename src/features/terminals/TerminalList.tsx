@@ -1,44 +1,51 @@
 import React, { useMemo, useState } from "react";
 import type { Terminal, KayitDurum } from "./types";
 
+type Props = {
+  items: Terminal[];
+  onEdit: (t: Terminal) => void;
+};
+
 function durumLabel(d: KayitDurum) {
   if (d === 0) return "Kapalı";
   if (d === 1) return "Açık";
   return "Kurulum";
 }
 
-export default function TerminalList({
-  items,
-  onEdit,
-}: {
-  items: Terminal[];
-  onEdit: (t: Terminal) => void;
-}) {
+export default function TerminalList({ items, onEdit }: Props) {
+  // 🔎 Filtre state'leri
   const [isyeriNo, setIsyeriNo] = useState("");
   const [kayitDurum, setKayitDurum] = useState<"" | "0" | "1" | "2">("");
   const [q, setQ] = useState("");
 
+  // İşyeri numaralarını (unique) çıkar
+  const uniqueIsyeri = useMemo(
+    () => Array.from(new Set(items.map((i) => i.isyeriNo))).sort(),
+    [items]
+  );
+
+  // Filtrelenmiş liste
   const filtered = useMemo(() => {
+    const query = q.trim().toUpperCase();
     return items
       .filter((t) => (isyeriNo ? t.isyeriNo === isyeriNo : true))
-      .filter((t) => (kayitDurum === "" ? true : String(t.kayitDurum) === kayitDurum))
-      .filter((t) => {
-        const s = q.trim().toUpperCase();
-        if (!s) return true;
-        return (
-          t.seriNo.toUpperCase().includes(s) ||
-          t.modelKodu.toUpperCase().includes(s) ||
-          t.servisFirmasi.toUpperCase().includes(s)
-        );
-      })
+      .filter((t) =>
+        kayitDurum === "" ? true : String(t.kayitDurum) === kayitDurum
+      )
+      .filter((t) =>
+        query
+          ? t.seriNo.toUpperCase().includes(query) ||
+            t.modelKodu.toUpperCase().includes(query) ||
+            t.servisFirmasi.toUpperCase().includes(query)
+          : true
+      )
       .sort((a, b) => (a.kayitTarihi < b.kayitTarihi ? 1 : -1));
   }, [items, isyeriNo, kayitDurum, q]);
 
-  const uniqueIsyeri = Array.from(new Set(items.map((i) => i.isyeriNo))).sort();
-
   return (
-    <div className="p-4 rounded-lg border">
-      <div className="flex items-end gap-3 mb-3 flex-wrap">
+    <div className="p-4 rounded-lg border space-y-3">
+      {/* 🔧 Filtre barı */}
+      <div className="flex items-end gap-3 flex-wrap">
         <div>
           <label className="block text-sm mb-1">İşyeri No (filtre)</label>
           <select
@@ -80,19 +87,20 @@ export default function TerminalList({
         </div>
       </div>
 
+      {/* 📋 Liste */}
       <div className="overflow-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left border-b">
-              <th className="py-2 pr-2">Terminal ID</th>
-              <th className="py-2 pr-2">Durum</th>
-              <th className="py-2 pr-2">İşyeri</th>
-              <th className="py-2 pr-2">Model</th>
-              <th className="py-2 pr-2">Seri</th>
-              <th className="py-2 pr-2">Servis</th>
-              <th className="py-2 pr-2">Kullanım</th>
-              <th className="py-2 pr-2">Kayıt Tarihi</th>
-              <th className="py-2 pr-2">Aksiyon</th>
+              <th className="py-2 pr-2">TERMINAL ID</th>
+              <th className="py-2 pr-2">DURUM</th>
+              <th className="py-2 pr-2">İŞYERİ</th>
+              <th className="py-2 pr-2">MODEL</th>
+              <th className="py-2 pr-2">SERI</th>
+              <th className="py-2 pr-2">SERVIS</th>
+              <th className="py-2 pr-2">KULLANIM</th>
+              <th className="py-2 pr-2">KAYIT TARIHI</th>
+              <th className="py-2 pr-2">AKSİYON</th>
             </tr>
           </thead>
           <tbody>
@@ -118,11 +126,27 @@ export default function TerminalList({
                 <td className="py-2 pr-2">{t.seriNo || "-"}</td>
                 <td className="py-2 pr-2">{t.servisFirmasi || "-"}</td>
                 <td className="py-2 pr-2">{t.kullanimTipi}</td>
-                <td className="py-2 pr-2">{new Date(t.kayitTarihi).toLocaleString()}</td>
                 <td className="py-2 pr-2">
-                  <button className="px-2 py-1 rounded border" onClick={() => onEdit(t)}>
-                    Düzenle
-                  </button>
+                  {new Date(t.kayitTarihi).toLocaleString()}
+                </td>
+                <td className="py-2 pr-2">
+                  <div className="flex gap-2">
+                    <button
+                      className="px-2 py-1 rounded border"
+                      onClick={() => onEdit(t)}
+                    >
+                      Düzenle
+                    </button>
+
+                    {/* ✅ Hızlı kapatma: modalı kapalı ön-seçili aç */}
+                    <button
+                      className="px-2 py-1 rounded border bg-red-50"
+                      onClick={() => onEdit({ ...t, kayitDurum: 0 as KayitDurum })}
+                      title="Kapat"
+                    >
+                      Kapat
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -139,4 +163,8 @@ export default function TerminalList({
     </div>
   );
 }
+
+
+
+
 
