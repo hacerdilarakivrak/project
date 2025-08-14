@@ -9,8 +9,6 @@ import Dashboard from "./pages/Dashboard";
 import TransactionsPage from "./pages/TransactionsPage";
 import ExchangeRatesPage from "./pages/ExchangeRatesPage";
 import LoansPage from "./pages/LoansPage";
-
-// ✅ TERMINAL sayfasını import et
 import TerminalsPage from "./features/terminals/TerminalsPage";
 
 import Layout from "./components/Layout/Layout";
@@ -28,10 +26,8 @@ function App() {
         <ToastContainer position="top-right" autoClose={3000} />
 
         <Routes>
-          {/* Giriş */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Ana sayfa */}
           <Route
             path="/"
             element={
@@ -43,7 +39,6 @@ function App() {
             }
           />
 
-          {/* Müşteri İşlemleri */}
           <Route
             path="/customers"
             element={
@@ -55,7 +50,6 @@ function App() {
             }
           />
 
-          {/* Hesap Tanımlama */}
           <Route
             path="/accounts"
             element={
@@ -67,7 +61,6 @@ function App() {
             }
           />
 
-          {/* İşyeri Tanımlama */}
           <Route
             path="/workplaces"
             element={
@@ -79,7 +72,6 @@ function App() {
             }
           />
 
-          {/* İşlemler */}
           <Route
             path="/transactions"
             element={
@@ -91,7 +83,6 @@ function App() {
             }
           />
 
-          {/* Dashboard */}
           <Route
             path="/dashboard"
             element={
@@ -103,7 +94,6 @@ function App() {
             }
           />
 
-          {/* Döviz Kurları */}
           <Route
             path="/exchange-rates"
             element={
@@ -115,7 +105,6 @@ function App() {
             }
           />
 
-          {/* Kredi ve Mevduat */}
           <Route
             path="/loans"
             element={
@@ -127,7 +116,6 @@ function App() {
             }
           />
 
-          {/* ✅ Terminaller — yeni rota */}
           <Route
             path="/terminals"
             element={
@@ -139,7 +127,6 @@ function App() {
             }
           />
 
-          {/* Yakalama (fallback) */}
           <Route
             path="*"
             element={
@@ -155,4 +142,3 @@ function App() {
 }
 
 export default App;
-
