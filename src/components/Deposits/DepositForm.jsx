@@ -211,4 +211,3 @@ export default function DepositForm({ onAdd, onNotify }) {
     </form>
   );
 }
-
