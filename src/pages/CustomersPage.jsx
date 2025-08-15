@@ -16,16 +16,57 @@ const CustomersPage = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2 style={{ color: "#fff" }}>Müşteri İşlemleri</h2>
-      <CustomerForm
-        onCustomerAdded={handleRefresh}
-        selectedCustomer={selectedCustomer}
-      />
-      <hr style={{ borderColor: "#ccc" }} />
-      <CustomerList refresh={refresh} onEdit={handleEdit} />
+    <div
+      style={{
+        minHeight: "calc(100vh - 64px)",
+        background: "#2c2c2c", // dış arka plan
+        padding: "32px 0",
+      }}
+    >
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 16px" }}>
+        <h1
+          style={{
+            textAlign: "center",
+            fontSize: 36,
+            fontWeight: 700,
+            marginBottom: 20,
+            letterSpacing: ".3px",
+            color: "#ffffff",
+          }}
+        >
+          Müşteri İşlemleri
+        </h1>
+
+        <div
+          style={{
+            borderRadius: 16,
+            border: "1px solid #3a3a3a",
+            background: "#1a1a1a", // panel zemini
+            boxShadow: "0 10px 40px rgba(0,0,0,.35)",
+            padding: 24,
+          }}
+        >
+          <div style={{ marginBottom: 24 }}>
+            <CustomerForm
+              onCustomerAdded={handleRefresh}
+              selectedCustomer={selectedCustomer}
+            />
+          </div>
+
+          <hr
+            style={{
+              border: 0,
+              borderTop: "1px solid #2f2f2f",
+              margin: "8px 0 24px",
+            }}
+          />
+
+          <CustomerList refresh={refresh} onEdit={handleEdit} />
+        </div>
+      </div>
     </div>
   );
 };
 
 export default CustomersPage;
+

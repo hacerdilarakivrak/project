@@ -74,8 +74,8 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
       }
 
       setForm(initialForm);
-      if (onAccountAdd) onAccountAdd();
-      if (clearSelection) clearSelection();
+      onAccountAdd?.();
+      clearSelection?.();
     } catch (err) {
       alert("Hata oluştu: " + err.message);
     }
@@ -85,8 +85,6 @@ const AccountForm = ({ onAccountAdd, selectedAccount, clearSelection, customers 
 
   return (
     <form onSubmit={handleSubmit} style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <h2 style={{ color: "#fff", marginBottom: "20px" }}>Hesap Tanımlama</h2>
-
       <div
         style={{
           display: "grid",
@@ -216,3 +214,4 @@ const labelStyle = {
 };
 
 export default AccountForm;
+
