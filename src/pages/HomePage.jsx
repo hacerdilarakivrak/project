@@ -82,7 +82,7 @@ const HomePage = () => {
           width: "100%",
         }}
       >
-        X Bankası Uygulama Paneli
+        X Bankası Yönetim Paneli
       </div>
 
       <div style={{ width: "100%", margin: 0, padding: 0 }}>
@@ -145,7 +145,7 @@ const HomePage = () => {
           marginTop: "80px",
         }}
       >
-        © 2025 X Bankası Projesi by Hacer Dilara Kıvrak
+        © 2025 X Bank Project by Hacer Dilara Kıvrak
       </footer>
     </div>
   );

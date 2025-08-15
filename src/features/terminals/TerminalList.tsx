@@ -13,32 +13,88 @@ function durumLabel(d: KayitDurum) {
   return "Kurulum";
 }
 
+type SortKey =
+  | "id"
+  | "kayitDurum"
+  | "isyeriNo"
+  | "modelKodu"
+  | "seriNo"
+  | "servisFirmasi"
+  | "kullanimTipi"
+  | "kayitTarihi";
+
 export default function TerminalList({ items, onEdit, onDelete }: Props) {
   const [isyeriNo, setIsyeriNo] = useState("");
   const [kayitDurum, setKayitDurum] = useState<"" | "0" | "1" | "2">("");
   const [q, setQ] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("kayitTarihi");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const uniqueIsyeri = useMemo(
     () => Array.from(new Set(items.map((i) => i.isyeriNo))).sort(),
     [items]
   );
 
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir(key === "kayitTarihi" ? "desc" : "asc");
+    }
+  }
+
   const filtered = useMemo(() => {
     const query = q.trim().toUpperCase();
-    return items
+    const base = items
       .filter((t) => (isyeriNo ? t.isyeriNo === isyeriNo : true))
-      .filter((t) =>
-        kayitDurum === "" ? true : String(t.kayitDurum) === kayitDurum
-      )
+      .filter((t) => (kayitDurum === "" ? true : String(t.kayitDurum) === kayitDurum))
       .filter((t) =>
         query
           ? (t.seriNo || "").toUpperCase().includes(query) ||
             (t.modelKodu || "").toUpperCase().includes(query) ||
             (t.servisFirmasi || "").toUpperCase().includes(query)
           : true
-      )
-      .sort((a, b) => (a.kayitTarihi < b.kayitTarihi ? 1 : -1));
-  }, [items, isyeriNo, kayitDurum, q]);
+      );
+
+    const getVal = (t: Terminal): string | number => {
+      switch (sortKey) {
+        case "id":
+          return t.id;
+        case "kayitDurum":
+          return t.kayitDurum;
+        case "isyeriNo":
+          return t.isyeriNo || "";
+        case "modelKodu":
+          return t.modelKodu || "";
+        case "seriNo":
+          return t.seriNo || "";
+        case "servisFirmasi":
+          return t.servisFirmasi || "";
+        case "kullanimTipi":
+          return t.kullanimTipi || "";
+        case "kayitTarihi":
+          return new Date(t.kayitTarihi).getTime();
+      }
+    };
+
+    const sorted = [...base].sort((a, b) => {
+      const av = getVal(a);
+      const bv = getVal(b);
+      let cmp = 0;
+      if (typeof av === "number" && typeof bv === "number") {
+        cmp = av - bv;
+      } else {
+        cmp = String(av).localeCompare(String(bv), "tr", { numeric: true });
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [items, isyeriNo, kayitDurum, q, sortKey, sortDir]);
+
+  const sortIcon = (key: SortKey) =>
+    sortKey !== key ? "↕" : sortDir === "asc" ? "▲" : "▼";
 
   return (
     <div className="p-4 rounded-lg border space-y-3">
@@ -86,16 +142,30 @@ export default function TerminalList({ items, onEdit, onDelete }: Props) {
 
       <div className="overflow-auto">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left border-b">
-              <th className="py-2 pr-2">TERMINAL ID</th>
-              <th className="py-2 pr-2">DURUM</th>
-              <th className="py-2 pr-2">İŞYERİ</th>
-              <th className="py-2 pr-2">MODEL</th>
-              <th className="py-2 pr-2">SERI</th>
-              <th className="py-2 pr-2">SERVIS</th>
-              <th className="py-2 pr-2">KULLANIM</th>
-              <th className="py-2 pr-2">KAYIT TARIHI</th>
+          <thead className="sticky top-0 bg-black/60 backdrop-blur border-b">
+            <tr className="text-left">
+              {([
+                ["id", "TERMINAL ID"],
+                ["kayitDurum", "DURUM"],
+                ["isyeriNo", "İŞYERİ"],
+                ["modelKodu", "MODEL"],
+                ["seriNo", "SERI"],
+                ["servisFirmasi", "SERVIS"],
+                ["kullanimTipi", "KULLANIM"],
+                ["kayitTarihi", "KAYIT TARIHI"],
+              ] as [SortKey, string][]).map(([key, label]) => (
+                <th key={key} className="py-2 pr-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort(key)}
+                    className="flex items-center gap-1 select-none cursor-pointer"
+                    title="Sırala"
+                  >
+                    <span>{label}</span>
+                    <span className="text-xs opacity-70">{sortIcon(key)}</span>
+                  </button>
+                </th>
+              ))}
               <th className="py-2 pr-2">AKSİYON</th>
             </tr>
           </thead>
@@ -135,9 +205,7 @@ export default function TerminalList({ items, onEdit, onDelete }: Props) {
                     </button>
                     <button
                       className="px-2 py-1 rounded border bg-red-50"
-                      onClick={() =>
-                        onEdit({ ...t, kayitDurum: 0 as KayitDurum })
-                      }
+                      onClick={() => onEdit({ ...t, kayitDurum: 0 as KayitDurum })}
                       title="Kapat"
                     >
                       Kapat
@@ -166,6 +234,3 @@ export default function TerminalList({ items, onEdit, onDelete }: Props) {
     </div>
   );
 }
-
-
-
