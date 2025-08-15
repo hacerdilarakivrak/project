@@ -4,6 +4,7 @@ import type { Terminal, KayitDurum } from "./types";
 type Props = {
   items: Terminal[];
   onEdit: (t: Terminal) => void;
+  onDelete?: (id: string) => void;
 };
 
 function durumLabel(d: KayitDurum) {
@@ -12,7 +13,7 @@ function durumLabel(d: KayitDurum) {
   return "Kurulum";
 }
 
-export default function TerminalList({ items, onEdit }: Props) {
+export default function TerminalList({ items, onEdit, onDelete }: Props) {
   const [isyeriNo, setIsyeriNo] = useState("");
   const [kayitDurum, setKayitDurum] = useState<"" | "0" | "1" | "2">("");
   const [q, setQ] = useState("");
@@ -73,9 +74,7 @@ export default function TerminalList({ items, onEdit }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm mb-1">
-            Ara (Seri / Model / Servis)
-          </label>
+          <label className="block text-sm mb-1">Ara (Seri / Model / Servis)</label>
           <input
             className="border rounded px-2 py-1"
             placeholder="örn: S900 veya AB12"
@@ -143,6 +142,13 @@ export default function TerminalList({ items, onEdit }: Props) {
                     >
                       Kapat
                     </button>
+                    <button
+                      className="px-2 py-1 rounded border bg-red-600 text-white"
+                      onClick={() => onDelete?.(t.id)}
+                      title="Sil"
+                    >
+                      Sil
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -160,4 +166,6 @@ export default function TerminalList({ items, onEdit }: Props) {
     </div>
   );
 }
+
+
 

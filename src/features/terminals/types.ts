@@ -35,17 +35,13 @@ export type Terminal = {
   id: string;
   kayitDurum: KayitDurum;
   kayitTarihi: string;
-
   isyeriNo: string;
   kontakTelefon?: string;
   kontakYetkiliIsmi?: string;
-
   kullanimTipi: KullanimTipi;
-
   modelKodu: ModelKodu;
   servisFirmasi: ServisFirmasi;
-  seriNo: string; // '' veya A-Z0-9
-
+  seriNo: string;
   kapanmaNedeni?: KapanmaNedeni;
   guncellemeTarihi?: string;
 };

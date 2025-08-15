@@ -20,34 +20,21 @@ export const TerminalSchema = z
     id: z.string().min(1),
     kayitDurum: z.union([z.literal(0), z.literal(1), z.literal(2)]),
     kayitTarihi: z.string().min(1),
-
     isyeriNo: z.string().min(1, "İşyeri numarası zorunludur."),
-
-    // Opsiyonel: boş bırakılabilir ya da en az 5 karakter
     kontakTelefon: z
       .string()
       .optional()
       .refine((v) => !v || v.length === 0 || v.length >= 5, {
         message: "Telefon en az 5 karakter olmalı.",
       }),
-
-    // Opsiyonel: boş bırakılabilir
     kontakYetkiliIsmi: z.string().optional(),
-
     kullanimTipi: KULLANIM_TIPLERI_ENUM,
-
-    // Boş ("") seçeneği dahil
     modelKodu: MODEL_KODLARI_ENUM,
     servisFirmasi: SERVIS_FIRMALARI_ENUM,
-
-    // Boş olabilir veya A-Z0-9
     seriNo: z
       .string()
       .regex(/^[A-Z0-9]*$/, "Seri yalnızca A-Z ve 0-9 içerebilir."),
-
-    // Sadece kapalıyken zorunlu olacak (superRefine'de kontrol)
     kapanmaNedeni: KAPANMA_NEDENLERI_ENUM.optional(),
-
     guncellemeTarihi: z.string().optional(),
   })
   .superRefine((v, ctx) => {
@@ -92,4 +79,5 @@ export function validateTerminalForBulk(base: Terminal) {
   };
   return TerminalSchema.safeParse(bulkCandidate);
 }
+
 

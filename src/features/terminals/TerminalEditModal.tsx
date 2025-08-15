@@ -36,7 +36,6 @@ export default function TerminalEditModal({
 
   const showKapanma = Number(form.kayitDurum) === 0;
 
-  // Generic imzayı gevşetip güvenli cast ile tek noktadan güncelliyoruz.
   function setField<K extends keyof Terminal>(key: K, value: Terminal[K] | any) {
     setErrorText("");
     setForm((f) => ({ ...f, [key]: value as Terminal[K] }));
@@ -232,4 +231,5 @@ export default function TerminalEditModal({
     </div>
   );
 }
+
 
