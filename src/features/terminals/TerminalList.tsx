@@ -31,9 +31,9 @@ export default function TerminalList({ items, onEdit }: Props) {
       )
       .filter((t) =>
         query
-          ? t.seriNo.toUpperCase().includes(query) ||
-            t.modelKodu.toUpperCase().includes(query) ||
-            t.servisFirmasi.toUpperCase().includes(query)
+          ? (t.seriNo || "").toUpperCase().includes(query) ||
+            (t.modelKodu || "").toUpperCase().includes(query) ||
+            (t.servisFirmasi || "").toUpperCase().includes(query)
           : true
       )
       .sort((a, b) => (a.kayitTarihi < b.kayitTarihi ? 1 : -1));
@@ -73,7 +73,9 @@ export default function TerminalList({ items, onEdit }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm mb-1">Ara (Seri / Model / Servis)</label>
+          <label className="block text-sm mb-1">
+            Ara (Seri / Model / Servis)
+          </label>
           <input
             className="border rounded px-2 py-1"
             placeholder="örn: S900 veya AB12"
@@ -100,8 +102,8 @@ export default function TerminalList({ items, onEdit }: Props) {
           </thead>
           <tbody>
             {filtered.map((t) => (
-              <tr key={t.terminalId} className="border-b last:border-0">
-                <td className="py-2 pr-2 font-mono">{t.terminalId}</td>
+              <tr key={t.id} className="border-b last:border-0">
+                <td className="py-2 pr-2 font-mono">{t.id}</td>
                 <td className="py-2 pr-2">
                   <span
                     className={
@@ -134,7 +136,9 @@ export default function TerminalList({ items, onEdit }: Props) {
                     </button>
                     <button
                       className="px-2 py-1 rounded border bg-red-50"
-                      onClick={() => onEdit({ ...t, kayitDurum: 0 as KayitDurum })}
+                      onClick={() =>
+                        onEdit({ ...t, kayitDurum: 0 as KayitDurum })
+                      }
                       title="Kapat"
                     >
                       Kapat
@@ -156,3 +160,4 @@ export default function TerminalList({ items, onEdit }: Props) {
     </div>
   );
 }
+

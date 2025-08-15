@@ -46,9 +46,13 @@ export default function TerminalForm({
   const [errorText, setErrorText] = useState("");
 
   const trioAny =
-    form.modelKodu !== "" || form.servisFirmasi !== "" || form.seriNo.trim() !== "";
+    form.modelKodu !== "" ||
+    form.servisFirmasi !== "" ||
+    form.seriNo.trim() !== "";
   const trioAll =
-    form.modelKodu !== "" && form.servisFirmasi !== "" && form.seriNo.trim() !== "";
+    form.modelKodu !== "" &&
+    form.servisFirmasi !== "" &&
+    form.seriNo.trim() !== "";
   const adetEnabled = !trioAny;
 
   const onChange = <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -64,7 +68,7 @@ export default function TerminalForm({
   const buildSingle = (): Terminal => {
     const now = new Date().toISOString();
     return {
-      terminalId: uuid(),
+      id: uuid(),
       kayitDurum: form.kayitDurum,
       kayitTarihi: now,
       isyeriNo: form.isyeriNo.trim(),
@@ -100,7 +104,7 @@ export default function TerminalForm({
       }
       const created: Terminal[] = Array.from({ length: n }).map(() => ({
         ...probe,
-        terminalId: uuid(),
+        id: uuid(),
         kayitTarihi: new Date().toISOString(),
       }));
       addTerminals(created);
@@ -161,7 +165,9 @@ export default function TerminalForm({
           <select
             className="w-full border rounded px-2 py-1"
             value={form.kayitDurum}
-            onChange={(e) => onChange("kayitDurum", Number(e.target.value) as KayitDurum)}
+            onChange={(e) =>
+              onChange("kayitDurum", Number(e.target.value) as KayitDurum)
+            }
           >
             <option value={2}>Kurulum Bekliyor (2)</option>
             <option value={1}>Açık (1)</option>
@@ -173,7 +179,9 @@ export default function TerminalForm({
           <select
             className="w-full border rounded px-2 py-1"
             value={form.kullanimTipi}
-            onChange={(e) => onChange("kullanimTipi", e.target.value as KullanimTipi)}
+            onChange={(e) =>
+              onChange("kullanimTipi", e.target.value as KullanimTipi)
+            }
           >
             {KULLANIM_TIPLERI.map((k) => (
               <option key={k} value={k}>
@@ -208,7 +216,9 @@ export default function TerminalForm({
           <select
             className="w-full border rounded px-2 py-1"
             value={form.servisFirmasi}
-            onChange={(e) => onChange("servisFirmasi", e.target.value as ServisFirmasi)}
+            onChange={(e) =>
+              onChange("servisFirmasi", e.target.value as ServisFirmasi)
+            }
           >
             {SERVIS_FIRMALARI.map((s) => (
               <option key={s} value={s}>
@@ -245,7 +255,8 @@ export default function TerminalForm({
           />
           {!adetEnabled && (
             <p className="text-xs text-gray-500 mt-1">
-              Model/Servis/Seri alanlarından biri dolu olduğu için toplu ekleme devre dışı.
+              Model/Servis/Seri alanlarından biri dolu olduğu için toplu ekleme
+              devre dışı.
             </p>
           )}
         </div>
@@ -276,3 +287,4 @@ export default function TerminalForm({
     </div>
   );
 }
+

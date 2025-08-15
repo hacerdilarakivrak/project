@@ -1,48 +1,50 @@
 import React, { useEffect, useState } from "react";
+import type { Terminal } from "./types";
+import { loadTerminals, updateTerminal } from "./storage";
+
 import TerminalForm from "./TerminalForm";
 import TerminalList from "./TerminalList";
 import TerminalEditModal from "./TerminalEditModal";
-import type { Terminal } from "./types";
-import { loadTerminals, updateTerminal } from "./storage";
-import { toast } from "react-toastify";
 
 export default function TerminalsPage() {
   const [items, setItems] = useState<Terminal[]>([]);
   const [editing, setEditing] = useState<Terminal | null>(null);
 
-  const refresh = () => setItems(loadTerminals());
-
+  // Sayfa açılışında kayıtları yükle
   useEffect(() => {
-    refresh();
+    setItems(loadTerminals());
   }, []);
 
-  const handleCreated = () => {
-    refresh();
-    toast.success("Terminal(ler) eklendi");
-  };
+  // Formdan gelen yeni kayıtları listeye ekle
+  function handleCreated(created: Terminal[]) {
+    setItems((prev) => [...prev, ...created]);
+  }
 
-  const onEditClick = (t: Terminal) => setEditing(t);
+  // Listeden "Düzenle/Kapat" tıklanınca modalı aç
+  function handleEdit(t: Terminal) {
+    setEditing(t);
+  }
 
-  const onSaveEdit = (updated: Terminal) => {
-    updateTerminal(updated);
+  // Modalda kaydet -> storage güncelle + state yenile
+  function handleSave(updated: Terminal) {
+    const newList = updateTerminal(updated);
+    setItems(newList);
     setEditing(null);
-    refresh();
-    toast.success(
-      updated.kayitDurum === 0 ? "Terminal kapatıldı" : "Terminal güncellendi"
-    );
-  };
+  }
 
   return (
     <div className="space-y-6">
       <TerminalForm onCreated={handleCreated} />
-      <TerminalList items={items} onEdit={onEditClick} />
+      <TerminalList items={items} onEdit={handleEdit} />
+
       {editing && (
         <TerminalEditModal
           initial={editing}
-          onSave={onSaveEdit}
+          onSave={handleSave}
           onClose={() => setEditing(null)}
         />
       )}
     </div>
   );
 }
+

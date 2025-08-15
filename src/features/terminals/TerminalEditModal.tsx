@@ -28,18 +28,19 @@ export default function TerminalEditModal({
   const trioAny =
     form.modelKodu !== "" ||
     form.servisFirmasi !== "" ||
-    (form.seriNo ?? "").trim() !== "";
+    (form.seriNo || "").trim() !== "";
   const trioAll =
     form.modelKodu !== "" &&
     form.servisFirmasi !== "" &&
-    (form.seriNo ?? "").trim() !== "";
+    (form.seriNo || "").trim() !== "";
 
   const showKapanma = Number(form.kayitDurum) === 0;
 
-  const onChange = <K extends keyof Terminal>(key: K, value: Terminal[K]) => {
+  // Generic imzayı gevşetip güvenli cast ile tek noktadan güncelliyoruz.
+  function setField<K extends keyof Terminal>(key: K, value: Terminal[K] | any) {
     setErrorText("");
-    setForm((f) => ({ ...f, [key]: value }));
-  };
+    setForm((f) => ({ ...f, [key]: value as Terminal[K] }));
+  }
 
   const handleSave = () => {
     setErrorText("");
@@ -55,7 +56,7 @@ export default function TerminalEditModal({
 
     const candidate: Terminal = {
       ...form,
-      seriNo: (form.seriNo ?? "").toUpperCase(),
+      seriNo: (form.seriNo || "").toUpperCase(),
     };
 
     const res = validateTerminal(candidate);
@@ -84,7 +85,7 @@ export default function TerminalEditModal({
               className="w-full border rounded px-2 py-1"
               value={form.kayitDurum}
               onChange={(e) =>
-                onChange("kayitDurum", Number(e.target.value) as KayitDurum)
+                setField("kayitDurum", Number(e.target.value) as KayitDurum)
               }
             >
               <option value={2}>Kurulum</option>
@@ -97,7 +98,7 @@ export default function TerminalEditModal({
             <input
               className="w-full border rounded px-2 py-1"
               value={form.isyeriNo}
-              onChange={(e) => onChange("isyeriNo", e.target.value)}
+              onChange={(e) => setField("isyeriNo", e.target.value)}
             />
           </div>
           <div>
@@ -106,7 +107,10 @@ export default function TerminalEditModal({
               className="w-full border rounded px-2 py-1"
               value={form.kullanimTipi}
               onChange={(e) =>
-                onChange("kullanimTipi", e.target.value as Terminal["kullanimTipi"])
+                setField(
+                  "kullanimTipi",
+                  e.target.value as Terminal["kullanimTipi"]
+                )
               }
             >
               {KULLANIM_TIPLERI.map((k) => (
@@ -123,16 +127,16 @@ export default function TerminalEditModal({
             <label className="block text-sm mb-1">Kontak Telefon</label>
             <input
               className="w-full border rounded px-2 py-1"
-              value={form.kontakTelefon}
-              onChange={(e) => onChange("kontakTelefon", e.target.value)}
+              value={form.kontakTelefon || ""}
+              onChange={(e) => setField("kontakTelefon", e.target.value)}
             />
           </div>
           <div>
             <label className="block text-sm mb-1">Yetkili İsmi</label>
             <input
               className="w-full border rounded px-2 py-1"
-              value={form.kontakYetkiliIsmi}
-              onChange={(e) => onChange("kontakYetkiliIsmi", e.target.value)}
+              value={form.kontakYetkiliIsmi || ""}
+              onChange={(e) => setField("kontakYetkiliIsmi", e.target.value)}
             />
           </div>
         </div>
@@ -144,7 +148,7 @@ export default function TerminalEditModal({
               className="w-full border rounded px-2 py-1"
               value={form.modelKodu}
               onChange={(e) =>
-                onChange("modelKodu", e.target.value as Terminal["modelKodu"])
+                setField("modelKodu", e.target.value as Terminal["modelKodu"])
               }
             >
               {MODEL_KODLARI.map((m) => (
@@ -160,7 +164,7 @@ export default function TerminalEditModal({
               className="w-full border rounded px-2 py-1"
               value={form.servisFirmasi}
               onChange={(e) =>
-                onChange(
+                setField(
                   "servisFirmasi",
                   e.target.value as Terminal["servisFirmasi"]
                 )
@@ -177,8 +181,8 @@ export default function TerminalEditModal({
             <label className="block text-sm mb-1">Seri No</label>
             <input
               className="w-full border rounded px-2 py-1"
-              value={form.seriNo}
-              onChange={(e) => onChange("seriNo", e.target.value.toUpperCase())}
+              value={form.seriNo || ""}
+              onChange={(e) => setField("seriNo", e.target.value.toUpperCase())}
               placeholder="A-Z ve 0-9"
             />
           </div>
@@ -191,7 +195,10 @@ export default function TerminalEditModal({
               className="w-full border rounded px-2 py-1"
               value={form.kapanmaNedeni ?? ""}
               onChange={(e) =>
-                onChange("kapanmaNedeni", e.target.value || undefined)
+                setField(
+                  "kapanmaNedeni",
+                  (e.target.value || undefined) as Terminal["kapanmaNedeni"]
+                )
               }
             >
               <option value="">Seçiniz</option>
@@ -225,3 +232,4 @@ export default function TerminalEditModal({
     </div>
   );
 }
+
