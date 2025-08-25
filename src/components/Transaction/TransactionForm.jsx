@@ -90,6 +90,29 @@ const TransactionForm = ({ onTransactionAdded }) => {
   useEffect(() => {
     fetchAccounts();
     fetchCustomers();
+
+    // Aynı sekmede yeni hesap eklendiğinde tetiklenecek custom event
+    const onAccountsUpdated = () => fetchAccounts();
+
+    // Sekmeye odaklanınca / görünür olunca yenile
+    const onFocus = () => fetchAccounts();
+
+    // Diğer sekmeden localStorage değişirse
+    const onStorage = (e) => {
+      if (e.key === "accounts") fetchAccounts();
+    };
+
+    window.addEventListener("accounts-updated", onAccountsUpdated);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener("accounts-updated", onAccountsUpdated);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   const getAccountById = (id) => hesaplar.find((h) => String(h.id) === String(id));
@@ -105,6 +128,8 @@ const TransactionForm = ({ onTransactionAdded }) => {
       acc[idx] = { ...acc[idx], bakiye: Number(newBalance) || 0 };
       writeLS("accounts", acc);
       setHesaplar(acc);
+      // Bakiye güncelleyince de formların senkronu için yayınlayabiliriz (opsiyonel)
+      window.dispatchEvent(new Event("accounts-updated"));
     }
   };
 
@@ -256,6 +281,14 @@ const TransactionForm = ({ onTransactionAdded }) => {
   return (
     <div>
       <h2>Yeni İşlem Ekle</h2>
+
+      {/* İstersen bu butonu kaldırabilirsin, debug için faydalı */}
+      <div style={{ marginBottom: 8 }}>
+        <button type="button" onClick={fetchAccounts}>
+          Hesapları Yenile
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit}>
         <select value={tur} onChange={(e) => setTur(e.target.value)}>
           <option value="paraYatirma">Para Yatırma</option>

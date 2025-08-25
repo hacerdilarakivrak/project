@@ -21,7 +21,6 @@ const TransactionList = ({ refresh }) => {
 
   const itemsPerPage = 10;
 
-  /* ---------------- helpers (LS + tarih) ---------------- */
   const safeRead = (key, fallback = []) => {
     try {
       const v = JSON.parse(localStorage.getItem(key) || "null");
@@ -43,7 +42,6 @@ const TransactionList = ({ refresh }) => {
     return isNaN(d) ? null : d;
   };
 
-  /* ---------------- data fetch ---------------- */
   useEffect(() => {
     fetchAll();
   }, [refresh]);
@@ -61,7 +59,6 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
-  /* ---------------- accounts helpers ---------------- */
   const displayName = (acc) =>
     acc?.hesapAdi || acc?.name || `Hesap ${acc?.id || ""}`;
 
@@ -93,7 +90,6 @@ const TransactionList = ({ refresh }) => {
     writeAccounts(next);
   };
 
-  /* ---------------- filtreleme ---------------- */
   useEffect(() => {
     const filtered = islemler.filter((t) => {
       const dt = parseTxDate(t.date || t.tarih);
@@ -113,7 +109,6 @@ const TransactionList = ({ refresh }) => {
     setCurrentPage(1);
   }, [islemler, startDate, endDate, searchTerm]);
 
-  /* ---------------- edit ---------------- */
   const handleEditClick = (tx) => {
     setEditingTransaction(tx);
     setEditAmount(tx.amount ?? tx.tutar ?? "");
@@ -158,7 +153,6 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
-  /* ---------------- delete ---------------- */
   const handleDelete = (tx) => {
     if (!window.confirm("Bu işlemi silmek istediğinizden emin misiniz?")) return;
 
@@ -194,7 +188,6 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
-  /* ---------------- UI helpers ---------------- */
   const clearFilters = () => {
     setStartDate(null);
     setEndDate(null);

@@ -139,8 +139,7 @@ const WorkplaceList = ({ refresh, onEdit, setSelectedWorkplace }) => {
     fontWeight: active ? "bold" : "normal",
   });
 
-  const columns = [
-    "ID (MockAPI)",
+  const visibleColumns = [
     "İşyeri No",
     "İşyeri Adı",
     "Kayıt Tarihi",
@@ -240,7 +239,8 @@ const WorkplaceList = ({ refresh, onEdit, setSelectedWorkplace }) => {
           >
             <thead style={{ backgroundColor: "#333" }}>
               <tr>
-                {columns.map((h, i) => (
+                <th style={{ ...thStyle, display: "none" }}>ID (MockAPI)</th>
+                {visibleColumns.map((h, i) => (
                   <th key={i} style={thStyle}>
                     {h}
                   </th>
@@ -250,14 +250,15 @@ const WorkplaceList = ({ refresh, onEdit, setSelectedWorkplace }) => {
             <tbody>
               {currentItems.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} style={{ textAlign: "center", padding: "12px", color: "#ccc" }}>
+                  <td colSpan={visibleColumns.length + 1} style={{ textAlign: "center", padding: "12px", color: "#ccc" }}>
                     Filtreye uygun işyeri bulunamadı.
                   </td>
                 </tr>
               ) : (
                 currentItems.map((wp) => (
-                  <tr key={wp.id} style={{ backgroundColor: "#2a2a2a", textAlign: "center" }}>
-                    <td style={tdStyle}>{wp.id}</td>
+                  <tr key={wp.id} style={{ backgroundColor: "#2a2a2a", textAlign: "center" }} data-id={wp.id}>
+                    <td style={{ ...tdStyle, display: "none" }}>{wp.id}</td>
+
                     <td style={tdStyle}>{wp.workplaceNo}</td>
                     <td style={tdStyle}>{wp.name}</td>
                     <td style={tdStyle}>{formatDate(wp.registrationDate)}</td>
