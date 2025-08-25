@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api";
 
-const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
+const CUSTOMERS_URL = `/customers`;
 
 const generateCustomerNo = () => {
   return Math.floor(10000000 + Math.random() * 90000000).toString();
@@ -10,7 +10,7 @@ const generateCustomerNo = () => {
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const validateTC = (tc) => {
-  if (tc.length !== 11) return false;
+  if (tc.length !== 11 || !/^\d{11}$/.test(tc)) return false;
   const total = tc
     .slice(0, 10)
     .split("")
@@ -19,10 +19,23 @@ const validateTC = (tc) => {
 };
 
 const initialForm = {
-  ad: "", soyad: "", unvan: "", musteriTuru: "G",
-  vergiKimlikNo: "", tcKimlikNo: "", telefon: "", email: "",
-  adres: "", babaAdi: "", anneAdi: "", dogumTarihi: "", dogumYeri: "",
-  cinsiyet: "", ogrenimDurumu: "", medeniDurum: "", kamuDurumu: false
+  ad: "",
+  soyad: "",
+  unvan: "",
+  musteriTuru: "G",
+  vergiKimlikNo: "",
+  tcKimlikNo: "",
+  telefon: "",
+  email: "",
+  adres: "",
+  babaAdi: "",
+  anneAdi: "",
+  dogumTarihi: "",
+  dogumYeri: "",
+  cinsiyet: "",
+  ogrenimDurumu: "",
+  medeniDurum: "",
+  kamuDurumu: false,
 };
 
 const CustomerForm = ({ onCustomerAdded, selectedCustomer, clearSelection }) => {
@@ -31,19 +44,17 @@ const CustomerForm = ({ onCustomerAdded, selectedCustomer, clearSelection }) => 
   useEffect(() => {
     if (selectedCustomer) {
       setForm(selectedCustomer);
+    } else {
+      setForm(initialForm);
     }
   }, [selectedCustomer]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    if (name === "vergiKimlikNo") {
-      if (!/^\d*$/.test(value) || value.length > 10) return;
-    }
-
-    if (name === "telefon") {
-      if (!/^\d*$/.test(value) || value.length > 11) return;
-    }
+    if (name === "vergiKimlikNo" && (!/^\d*$/.test(value) || value.length > 10)) return;
+    if (name === "telefon" && (!/^\d*$/.test(value) || value.length > 11)) return;
+    if (name === "tcKimlikNo" && (!/^\d*$/.test(value) || value.length > 11)) return;
 
     if (["ad", "soyad", "babaAdi", "anneAdi", "dogumYeri", "unvan"].includes(name)) {
       if (!/^[a-zA-ZğüşöçıİĞÜŞÖÇ\s]*$/.test(value)) return;
@@ -65,9 +76,14 @@ const CustomerForm = ({ onCustomerAdded, selectedCustomer, clearSelection }) => 
       return;
     }
 
+    if (form.musteriTuru === "T" && !form.vergiKimlikNo) {
+      alert("Tüzel müşteri için Vergi Kimlik No zorunludur.");
+      return;
+    }
+
     try {
-      if (selectedCustomer) {
-        await axios.put(`${API_URL}/${selectedCustomer.id}`, form);
+      if (selectedCustomer?.id) {
+        await api.put(`${CUSTOMERS_URL}/${selectedCustomer.id}`, form);
         alert("Müşteri güncellendi.");
       } else {
         const newCustomer = {
@@ -75,15 +91,15 @@ const CustomerForm = ({ onCustomerAdded, selectedCustomer, clearSelection }) => 
           musteriNo: generateCustomerNo(),
           kayitTarihi: new Date().toISOString().split("T")[0],
         };
-        await axios.post(API_URL, newCustomer);
+        await api.post(CUSTOMERS_URL, newCustomer);
         alert("Müşteri kaydedildi.");
       }
 
       setForm(initialForm);
-      if (onCustomerAdded) onCustomerAdded();
-      if (clearSelection) clearSelection();
+      onCustomerAdded?.();
+      clearSelection?.();
     } catch (error) {
-      alert("Hata oluştu: " + error);
+      alert("Hata oluştu: " + (error?.response?.data?.error || error.message));
     }
   };
 
@@ -225,22 +241,12 @@ const CustomerForm = ({ onCustomerAdded, selectedCustomer, clearSelection }) => 
 
       <div style={{ display: "flex", flexDirection: "column" }}>
         <label>Baba Adı</label>
-        <input
-          name="babaAdi"
-          value={form.babaAdi}
-          onChange={handleChange}
-          style={inputStyle}
-        />
+        <input name="babaAdi" value={form.babaAdi} onChange={handleChange} style={inputStyle} />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
         <label>Anne Adı</label>
-        <input
-          name="anneAdi"
-          value={form.anneAdi}
-          onChange={handleChange}
-          style={inputStyle}
-        />
+        <input name="anneAdi" value={form.anneAdi} onChange={handleChange} style={inputStyle} />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
@@ -267,12 +273,7 @@ const CustomerForm = ({ onCustomerAdded, selectedCustomer, clearSelection }) => 
 
       <div style={{ display: "flex", flexDirection: "column" }}>
         <label>Cinsiyet</label>
-        <select
-          name="cinsiyet"
-          value={form.cinsiyet}
-          onChange={handleChange}
-          style={inputStyle}
-        >
+        <select name="cinsiyet" value={form.cinsiyet} onChange={handleChange} style={inputStyle}>
           <option value="">Seçiniz</option>
           <option value="K">Kadın</option>
           <option value="E">Erkek</option>

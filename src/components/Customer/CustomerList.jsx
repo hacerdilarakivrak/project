@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api"; 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
+const CUSTOMERS_URL = `/customers`;
 
 const CustomerList = ({ refresh, onEdit }) => {
   const [customers, setCustomers] = useState([]);
@@ -31,14 +31,13 @@ const CustomerList = ({ refresh, onEdit }) => {
     setError("");
     try {
       const [pageRes, allRes] = await Promise.all([
-        axios.get(`${API_URL}?page=${page}&limit=${limit}`),
-        axios.get(API_URL),
+        api.get(CUSTOMERS_URL, { params: { page, limit } }),
+        api.get(CUSTOMERS_URL),
       ]);
-
-      setCustomers(pageRes.data);
-      setTotalPages(Math.ceil(allRes.data.length / limit));
+      setCustomers(Array.isArray(pageRes.data) ? pageRes.data : []);
+      const total = Array.isArray(allRes.data) ? allRes.data.length : 0;
+      setTotalPages(Math.max(1, Math.ceil(total / limit)));
     } catch (err) {
-      console.error("Müşteriler alınamadı:", err);
       setError("Müşteri verileri alınırken bir hata oluştu.");
     } finally {
       setLoading(false);
@@ -49,12 +48,11 @@ const CustomerList = ({ refresh, onEdit }) => {
     let filtered = customers;
 
     if (searchTerm) {
+      const q = searchTerm.toLowerCase();
       filtered = filtered.filter((c) =>
         [c.musteriNo, c.ad, c.soyad, c.unvan]
           .filter(Boolean)
-          .some((field) =>
-            field.toString().toLowerCase().includes(searchTerm.toLowerCase())
-          )
+          .some((field) => field.toString().toLowerCase().includes(q))
       );
     }
 
@@ -66,14 +64,12 @@ const CustomerList = ({ refresh, onEdit }) => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Bu müşteriyi silmek istediğinize emin misiniz?")) {
-      try {
-        await axios.delete(`${API_URL}/${id}`);
-        fetchCustomers();
-      } catch (err) {
-        console.error("Silme işlemi başarısız:", err);
-        alert("Müşteri silinirken bir hata oluştu.");
-      }
+    if (!window.confirm("Bu müşteriyi silmek istediğinize emin misiniz?")) return;
+    try {
+      await api.delete(`${CUSTOMERS_URL}/${id}`);
+      fetchCustomers();
+    } catch {
+      alert("Müşteri silinirken bir hata oluştu.");
     }
   };
 
@@ -120,15 +116,14 @@ const CustomerList = ({ refresh, onEdit }) => {
           4: { cellWidth: 15 },
           5: { cellWidth: 25 },
           6: { cellWidth: 28 },
-          15: { cellWidth: 35 }, 
-          16: { cellWidth: 40 }, 
+          15: { cellWidth: 35 },
+          16: { cellWidth: 40 },
         },
         theme: "striped"
       });
 
       doc.save("musteri-listesi.pdf");
-    } catch (err) {
-      console.error("PDF oluşturulurken hata:", err);
+    } catch {
       alert("PDF oluşturulurken bir hata oluştu.");
     }
   };
@@ -181,10 +176,7 @@ const CustomerList = ({ refresh, onEdit }) => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-        >
+        <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
           <option value="all">Tümü</option>
           <option value="G">Gerçek</option>
           <option value="T">Tüzel</option>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import LoanCalculator from "../Loans/LoanCalculator";
+import api from "../../api";
 
 const LoanForm = ({ onLoanAdded, editingLoan }) => {
   const [customers, setCustomers] = useState([]);
@@ -24,10 +25,10 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
   });
 
   useEffect(() => {
-    fetch("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers")
-      .then((res) => res.json())
-      .then((data) => setCustomers(data))
-      .catch((err) => console.error("Müşteri listesi alınamadı:", err));
+    api
+      .get("/customers")
+      .then((res) => setCustomers(Array.isArray(res.data) ? res.data : []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -78,13 +79,11 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
     const { name, value } = e.target;
 
     if (name === "customerId") {
-      const selectedCustomer = customers.find((c) => c.musteriNo === value);
+      const selectedCustomer = customers.find((c) => String(c.musteriNo) === String(value));
       setFormData((prev) => ({
         ...prev,
         customerId: value,
-        customerName: selectedCustomer
-          ? `${selectedCustomer.ad} ${selectedCustomer.soyad}`
-          : "",
+        customerName: selectedCustomer ? `${selectedCustomer.ad} ${selectedCustomer.soyad}` : "",
       }));
     } else if (name === "loanType") {
       setFormData((prev) => ({
@@ -325,11 +324,7 @@ const LoanForm = ({ onLoanAdded, editingLoan }) => {
         </button>
       </form>
 
-      <LoanCalculator
-        amount={formData.amount}
-        term={formData.term}
-        interest={formData.interestRate}
-      />
+      <LoanCalculator amount={formData.amount} term={formData.term} interest={formData.interestRate} />
     </>
   );
 };

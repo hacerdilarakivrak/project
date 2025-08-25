@@ -1,40 +1,77 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import api from "../../api";
 
-const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts";
+const ACCOUNTS_URL = `/accounts`;
+const PAGE_SIZE = 10;
 
 const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
   const [accounts, setAccounts] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 10;
+  const [loading, setLoading] = useState(false);
+  const [errMsg, setErrMsg] = useState("");
+
+  useEffect(() => {
+    setPage(1);
+  }, [musteriNoFilter]);
+
+  const abortRef = useRef(null);
+  const listParams = useMemo(() => {
+    const p = { page, limit: PAGE_SIZE };
+    if (musteriNoFilter) p.musteriNo = musteriNoFilter;
+    return p;
+  }, [page, musteriNoFilter]);
 
   useEffect(() => {
     fetchAccounts();
-  }, [refresh, page, musteriNoFilter]);
+  }, [refresh, listParams]);
 
   const fetchAccounts = async () => {
-    try {
-      const query = musteriNoFilter ? `&musteriNo=${musteriNoFilter}` : "";
-      const paginatedRes = await axios.get(`${API_URL}?page=${page}&limit=${limit}${query}`);
-      setAccounts(paginatedRes.data);
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-      const allRes = await axios.get(`${API_URL}?${query}`);
-      setTotalPages(Math.ceil(allRes.data.length / limit));
+    setLoading(true);
+    setErrMsg("");
+
+    try {
+      const pageRes = await api.get(ACCOUNTS_URL, {
+        params: listParams,
+        signal: controller.signal,
+      });
+      setAccounts(Array.isArray(pageRes.data) ? pageRes.data : []);
+
+      const allParams = {};
+      if (musteriNoFilter) allParams.musteriNo = musteriNoFilter;
+
+      const allRes = await api.get(ACCOUNTS_URL, {
+        params: allParams,
+        signal: controller.signal,
+      });
+      const total = Array.isArray(allRes.data) ? allRes.data.length : 0;
+      setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
     } catch (error) {
-      console.error("Veriler alınamadı:", error);
+      if (error.name === "CanceledError" || error.code === "ERR_CANCELED") return;
+      console.error("Veriler_alinamadi:", error);
+      setErrMsg("Veriler alınamadı.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Bu hesabı silmek istediğinize emin misiniz?")) {
-      try {
-        await axios.delete(`${API_URL}/${id}`);
+    if (!window.confirm("Bu hesabı silmek istediğinize emin misiniz?")) return;
+
+    try {
+      await api.delete(`${ACCOUNTS_URL}/${id}`);
+      if (accounts.length === 1 && page > 1) {
+        setPage((p) => p - 1);
+      } else {
         fetchAccounts();
-        if (accounts.length === 1 && page > 1) setPage(page - 1); 
-      } catch (error) {
-        console.error("Silme işlemi başarısız:", error);
       }
+    } catch (error) {
+      console.error("Silme_islemi_basarisiz:", error);
+      alert("Silme işlemi başarısız.");
     }
   };
 
@@ -42,9 +79,12 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
     <div style={{ marginTop: "40px", overflowX: "auto", paddingBottom: "30px" }}>
       <h2 style={{ marginBottom: "16px", color: "#fff" }}>📑 Tanımlı Hesaplar</h2>
 
-      {accounts.length === 0 ? (
+      {loading && <p style={{ color: "#ccc" }}>Yükleniyor...</p>}
+      {!loading && errMsg && <p style={{ color: "tomato" }}>{errMsg}</p>}
+
+      {!loading && !errMsg && accounts.length === 0 ? (
         <p style={{ color: "#ccc" }}>Henüz hesap kaydı yok.</p>
-      ) : (
+      ) : !loading && !errMsg ? (
         <>
           <table
             style={{
@@ -143,7 +183,7 @@ const AccountList = ({ refresh, onEdit, musteriNoFilter }) => {
             ))}
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 };

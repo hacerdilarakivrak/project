@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useMemo, useState } from "react";
+import api from "../api";
 import {
   XAxis,
   YAxis,
@@ -19,54 +19,61 @@ const Dashboard = () => {
   const [workplaces, setWorkplaces] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers")
-      .then((res) => setCustomers(res.data));
-
-    axios
-      .get("https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/accounts")
-      .then((res) => setAccounts(res.data));
-
-    axios
-      .get("https://6881d02966a7eb81224c12c1.mockapi.io/workplaces")
-      .then((res) => setWorkplaces(res.data));
+    api.get("/customers").then((res) => setCustomers(Array.isArray(res.data) ? res.data : [])).catch(() => {});
+    api.get("/accounts").then((res) => setAccounts(Array.isArray(res.data) ? res.data : [])).catch(() => {});
+    api.get("/workplaces").then((res) => setWorkplaces(Array.isArray(res.data) ? res.data : [])).catch(() => {});
   }, []);
 
-  const today = new Date().toISOString().split("T")[0];
-  const todaysAccounts = accounts.filter((acc) => acc.kayitTarihi === today).length;
+  const todayISO = new Date().toISOString().split("T")[0];
 
-  const weeklyData = customers
-    .filter((c) => c.kayitTarihi)
-    .reduce((acc, customer) => {
-      const date = new Date(customer.kayitTarihi);
-      const monday = new Date(date);
-      const day = monday.getDay();
-      const diff = (day === 0 ? -6 : 1) - day;
-      monday.setDate(monday.getDate() + diff);
+  const dateOnly = (val) => {
+    if (!val) return null;
+    if (typeof val === "string") {
+      if (val.length >= 10) return val.slice(0, 10);
+    }
+    const d = new Date(val);
+    return isNaN(d) ? null : d.toISOString().slice(0, 10);
+  };
 
-      const mondayStr = monday.toISOString().split("T")[0];
-      const existing = acc.find((d) => d.weekStart === mondayStr);
+  const todaysAccounts = useMemo(
+    () =>
+      accounts.filter((acc) => {
+        const d = dateOnly(acc.kayitTarihi || acc.createdAt || acc.registrationDate);
+        return d === todayISO;
+      }).length,
+    [accounts, todayISO]
+  );
 
-      if (existing) {
-        existing.count += 1;
-      } else {
-        acc.push({ weekStart: mondayStr, count: 1 });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => new Date(a.weekStart) - new Date(b.weekStart))
-    .slice(-4);
+  const weeklyData = useMemo(() => {
+    const weeklyMap = new Map();
+    (customers || [])
+      .filter((c) => c.kayitTarihi || c.createdAt)
+      .forEach((c) => {
+        const iso = dateOnly(c.kayitTarihi || c.createdAt);
+        if (!iso) return;
+        const dt = new Date(iso);
+        const day = dt.getDay(); 
+        const diffToMonday = (day === 0 ? -6 : 1) - day;
+        const monday = new Date(dt);
+        monday.setDate(dt.getDate() + diffToMonday);
+        const mondayStr = monday.toISOString().slice(0, 10);
+        weeklyMap.set(mondayStr, (weeklyMap.get(mondayStr) || 0) + 1);
+      });
 
-  const accountTypeData = [
-    {
-      name: "Vadeli",
-      value: accounts.filter((a) => a.hesapTuru?.toLowerCase() === "vadeli").length,
-    },
-    {
-      name: "Vadesiz",
-      value: accounts.filter((a) => a.hesapTuru?.toLowerCase() === "vadesiz").length,
-    },
-  ];
+    return Array.from(weeklyMap.entries())
+      .map(([weekStart, count]) => ({ weekStart, count }))
+      .sort((a, b) => new Date(a.weekStart) - new Date(b.weekStart))
+      .slice(-4);
+  }, [customers]);
+
+  const accountTypeData = useMemo(() => {
+    const vadeli = accounts.filter((a) => (a.hesapTuru || a.type || "").toString().toLowerCase() === "vadeli").length;
+    const vadesiz = accounts.filter((a) => (a.hesapTuru || a.type || "").toString().toLowerCase() === "vadesiz").length;
+    return [
+      { name: "Vadeli", value: vadeli },
+      { name: "Vadesiz", value: vadesiz },
+    ];
+  }, [accounts]);
 
   const COLORS = ["#0088FE", "#FF8042", "#00C49F", "#FFBB28"];
 
@@ -129,14 +136,7 @@ const Dashboard = () => {
         <div>
           <h3>Hesap Türleri</h3>
           <PieChart width={400} height={250}>
-            <Pie
-              data={accountTypeData}
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              dataKey="value"
-              label
-            >
+            <Pie data={accountTypeData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
               {accountTypeData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}

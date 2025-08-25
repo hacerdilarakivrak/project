@@ -1,136 +1,152 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
 import "./TransactionList.css";
 
-const API_URL = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/transactions";
-
 const TransactionList = ({ refresh }) => {
   const [islemler, setIslemler] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [musteriNo, setMusteriNo] = useState("");
-  const [faturaNo, setFaturaNo] = useState("");
-  const [faturaTuru, setFaturaTuru] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [editAmount, setEditAmount] = useState("");
-  const [editAciklama, setEditAciklama] = useState("");
+  const [editFromId, setEditFromId] = useState("");
+  const [editToId, setEditToId] = useState("");
+
   const itemsPerPage = 10;
 
-  const faturaTurMap = {
-    electricity: "Elektrik",
-    water: "Su",
-    gas: "Doğalgaz",
-    internet: "İnternet",
+  const safeRead = (key) => {
+    try {
+      return JSON.parse(localStorage.getItem(key) || "[]");
+    } catch {
+      return [];
+    }
+  };
+
+  const parseTxDate = (raw) => {
+    if (!raw) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+      const [y, m, d] = raw.split("-").map((n) => parseInt(n, 10));
+      return new Date(y, m - 1, d);
+    }
+    const d = new Date(raw);
+    return isNaN(d) ? null : d;
   };
 
   useEffect(() => {
-    fetchTransactions();
+    fetchAll();
   }, [refresh]);
 
-  const fetchTransactions = async () => {
+  const fetchAll = () => {
     try {
-      const res = await axios.get(API_URL);
-      setIslemler(res.data);
-      setFilteredTransactions(res.data);
+      const tx = safeRead("transactions");
+      const acc = safeRead("accounts");
+      setIslemler(Array.isArray(tx) ? tx : []);
+      setAccounts(Array.isArray(acc) ? acc : []);
       setCurrentPage(1);
     } catch (err) {
-      console.error("İşlemler alınırken hata:", err);
-      toast.error("İşlemler alınırken bir hata oluştu!");
+      console.error("Veri alınamadı:", err);
+      toast.error("İşlemler/hesaplar alınamadı!");
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Bu işlemi silmek istediğinize emin misiniz?")) {
-      try {
-        await axios.delete(`${API_URL}/${id}`);
-        toast.success("İşlem başarıyla silindi!");
-        fetchTransactions();
-      } catch (err) {
-        console.error("İşlem silinirken hata oluştu:", err);
-        toast.error("İşlem silinirken bir hata oluştu!");
-      }
-    }
-  };
+  const displayName = (acc) =>
+    acc?.hesapAdi || acc?.name || `Hesap ${acc?.id || ""}`;
 
-  const handleEditClick = (transaction) => {
-    setEditingTransaction(transaction);
-    setEditAmount(transaction.tutar);
-    setEditAciklama(transaction.aciklama || "");
-  };
+  const accountOptions = useMemo(
+    () =>
+      accounts
+        .map((a) => ({ id: a.id, label: displayName(a) }))
+        .sort((x, y) => String(x.label).localeCompare(String(y.label))),
+    [accounts]
+  );
 
-  const handleSaveEdit = async () => {
-    try {
-      await axios.put(`${API_URL}/${editingTransaction.id}`, {
-        ...editingTransaction,
-        tutar: editAmount,
-        aciklama: editAciklama,
-      });
-      toast.success("İşlem başarıyla güncellendi!");
-      setEditingTransaction(null);
-      fetchTransactions();
-    } catch (err) {
-      console.error("İşlem güncellenirken hata:", err);
-      toast.error("İşlem güncellenirken hata oluştu!");
-    }
-  };
-
-  const getIslemTurText = (islem) => {
-    switch (islem.tur) {
-      case "paraYatirma":
-        return `Para Yatırma (${islem.hesapAdi})`;
-      case "paraCekme":
-        return `Para Çekme (${islem.hesapAdi})`;
-      case "transferGonderen":
-        return `Transfer (Gönderen) - ${islem.hesapAdi}`;
-      case "transferAlici":
-        return `Transfer (Alıcı) - ${islem.hesapAdi}`;
-      case "faturaOdeme":
-        return "Fatura Ödeme";
-      default:
-        return islem.tur || "-";
-    }
+  const findAccountIdByName = (name) => {
+    const m = accounts.find((a) => displayName(a) === name);
+    return m?.id ?? "";
   };
 
   useEffect(() => {
-    const filtered = islemler.filter((islem) => {
-      const islemTarihi = new Date(islem.tarih);
-      if (startDate && islemTarihi < startDate) return false;
-      if (endDate && islemTarihi > endDate) return false;
-      if (musteriNo && !islem.musteriID?.toString().includes(musteriNo))
-        return false;
-      if (faturaNo && islem.tur === "faturaOdeme" && !islem.faturaNo?.toString().includes(faturaNo))
-        return false;
-      if (faturaTuru && islem.tur === "faturaOdeme" && faturaTurMap[islem.faturaTuru] !== faturaTuru)
-        return false;
+    const filtered = islemler.filter((t) => {
+      const dt = parseTxDate(t.date || t.tarih);
+      if (startDate && (!dt || dt < startDate)) return false;
+      if (endDate && (!dt || dt > endDate)) return false;
+
+      if (searchTerm) {
+        const s = searchTerm.toLowerCase();
+        const from = String(t.from || "").toLowerCase();
+        const to = String(t.to || "").toLowerCase();
+        if (!from.includes(s) && !to.includes(s)) return false;
+      }
       return true;
     });
+
     setFilteredTransactions(filtered);
     setCurrentPage(1);
-  }, [startDate, endDate, musteriNo, faturaNo, faturaTuru, islemler]);
+  }, [islemler, startDate, endDate, searchTerm]);
+
+  const handleEditClick = (tx) => {
+    setEditingTransaction(tx);
+    setEditAmount(tx.amount ?? tx.tutar ?? "");
+    setEditFromId(findAccountIdByName(tx.from));
+    setEditToId(findAccountIdByName(tx.to));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editFromId || !editToId) {
+      toast.error("Kaynak ve hedef hesap seçiniz.");
+      return;
+    }
+    if (Number(editAmount) <= 0) {
+      toast.error("Tutar 0'dan büyük olmalı.");
+      return;
+    }
+
+    try {
+      const txs = safeRead("transactions");
+      const idx = txs.findIndex((x) => x.id === editingTransaction.id);
+      if (idx >= 0) {
+        const fromAcc = accounts.find((a) => String(a.id) === String(editFromId));
+        const toAcc = accounts.find((a) => String(a.id) === String(editToId));
+
+        txs[idx] = {
+          ...txs[idx],
+          from: fromAcc ? displayName(fromAcc) : txs[idx].from,
+          to: toAcc ? displayName(toAcc) : txs[idx].to,
+          tutar: Number(editAmount),
+        };
+
+        localStorage.setItem("transactions", JSON.stringify(txs));
+        setEditingTransaction(null);
+        fetchAll();
+        toast.success("İşlem güncellendi.");
+      }
+    } catch (err) {
+      console.error("Güncelleme hatası:", err);
+      toast.error("Güncelleme hatası");
+    }
+  };
 
   const clearFilters = () => {
     setStartDate(null);
     setEndDate(null);
-    setMusteriNo("");
-    setFaturaNo("");
-    setFaturaTuru("");
+    setSearchTerm("");
     setFilteredTransactions(islemler);
     setCurrentPage(1);
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentTransactions = filteredTransactions.slice(
-    indexOfFirstItem,
+    indexOfLastItem - itemsPerPage,
     indexOfLastItem
   );
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / itemsPerPage));
 
   return (
     <div className="transaction-list-container">
@@ -165,34 +181,13 @@ const TransactionList = ({ refresh }) => {
         </div>
 
         <div className="musteri-filter">
-          <label>Müşteri No: </label>
+          <label>Hesap Ara (Kaynak/Hedef): </label>
           <input
             type="text"
-            value={musteriNo}
-            onChange={(e) => setMusteriNo(e.target.value)}
-            placeholder="Müşteri numarası giriniz"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Hesap adı yazın"
           />
-        </div>
-
-        <div className="musteri-filter">
-          <label>Fatura No: </label>
-          <input
-            type="text"
-            value={faturaNo}
-            onChange={(e) => setFaturaNo(e.target.value)}
-            placeholder="Fatura numarası giriniz"
-          />
-        </div>
-
-        <div className="musteri-filter">
-          <label>Fatura Türü: </label>
-          <select value={faturaTuru} onChange={(e) => setFaturaTuru(e.target.value)}>
-            <option value="">Tümü</option>
-            <option value="Elektrik">Elektrik</option>
-            <option value="Su">Su</option>
-            <option value="Doğalgaz">Doğalgaz</option>
-            <option value="İnternet">İnternet</option>
-          </select>
         </div>
 
         <div className="filter-buttons">
@@ -205,51 +200,38 @@ const TransactionList = ({ refresh }) => {
       <table className="transaction-table">
         <thead>
           <tr>
-            <th>İşlem</th>
+            <th>Kaynak Hesap</th>
+            <th>Hedef Hesap</th>
             <th>Tutar</th>
             <th>Tarih</th>
-            <th>Müşteri No</th>
-            <th>Fatura No</th>
-            <th>Fatura Türü</th>
-            <th>Açıklama</th>
-            <th>Bakiye Sonrası</th>
             <th>İşlem</th>
           </tr>
         </thead>
         <tbody>
           {currentTransactions.length === 0 ? (
             <tr>
-              <td colSpan="9" style={{ textAlign: "center", padding: "12px" }}>
+              <td colSpan="5" style={{ textAlign: "center", padding: "12px" }}>
                 Kayıtlı işlem yok.
               </td>
             </tr>
           ) : (
-            currentTransactions.map((islem) => (
-              <tr key={islem.id}>
-                <td>{getIslemTurText(islem)}</td>
-                <td>{islem.tutar} ₺</td>
-                <td>{islem.tarih}</td>
-                <td>{islem.musteriID || "-"}</td>
-                <td>{islem.faturaNo || "-"}</td>
-                <td>{faturaTurMap[islem.faturaTuru] || "-"}</td>
-                <td>{islem.aciklama || "-"}</td>
-                <td>{islem.bakiyeSonrasi ?? 0} ₺</td>
-                <td>
-                  <button
-                    className="edit-button"
-                    onClick={() => handleEditClick(islem)}
-                  >
-                    Düzenle
-                  </button>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDelete(islem.id)}
-                  >
-                    Sil
-                  </button>
-                </td>
-              </tr>
-            ))
+            currentTransactions.map((t) => {
+              const raw = t.date || t.tarih;
+              const d = parseTxDate(raw);
+              return (
+                <tr key={t.id}>
+                  <td>{t.from || "-"}</td>
+                  <td>{t.to || "-"}</td>
+                  <td>{Number(t.tutar ?? 0).toLocaleString("tr-TR")} ₺</td>
+                  <td>{d ? d.toLocaleDateString("tr-TR") : "-"}</td>
+                  <td>
+                    <button className="edit-button" onClick={() => handleEditClick(t)}>
+                      Düzenle
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>
@@ -257,26 +239,41 @@ const TransactionList = ({ refresh }) => {
       {editingTransaction && (
         <div className="edit-form">
           <h3>İşlem Düzenle</h3>
+
+          <label>Kaynak Hesap:</label>
+          <select value={editFromId} onChange={(e) => setEditFromId(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {accountOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+
+          <label>Hedef Hesap:</label>
+          <select value={editToId} onChange={(e) => setEditToId(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {accountOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+
           <label>Tutar:</label>
           <input
             type="number"
+            min="0.01"
+            step="0.01"
             value={editAmount}
             onChange={(e) => setEditAmount(e.target.value)}
           />
-          <label>Açıklama:</label>
-          <input
-            type="text"
-            value={editAciklama}
-            onChange={(e) => setEditAciklama(e.target.value)}
-          />
+
           <div className="edit-buttons">
             <button onClick={handleSaveEdit} className="save-button">
               Kaydet
             </button>
-            <button
-              onClick={() => setEditingTransaction(null)}
-              className="cancel-button"
-            >
+            <button onClick={() => setEditingTransaction(null)} className="cancel-button">
               İptal
             </button>
           </div>
@@ -284,7 +281,7 @@ const TransactionList = ({ refresh }) => {
       )}
 
       <div className="pagination">
-        {Array.from({ length: totalPages || 1 }, (_, index) => (
+        {Array.from({ length: totalPages }, (_, index) => (
           <button
             key={index + 1}
             onClick={() => setCurrentPage(index + 1)}
@@ -299,5 +296,3 @@ const TransactionList = ({ refresh }) => {
 };
 
 export default TransactionList;
-
-

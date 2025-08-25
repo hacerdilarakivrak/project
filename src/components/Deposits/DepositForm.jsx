@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api";
 
 export default function DepositForm({ onAdd, onNotify }) {
   const [type, setType] = useState("Vadeli");
@@ -18,9 +18,7 @@ export default function DepositForm({ onAdd, onNotify }) {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const { data } = await axios.get(
-          "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers"
-        );
+        const { data } = await api.get("/customers");
         setCustomers(Array.isArray(data) ? data : []);
       } catch {
         onNotify?.({ type: "error", message: "Müşteri listesi alınamadı." });
@@ -46,7 +44,7 @@ export default function DepositForm({ onAdd, onNotify }) {
   };
 
   const buildName = (c) => {
-    const composed = [c.ad, c.soyad].map(x => (x || "").trim()).filter(Boolean).join(" ");
+    const composed = [c.ad, c.soyad].map((x) => (x || "").trim()).filter(Boolean).join(" ");
     const alt = (c.adSoyad || c.fullName || c.name || "").toString().trim();
     return composed || alt || "İsimsiz";
   };
@@ -55,9 +53,7 @@ export default function DepositForm({ onAdd, onNotify }) {
   const displayName = (c) => `${buildCode(c)} - ${buildName(c)}`;
 
   const sortedCustomers = useMemo(() => {
-    return [...customers].sort((a, b) =>
-      String(buildCode(a)).localeCompare(String(buildCode(b)))
-    );
+    return [...customers].sort((a, b) => String(buildCode(a)).localeCompare(String(buildCode(b))));
   }, [customers]);
 
   const generateAccountNo = () => {
@@ -119,11 +115,7 @@ export default function DepositForm({ onAdd, onNotify }) {
 
       <div className="row">
         <label>Müşteri</label>
-        <select
-          value={customerId}
-          onChange={(e) => setCustomerId(e.target.value)}
-          disabled={loading}
-        >
+        <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} disabled={loading}>
           <option value="">{loading ? "Yükleniyor..." : "Müşteri Seçiniz"}</option>
           {sortedCustomers.map((c) => (
             <option key={c.id} value={c.id}>
@@ -152,46 +144,22 @@ export default function DepositForm({ onAdd, onNotify }) {
 
       <div className="row">
         <label>Tutar</label>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="0,00"
-        />
+        <input type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" />
       </div>
 
       {type === "Vadeli" && (
         <>
           <div className="row">
             <label>Faiz Oranı (%)</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={interestRate}
-              onChange={(e) => setInterestRate(e.target.value)}
-              placeholder="Örn: 45"
-            />
+            <input type="number" min="0" step="0.01" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} placeholder="Örn: 45" />
           </div>
           <div className="row">
             <label>Başlangıç</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
           </div>
           <div className="row">
             <label>Vade (ay)</label>
-            <input
-              type="number"
-              min="1"
-              step="1"
-              value={termMonths}
-              onChange={(e) => setTermMonths(e.target.value)}
-            />
+            <input type="number" min="1" step="1" value={termMonths} onChange={(e) => setTermMonths(e.target.value)} />
           </div>
           <div className="row">
             <label>Vade Talimatı</label>

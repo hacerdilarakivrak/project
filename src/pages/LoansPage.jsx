@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api";
 import LoanForm from "../components/Loans/LoanForm";
 import LoanDetailModal from "../components/Loans/LoanDetailModal";
 import { calcRiskScore } from "../utils/riskScore";
@@ -20,9 +20,11 @@ const LoansPage = () => {
   const [editingLoan, setEditingLoan] = useState(null);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [deposits, setDeposits] = useState([]);
   const [selectedDeposit, setSelectedDeposit] = useState(null);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+
   const [customers, setCustomers] = useState([]);
   const [notification, setNotification] = useState(null);
 
@@ -35,10 +37,8 @@ const LoansPage = () => {
 
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get(
-          "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers"
-        );
-        setCustomers(response.data);
+        const { data } = await api.get("/customers");
+        setCustomers(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Müşteriler yüklenirken hata oluştu:", error);
       }
@@ -53,15 +53,12 @@ const LoansPage = () => {
 
     loans.forEach((loan) => {
       if (!loan.startDate || !loan.term) return;
-
       const startDate = new Date(loan.startDate);
       for (let i = 1; i <= loan.term; i++) {
         const dueDate = new Date(startDate);
         dueDate.setMonth(dueDate.getMonth() + i);
-
         const diffTime = dueDate.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
         if (diffDays === 3) {
           reminders.push(`📅 ${loan.customerName} adlı müşterinin kredi ödemesi 3 gün içinde.`);
         }
@@ -115,11 +112,10 @@ const LoansPage = () => {
   };
 
   const handleDeleteLoan = (loanId) => {
-    if (window.confirm("Bu krediyi silmek istediğinize emin misiniz?")) {
-      const updatedLoans = loans.filter((loan) => loan.id !== loanId);
-      setLoans(updatedLoans);
-      localStorage.setItem("loans", JSON.stringify(updatedLoans));
-    }
+    if (!window.confirm("Bu krediyi silmek istediğinize emin misiniz?")) return;
+    const updatedLoans = loans.filter((loan) => loan.id !== loanId);
+    setLoans(updatedLoans);
+    localStorage.setItem("loans", JSON.stringify(updatedLoans));
   };
 
   const handleEditLoan = (loan) => setEditingLoan(loan);
@@ -140,11 +136,10 @@ const LoansPage = () => {
   };
 
   const handleDeleteDeposit = (depositId) => {
-    if (window.confirm("Bu mevduatı silmek istediğinize emin misiniz?")) {
-      const updated = deposits.filter((d) => d.id !== depositId);
-      setDeposits(updated);
-      localStorage.setItem("deposits", JSON.stringify(updated));
-    }
+    if (!window.confirm("Bu mevduatı silmek istediğinize emin misiniz?")) return;
+    const updated = deposits.filter((d) => d.id !== depositId);
+    setDeposits(updated);
+    localStorage.setItem("deposits", JSON.stringify(updated));
   };
 
   const handleCloseDepositAccount = (depositId) => {
@@ -176,8 +171,7 @@ const LoansPage = () => {
     return "-";
   };
 
-  const notifText =
-    typeof notification === "string" ? notification : notification?.message;
+  const notifText = typeof notification === "string" ? notification : notification?.message;
 
   return (
     <div style={pageStyle}>
@@ -523,5 +517,3 @@ const depositCSS = `
 `;
 
 export default LoansPage;
-
-

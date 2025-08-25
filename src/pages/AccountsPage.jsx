@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AccountForm from "../components/Account/AccountForm";
 import AccountList from "../components/Account/AccountList";
-import axios from "axios";
-
-const CUSTOMER_API = "https://6878b80d63f24f1fdc9f236e.mockapi.io/api/v1/customers";
+import api from "../api";
 
 const AccountsPage = () => {
   const [refresh, setRefresh] = useState(false);
@@ -11,15 +9,13 @@ const AccountsPage = () => {
   const [musteriNoFilter, setMusteriNoFilter] = useState("");
   const [customers, setCustomers] = useState([]);
 
-  const handleRefresh = () => {
-    setRefresh((r) => !r);
-  };
+  const handleRefresh = () => setRefresh((r) => !r);
 
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await axios.get(CUSTOMER_API);
-        setCustomers(res.data);
+        const res = await api.get("http://localhost:5000/api/customers");
+        setCustomers(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Müşteriler alınamadı:", err);
       }

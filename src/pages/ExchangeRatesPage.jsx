@@ -1,55 +1,82 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
+import api from "../api";
+
+const midRate = (r) =>
+  Number(
+    r?.forexSelling ??
+      r?.banknoteSelling ??
+      r?.forexBuying ??
+      r?.banknoteBuying ??
+      0
+  );
 
 const ExchangeRatesPage = () => {
   const [exchangeRates, setExchangeRates] = useState({ USD: 0, EUR: 0, GBP: 0 });
   const [prevRates, setPrevRates] = useState({ USD: 0, EUR: 0, GBP: 0 });
   const [rateHistory, setRateHistory] = useState([]);
+  const [asOf, setAsOf] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchRates();
-    const interval = setInterval(fetchRates, 60000);
+    const interval = setInterval(fetchRates, 60_000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchRates = () => {
-    axios
-      .get("http://localhost:5000/api/exchange-rates")
-      .then((res) => {
-        const data = {
-          USD: parseFloat(res.data.USD),
-          EUR: parseFloat(res.data.EUR),
-          GBP: parseFloat(res.data.GBP),
-        };
+  const fetchRates = async () => {
+    try {
+      setError("");
+      const res = await api.get("/exchange-rates", {
+        params: { codes: "USD,EUR,GBP" },
+      });
 
-        if (exchangeRates.USD === 0 && exchangeRates.EUR === 0 && exchangeRates.GBP === 0) {
-          setPrevRates(data);
-        } else {
-          setPrevRates(exchangeRates);
-        }
+      const rates = res.data?.rates || {};
+      const data = {
+        USD: midRate(rates.USD),
+        EUR: midRate(rates.EUR),
+        GBP: midRate(rates.GBP),
+      };
 
-        setExchangeRates(data);
+      setPrevRates((prev) =>
+        prev.USD === 0 && prev.EUR === 0 && prev.GBP === 0 ? data : exchangeRates
+      );
+      setExchangeRates(data);
+      setAsOf(res.data?.asOf || "");
 
-        const now = new Date();
-        const newEntry = {
-          time: now.toLocaleTimeString(),
-          timestamp: now.getTime(),
-          ...data,
-        };
-
-        setRateHistory((prev) => {
-          const updatedHistory = [...prev, newEntry];
-          const tenMinutesAgo = now.getTime() - 10 * 60 * 1000;
-          return updatedHistory.filter((entry) => entry.timestamp >= tenMinutesAgo);
-        });
-      })
-      .catch((err) => console.error("Döviz kurları alınamadı:", err));
+      const now = new Date();
+      const entry = {
+        time: now.toLocaleTimeString(),
+        timestamp: now.getTime(),
+        ...data,
+      };
+      setRateHistory((prev) => {
+        const updated = [...prev, entry];
+        const tenMinAgo = now.getTime() - 10 * 60 * 1000;
+        return updated.filter((e) => e.timestamp >= tenMinAgo);
+      });
+    } catch (err) {
+      console.error("Döviz kurları alınamadı:", err);
+      setError("Döviz kurları alınamadı.");
+    }
   };
 
   return (
     <div style={{ padding: "20px", color: "#fff", textAlign: "center" }}>
-      <h2>Döviz Kurları</h2>
+      <h2>Döviz Kurları {asOf && <small style={{ opacity: 0.7 }}>({asOf})</small>}</h2>
+      {error && (
+        <div style={{ background: "#612", border: "1px solid #a55", padding: 8, marginTop: 8 }}>
+          {error}
+        </div>
+      )}
 
       <div
         style={{
@@ -66,7 +93,7 @@ const ExchangeRatesPage = () => {
       </div>
 
       <div style={{ marginTop: "50px" }}>
-        <h3>Döviz Kuru Değişimi</h3>
+        <h3>Döviz Kuru Değişimi (son 10 dk)</h3>
         <LineChart width={800} height={300} data={rateHistory}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" />
@@ -90,11 +117,10 @@ const CurrencyCard = ({ currency, rate, prevRate }) => {
   };
 
   const trend = rate > prevRate ? "up" : rate < prevRate ? "down" : "same";
-  const percentageChange =
-    prevRate !== 0 ? (((rate - prevRate) / prevRate) * 100).toFixed(2) : "0.00";
-
+  const pct =
+    prevRate ? (((rate - prevRate) / prevRate) * 100).toFixed(2) : "0.00";
   const formattedChange =
-    trend === "up" ? `+${percentageChange}%` : trend === "down" ? `${percentageChange}%` : "0.00%";
+    trend === "up" ? `+${pct}%` : trend === "down" ? `${pct}%` : "0.00%";
 
   return (
     <div
@@ -120,10 +146,10 @@ const CurrencyCard = ({ currency, rate, prevRate }) => {
       />
       <h3>{currency}</h3>
       <p style={{ fontSize: "20px", fontWeight: "bold", margin: "5px 0" }}>
-        {rate}{" "}
-        {trend === "up" && <span style={{ color: "lime" }}>▲</span>}
-        {trend === "down" && <span style={{ color: "red" }}>▼</span>}
-        {trend === "same" && <span style={{ color: "gray" }}>▬</span>}
+        {rate.toLocaleString("tr-TR")}
+        {trend === "up" && <span style={{ color: "lime" }}> ▲</span>}
+        {trend === "down" && <span style={{ color: "red" }}> ▼</span>}
+        {trend === "same" && <span style={{ color: "gray" }}> ▬</span>}
       </p>
       <p
         style={{
@@ -138,3 +164,6 @@ const CurrencyCard = ({ currency, rate, prevRate }) => {
 };
 
 export default ExchangeRatesPage;
+
+
+
