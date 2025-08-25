@@ -19,6 +19,7 @@ app.use(
 app.use(express.json());
 app.use(morgan("dev"));
 
+// ---- Auth Guard ----
 function authGuard(req, res, next) {
   if (req.method === "OPTIONS") return res.sendStatus(204);
   const auth = req.headers.authorization || "";
@@ -29,6 +30,7 @@ function authGuard(req, res, next) {
   next();
 }
 
+// ---- Downstream APIs ----
 const api1 = axios.create({
   baseURL: process.env.MOCKAPI_BASE_URL_1,
   timeout: 10000,
@@ -44,8 +46,10 @@ app.get("/health", (_, res) =>
   res.json({ ok: true, time: new Date().toISOString() })
 );
 
+// ---- Router ----
 const apiRouter = express.Router();
 
+// ---- TCMB Exchange Rates (cached) ----
 const AX = axios.create({
   timeout: 15000,
   headers: { "User-Agent": "x-bank-education-app/1.0" },
@@ -148,6 +152,7 @@ apiRouter.get("/exchange-rates/all", async (_req, res) => {
   }
 });
 
+// ---- Customers ----
 apiRouter.get("/customers", async (req, res) => {
   try {
     const r = await api2.get("/customers", { params: req.query });
@@ -203,6 +208,7 @@ apiRouter.delete("/customers/:id", async (req, res) => {
   }
 });
 
+// ---- Accounts ----
 apiRouter.get("/accounts", async (req, res) => {
   try {
     const r = await api2.get("/accounts", { params: req.query });
@@ -258,6 +264,7 @@ apiRouter.delete("/accounts/:id", async (req, res) => {
   }
 });
 
+// ---- Transactions ----
 apiRouter.get("/transactions", async (req, res) => {
   try {
     const r = await api2.get("/transactions", { params: req.query });
@@ -313,6 +320,7 @@ apiRouter.delete("/transactions/:id", async (req, res) => {
   }
 });
 
+// ---- Workplaces (FULL CRUD) ----
 apiRouter.get("/workplaces", async (req, res) => {
   try {
     const r = await api1.get("/workplaces", { params: req.query });
@@ -324,23 +332,82 @@ apiRouter.get("/workplaces", async (req, res) => {
   }
 });
 
-apiRouter.get("/_routes", (req, res) => {
+apiRouter.get("/workplaces/:id", async (req, res) => {
+  try {
+    const r = await api1.get(`/workplaces/${req.params.id}`);
+    res.json(r.data);
+  } catch (e) {
+    res
+      .status(e?.response?.status || 500)
+      .json({ error: "Workplace fetch failed" });
+  }
+});
+
+apiRouter.post("/workplaces", async (req, res) => {
+  try {
+    const r = await api1.post("/workplaces", req.body);
+    res.status(201).json(r.data);
+  } catch (e) {
+    res
+      .status(e?.response?.status || 500)
+      .json({ error: "Workplace create failed" });
+  }
+});
+
+apiRouter.put("/workplaces/:id", async (req, res) => {
+  try {
+    const r = await api1.put(`/workplaces/${req.params.id}`, req.body);
+    res.json(r.data);
+  } catch (e) {
+    res
+      .status(e?.response?.status || 500)
+      .json({ error: "Workplace update failed" });
+  }
+});
+
+apiRouter.delete("/workplaces/:id", async (req, res) => {
+  try {
+    await api1.delete(`/workplaces/${req.params.id}`);
+    res.status(204).end();
+  } catch (e) {
+    res
+      .status(e?.response?.status || 500)
+      .json({ error: "Workplace delete failed" });
+  }
+});
+
+// ---- Route List ----
+apiRouter.get("/_routes", (_req, res) => {
   res.json({
     ok: true,
     routes: [
-      "GET  /api/exchange-rates?codes=USD,EUR,GBP",
-      "GET  /api/exchange-rates/all",
-      "GET  /api/customers",
-      "POST /api/customers",
-      "GET  /api/accounts",
-      "POST /api/accounts",
-      "GET  /api/transactions",
-      "POST /api/transactions",
+      "GET    /api/exchange-rates?codes=USD,EUR,GBP",
+      "GET    /api/exchange-rates/all",
+      "GET    /api/customers",
+      "POST   /api/customers",
+      "GET    /api/customers/:id",
+      "PUT    /api/customers/:id",
+      "DELETE /api/customers/:id",
+      "GET    /api/accounts",
+      "POST   /api/accounts",
+      "GET    /api/accounts/:id",
+      "PUT    /api/accounts/:id",
+      "DELETE /api/accounts/:id",
+      "GET    /api/transactions",
+      "POST   /api/transactions",
+      "GET    /api/transactions/:id",
+      "PUT    /api/transactions/:id",
       "DELETE /api/transactions/:id",
+      "GET    /api/workplaces",
+      "POST   /api/workplaces",
+      "GET    /api/workplaces/:id",
+      "PUT    /api/workplaces/:id",
+      "DELETE /api/workplaces/:id",
     ],
   });
 });
 
+// ---- Mount & Error Handlers ----
 app.use("/api", authGuard, apiRouter);
 
 app.use((req, res) =>
@@ -348,6 +415,7 @@ app.use((req, res) =>
     .status(404)
     .json({ error: `Not Found: ${req.method} ${req.originalUrl}` })
 );
+
 app.use((err, req, res, next) => {
   console.error("UNHANDLED ERROR:", err);
   res.status(500).json({ error: "Internal Server Error" });
