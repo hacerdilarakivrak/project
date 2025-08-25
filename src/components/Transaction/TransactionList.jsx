@@ -21,13 +21,17 @@ const TransactionList = ({ refresh }) => {
 
   const itemsPerPage = 10;
 
-  const safeRead = (key) => {
+  /* ---------------- helpers (LS + tarih) ---------------- */
+  const safeRead = (key, fallback = []) => {
     try {
-      return JSON.parse(localStorage.getItem(key) || "[]");
+      const v = JSON.parse(localStorage.getItem(key) || "null");
+      return v == null ? fallback : v;
     } catch {
-      return [];
+      return fallback;
     }
   };
+  const safeWrite = (key, value) =>
+    localStorage.setItem(key, JSON.stringify(value));
 
   const parseTxDate = (raw) => {
     if (!raw) return null;
@@ -39,14 +43,15 @@ const TransactionList = ({ refresh }) => {
     return isNaN(d) ? null : d;
   };
 
+  /* ---------------- data fetch ---------------- */
   useEffect(() => {
     fetchAll();
   }, [refresh]);
 
   const fetchAll = () => {
     try {
-      const tx = safeRead("transactions");
-      const acc = safeRead("accounts");
+      const tx = safeRead("transactions", []);
+      const acc = safeRead("accounts", []);
       setIslemler(Array.isArray(tx) ? tx : []);
       setAccounts(Array.isArray(acc) ? acc : []);
       setCurrentPage(1);
@@ -56,6 +61,7 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
+  /* ---------------- accounts helpers ---------------- */
   const displayName = (acc) =>
     acc?.hesapAdi || acc?.name || `Hesap ${acc?.id || ""}`;
 
@@ -72,6 +78,22 @@ const TransactionList = ({ refresh }) => {
     return m?.id ?? "";
   };
 
+  const findAccountByName = (name) =>
+    accounts.find((a) => displayName(a) === name);
+
+  const writeAccounts = (next) => {
+    safeWrite("accounts", next);
+    setAccounts(next);
+  };
+
+  const updateBalanceByName = (accName, newBalance) => {
+    const next = accounts.map((a) =>
+      displayName(a) === accName ? { ...a, bakiye: Number(newBalance) || 0 } : a
+    );
+    writeAccounts(next);
+  };
+
+  /* ---------------- filtreleme ---------------- */
   useEffect(() => {
     const filtered = islemler.filter((t) => {
       const dt = parseTxDate(t.date || t.tarih);
@@ -91,6 +113,7 @@ const TransactionList = ({ refresh }) => {
     setCurrentPage(1);
   }, [islemler, startDate, endDate, searchTerm]);
 
+  /* ---------------- edit ---------------- */
   const handleEditClick = (tx) => {
     setEditingTransaction(tx);
     setEditAmount(tx.amount ?? tx.tutar ?? "");
@@ -109,10 +132,12 @@ const TransactionList = ({ refresh }) => {
     }
 
     try {
-      const txs = safeRead("transactions");
+      const txs = safeRead("transactions", []);
       const idx = txs.findIndex((x) => x.id === editingTransaction.id);
       if (idx >= 0) {
-        const fromAcc = accounts.find((a) => String(a.id) === String(editFromId));
+        const fromAcc = accounts.find(
+          (a) => String(a.id) === String(editFromId)
+        );
         const toAcc = accounts.find((a) => String(a.id) === String(editToId));
 
         txs[idx] = {
@@ -122,7 +147,7 @@ const TransactionList = ({ refresh }) => {
           tutar: Number(editAmount),
         };
 
-        localStorage.setItem("transactions", JSON.stringify(txs));
+        safeWrite("transactions", txs);
         setEditingTransaction(null);
         fetchAll();
         toast.success("İşlem güncellendi.");
@@ -133,6 +158,43 @@ const TransactionList = ({ refresh }) => {
     }
   };
 
+  /* ---------------- delete ---------------- */
+  const handleDelete = (tx) => {
+    if (!window.confirm("Bu işlemi silmek istediğinizden emin misiniz?")) return;
+
+    const amount = Number(tx.tutar ?? tx.amount ?? 0) || 0;
+
+    try {
+      if (tx.type === "transfer") {
+        const from = findAccountByName(tx.from);
+        const to = findAccountByName(tx.to);
+        if (from) updateBalanceByName(tx.from, Number(from.bakiye || 0) + amount);
+        if (to) updateBalanceByName(tx.to, Number(to.bakiye || 0) - amount);
+      } else if (tx.type === "paraYatirma") {
+        const a = findAccountByName(tx.from);
+        if (a) updateBalanceByName(tx.from, Number(a.bakiye || 0) - amount);
+      } else if (tx.type === "paraCekme" || tx.type === "faturaOdeme") {
+        const a = findAccountByName(tx.from);
+        if (a) updateBalanceByName(tx.from, Number(a.bakiye || 0) + amount);
+      } else {
+        console.warn("Bilinmeyen transaction type:", tx.type);
+      }
+
+      const txs = safeRead("transactions", []);
+      const nextTxs = txs.filter((t) => t.id !== tx.id);
+      safeWrite("transactions", nextTxs);
+
+      setIslemler(nextTxs);
+      setFilteredTransactions((prev) => prev.filter((t) => t.id !== tx.id));
+
+      toast.success("İşlem silindi.");
+    } catch (err) {
+      console.error("Silme hatası:", err);
+      toast.error("İşlem silinirken bir hata oluştu.");
+    }
+  };
+
+  /* ---------------- UI helpers ---------------- */
   const clearFilters = () => {
     setStartDate(null);
     setEndDate(null);
@@ -146,7 +208,10 @@ const TransactionList = ({ refresh }) => {
     indexOfLastItem - itemsPerPage,
     indexOfLastItem
   );
-  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredTransactions.length / itemsPerPage)
+  );
 
   return (
     <div className="transaction-list-container">
@@ -216,17 +281,26 @@ const TransactionList = ({ refresh }) => {
             </tr>
           ) : (
             currentTransactions.map((t) => {
-              const raw = t.date || t.tarih;
-              const d = parseTxDate(raw);
+              const d = parseTxDate(t.date || t.tarih);
               return (
                 <tr key={t.id}>
                   <td>{t.from || "-"}</td>
                   <td>{t.to || "-"}</td>
                   <td>{Number(t.tutar ?? 0).toLocaleString("tr-TR")} ₺</td>
                   <td>{d ? d.toLocaleDateString("tr-TR") : "-"}</td>
-                  <td>
-                    <button className="edit-button" onClick={() => handleEditClick(t)}>
-                      Düzenle
+                  <td className="actions-cell">
+                    <button
+                      className="edit-button"
+                      onClick={() => handleEditClick(t)}
+                    >
+                      Güncelle
+                    </button>
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDelete(t)}
+                      style={{ marginLeft: 8 }}
+                    >
+                      Sil
                     </button>
                   </td>
                 </tr>
@@ -238,10 +312,13 @@ const TransactionList = ({ refresh }) => {
 
       {editingTransaction && (
         <div className="edit-form">
-          <h3>İşlem Düzenle</h3>
+          <h3>İşlem Güncelle</h3>
 
           <label>Kaynak Hesap:</label>
-          <select value={editFromId} onChange={(e) => setEditFromId(e.target.value)}>
+          <select
+            value={editFromId}
+            onChange={(e) => setEditFromId(e.target.value)}
+          >
             <option value="">Seçiniz</option>
             {accountOptions.map((o) => (
               <option key={o.id} value={o.id}>
@@ -251,7 +328,10 @@ const TransactionList = ({ refresh }) => {
           </select>
 
           <label>Hedef Hesap:</label>
-          <select value={editToId} onChange={(e) => setEditToId(e.target.value)}>
+          <select
+            value={editToId}
+            onChange={(e) => setEditToId(e.target.value)}
+          >
             <option value="">Seçiniz</option>
             {accountOptions.map((o) => (
               <option key={o.id} value={o.id}>
@@ -273,7 +353,10 @@ const TransactionList = ({ refresh }) => {
             <button onClick={handleSaveEdit} className="save-button">
               Kaydet
             </button>
-            <button onClick={() => setEditingTransaction(null)} className="cancel-button">
+            <button
+              onClick={() => setEditingTransaction(null)}
+              className="cancel-button"
+            >
               İptal
             </button>
           </div>
