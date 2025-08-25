@@ -115,7 +115,7 @@ const HomePage = () => {
       >
         <h2 style={{ fontSize: "32px", marginBottom: "16px" }}>Hoş Geldiniz</h2>
         <p style={{ fontSize: "18px", color: "#ccc" }}>
-          Sağ üstten bir işlem seçerek devam edebilirsiniz.
+          Menüden bir işlem seçerek devam edebilirsiniz.
         </p>
       </motion.section>
 
