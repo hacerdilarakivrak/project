@@ -17,12 +17,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
   const [tarih, setTarih] = useState("");
   const [aciklama, setAciklama] = useState("");
 
-  const readLS = (key) => {
-    try { return JSON.parse(localStorage.getItem(key) || "[]"); }
-    catch { return []; }
-  };
-  const writeLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-
   const normalizeAccount = (a) => ({
     id: a.id,
     hesapAdi: a.hesapAdi || a.name || `Hesap ${a.id}`,
@@ -37,109 +31,46 @@ const TransactionForm = ({ onTransactionAdded }) => {
   });
 
   const fetchAccounts = async () => {
-    let acc = readLS("accounts");
-    if (Array.isArray(acc) && acc.length > 0) {
-      setHesaplar(acc.map(normalizeAccount));
-      return;
-    }
     try {
       const { data } = await api.get("/accounts");
-      const arr = (Array.isArray(data) ? data : []).map(normalizeAccount);
-      if (arr.length > 0) {
-        writeLS("accounts", arr);
-        setHesaplar(arr);
-        return;
-      }
+      setHesaplar((Array.isArray(data) ? data : []).map(normalizeAccount));
     } catch (e) {
-      console.warn("API accounts alınamadı, seed kullanılacak.", e);
+      console.warn("API accounts alınamadı.", e);
     }
-    const seed = [
-      { id: 1, hesapAdi: "Vadesiz TL", bakiye: 1000 },
-      { id: 2, hesapAdi: "Birikim", bakiye: 5000 },
-      { id: 3, hesapAdi: "Kredi Kartı", bakiye: -2500 },
-    ];
-    writeLS("accounts", seed);
-    setHesaplar(seed);
   };
 
   const fetchCustomers = async () => {
-    let cus = readLS("customers");
-    if (Array.isArray(cus) && cus.length > 0) {
-      setMusteriler(cus.map(normalizeCustomer));
-      return;
-    }
     try {
       const { data } = await api.get("/customers");
-      const arr = (Array.isArray(data) ? data : []).map(normalizeCustomer);
-      if (arr.length > 0) {
-        writeLS("customers", arr);
-        setMusteriler(arr);
-        return;
-      }
+      setMusteriler((Array.isArray(data) ? data : []).map(normalizeCustomer));
     } catch (e) {
-      console.warn("API customers alınamadı, seed kullanılacak.", e);
+      console.warn("API customers alınamadı.", e);
     }
-    const seed = [
-      { id: 1, musteriNo: "1001", ad: "Ali", soyad: "Yılmaz" },
-      { id: 2, musteriNo: "1002", ad: "Ayşe", soyad: "Demir" },
-    ];
-    writeLS("customers", seed);
-    setMusteriler(seed);
   };
 
   useEffect(() => {
     fetchAccounts();
     fetchCustomers();
-
-    // Aynı sekmede yeni hesap eklendiğinde tetiklenecek custom event
-    const onAccountsUpdated = () => fetchAccounts();
-
-    // Sekmeye odaklanınca / görünür olunca yenile
-    const onFocus = () => fetchAccounts();
-
-    // Diğer sekmeden localStorage değişirse
-    const onStorage = (e) => {
-      if (e.key === "accounts") fetchAccounts();
-    };
-
-    window.addEventListener("accounts-updated", onAccountsUpdated);
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onFocus);
-    window.addEventListener("storage", onStorage);
-
-    return () => {
-      window.removeEventListener("accounts-updated", onAccountsUpdated);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onFocus);
-      window.removeEventListener("storage", onStorage);
-    };
   }, []);
 
-  const getAccountById = (id) => hesaplar.find((h) => String(h.id) === String(id));
+  const getAccountById = (id) =>
+    hesaplar.find((h) => String(h.id) === String(id));
   const getAccountNameById = (id) => {
     const a = getAccountById(id);
     return a?.hesapAdi || a?.name || (a ? `Hesap ${a.id}` : "");
   };
 
-  const updateAccountBalance = (id, newBalance) => {
-    const acc = [...hesaplar];
-    const idx = acc.findIndex((h) => String(h.id) === String(id));
-    if (idx >= 0) {
-      acc[idx] = { ...acc[idx], bakiye: Number(newBalance) || 0 };
-      writeLS("accounts", acc);
-      setHesaplar(acc);
-      // Bakiye güncelleyince de formların senkronu için yayınlayabiliriz (opsiyonel)
-      window.dispatchEvent(new Event("accounts-updated"));
+  const saveTransaction = async (tx) => {
+    try {
+      await api.post("/transactions", tx);
+      onTransactionAdded?.("İşlem başarıyla eklendi!");
+    } catch (err) {
+      console.error("Transaction kaydedilemedi:", err);
+      alert("İşlem kaydedilemedi!");
     }
   };
 
-  const saveTransaction = (tx) => {
-    const prev = readLS("transactions");
-    const next = [tx, ...prev];
-    writeLS("transactions", next);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const amount = Number(tutar);
@@ -152,137 +83,73 @@ const TransactionForm = ({ onTransactionAdded }) => {
       return;
     }
 
+    let transactionData = {
+      tur,
+      tutar: amount,
+      tarih,
+      musteriID: seciliMusteri || null,
+      aciklama,
+    };
+
     if (tur === "transfer") {
-      if (!gonderenHesapID || !aliciHesapID || gonderenHesapID === aliciHesapID) {
+      if (
+        !gonderenHesapID ||
+        !aliciHesapID ||
+        gonderenHesapID === aliciHesapID
+      ) {
         alert("Geçerli gönderen ve alıcı hesap seçiniz!");
         return;
       }
-      const fromAcc = getAccountById(gonderenHesapID);
-      const toAcc = getAccountById(aliciHesapID);
-      if (!fromAcc || !toAcc) {
-        alert("Hesap bulunamadı!");
-        return;
-      }
-      const fromBal = Number(fromAcc.bakiye || 0);
-      if (amount > fromBal) {
-        alert("Yetersiz bakiye!");
-        return;
-      }
-
-      updateAccountBalance(gonderenHesapID, fromBal - amount);
-      const toBal = Number(toAcc.bakiye || 0);
-      updateAccountBalance(aliciHesapID, toBal + amount);
-
-      saveTransaction({
-        id: crypto.randomUUID(),
+      transactionData = {
+        ...transactionData,
+        fromId: gonderenHesapID,
+        toId: aliciHesapID,
         from: getAccountNameById(gonderenHesapID),
         to: getAccountNameById(aliciHesapID),
-        tutar: amount,
-        tarih,
-        type: "transfer",
-        aciklama,
-      });
-
-      setGonderenHesapID("");
-      setAliciHesapID("");
-      setTur("paraYatirma");
-      setTutar("");
-      setTarih("");
-      setAciklama("");
-      onTransactionAdded?.("Transfer başarıyla eklendi!");
-      return;
-    }
-
-    if (tur === "faturaOdeme") {
+      };
+    } else if (tur === "faturaOdeme") {
       if (!seciliMusteri || !gonderenHesapID || !faturaNo) {
         alert("Lütfen müşteri, hesap ve fatura numarasını giriniz!");
         return;
       }
-      const fromAcc = getAccountById(gonderenHesapID);
-      if (!fromAcc) {
-        alert("Hesap bulunamadı!");
-        return;
-      }
-      const fromBal = Number(fromAcc.bakiye || 0);
-      if (amount > fromBal) {
-        alert("Yetersiz bakiye!");
-        return;
-      }
-
-      updateAccountBalance(gonderenHesapID, fromBal - amount);
-
-      const faturaLabelMap = {
-        electricity: "Elektrik",
-        water: "Su",
-        gas: "Doğalgaz",
-        internet: "İnternet",
-      };
-      const toLabel = `Fatura: ${faturaLabelMap[faturaTuru] || faturaTuru} (${faturaNo})`;
-
-      saveTransaction({
-        id: crypto.randomUUID(),
+      transactionData = {
+        ...transactionData,
+        fromId: gonderenHesapID,
         from: getAccountNameById(gonderenHesapID),
-        to: toLabel,
-        tutar: amount,
-        tarih,
-        type: "faturaOdeme",
-        aciklama,
-      });
-
-      setGonderenHesapID("");
-      setSeciliMusteri("");
-      setFaturaTuru("electricity");
-      setFaturaNo("");
-      setTur("paraYatirma");
-      setTutar("");
-      setTarih("");
-      setAciklama("");
-      onTransactionAdded?.("Fatura ödeme işlemi eklendi!");
-      return;
-    }
-
-    const acc = getAccountById(gonderenHesapID);
-    if (!acc) {
-      alert("Hesap bulunamadı!");
-      return;
-    }
-    let bal = Number(acc.bakiye || 0);
-
-    if (tur === "paraYatirma") {
-      bal += amount;
-    } else if (tur === "paraCekme") {
-      if (amount > bal) {
-        alert("Yetersiz bakiye!");
+        to: `Fatura: ${faturaTuru} (${faturaNo})`,
+        faturaTuru,
+        faturaNo,
+      };
+    } else {
+      if (!gonderenHesapID) {
+        alert("Hesap seçiniz!");
         return;
       }
-      bal -= amount;
+      transactionData = {
+        ...transactionData,
+        fromId: gonderenHesapID,
+        from: getAccountNameById(gonderenHesapID),
+        to: "-",
+      };
     }
 
-    updateAccountBalance(gonderenHesapID, bal);
-
-    saveTransaction({
-      id: crypto.randomUUID(),
-      from: getAccountNameById(gonderenHesapID),
-      to: "-",
-      tutar: amount,
-      tarih,
-      type: tur,
-      aciklama,
-    });
+    await saveTransaction(transactionData);
 
     setGonderenHesapID("");
+    setAliciHesapID("");
+    setSeciliMusteri("");
+    setFaturaTuru("electricity");
+    setFaturaNo("");
     setTur("paraYatirma");
     setTutar("");
     setTarih("");
     setAciklama("");
-    onTransactionAdded?.("İşlem başarıyla eklendi!");
   };
 
   return (
     <div>
       <h2>Yeni İşlem Ekle</h2>
 
-      {/* İstersen bu butonu kaldırabilirsin, debug için faydalı */}
       <div style={{ marginBottom: 8 }}>
         <button type="button" onClick={fetchAccounts}>
           Hesapları Yenile
@@ -311,7 +178,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
                 </option>
               ))}
             </select>
-
             <select
               value={aliciHesapID}
               onChange={(e) => setAliciHesapID(e.target.value)}
@@ -339,7 +205,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
                 </option>
               ))}
             </select>
-
             <select
               value={seciliMusteri}
               onChange={(e) => setSeciliMusteri(e.target.value)}
@@ -347,12 +212,11 @@ const TransactionForm = ({ onTransactionAdded }) => {
             >
               <option value="">Müşteri Seçiniz</option>
               {musteriler.map((m) => (
-                <option key={m.id} value={m.musteriNo}>
+                <option key={m.id} value={m.id}>
                   {m.musteriNo} - {m.ad} {m.soyad}
                 </option>
               ))}
             </select>
-
             <select
               value={faturaTuru}
               onChange={(e) => setFaturaTuru(e.target.value)}
@@ -362,7 +226,6 @@ const TransactionForm = ({ onTransactionAdded }) => {
               <option value="gas">Doğalgaz</option>
               <option value="internet">İnternet</option>
             </select>
-
             <input
               type="text"
               placeholder="Fatura No"
@@ -395,21 +258,18 @@ const TransactionForm = ({ onTransactionAdded }) => {
           min="0.01"
           step="0.01"
         />
-
         <input
           type="date"
           value={tarih}
           onChange={(e) => setTarih(e.target.value)}
           required
         />
-
         <input
           type="text"
           placeholder="Açıklama"
           value={aciklama}
           onChange={(e) => setAciklama(e.target.value)}
         />
-
         <button type="submit">İşlemi Kaydet</button>
       </form>
     </div>

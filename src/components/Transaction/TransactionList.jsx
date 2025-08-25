@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import { toast } from "react-toastify";
+import api from "../../api";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
 import "./TransactionList.css";
@@ -21,17 +22,6 @@ const TransactionList = ({ refresh }) => {
 
   const itemsPerPage = 10;
 
-  const safeRead = (key, fallback = []) => {
-    try {
-      const v = JSON.parse(localStorage.getItem(key) || "null");
-      return v == null ? fallback : v;
-    } catch {
-      return fallback;
-    }
-  };
-  const safeWrite = (key, value) =>
-    localStorage.setItem(key, JSON.stringify(value));
-
   const parseTxDate = (raw) => {
     if (!raw) return null;
     if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
@@ -42,22 +32,23 @@ const TransactionList = ({ refresh }) => {
     return isNaN(d) ? null : d;
   };
 
-  useEffect(() => {
-    fetchAll();
-  }, [refresh]);
-
-  const fetchAll = () => {
+  const fetchAll = async () => {
     try {
-      const tx = safeRead("transactions", []);
-      const acc = safeRead("accounts", []);
-      setIslemler(Array.isArray(tx) ? tx : []);
-      setAccounts(Array.isArray(acc) ? acc : []);
+      const txRes = await api.get("/transactions");
+      const accRes = await api.get("/accounts");
+
+      setIslemler(Array.isArray(txRes.data) ? txRes.data : []);
+      setAccounts(Array.isArray(accRes.data) ? accRes.data : []);
       setCurrentPage(1);
     } catch (err) {
       console.error("Veri alınamadı:", err);
       toast.error("İşlemler/hesaplar alınamadı!");
     }
   };
+
+  useEffect(() => {
+    fetchAll();
+  }, [refresh]);
 
   const displayName = (acc) =>
     acc?.hesapAdi || acc?.name || `Hesap ${acc?.id || ""}`;
@@ -73,21 +64,6 @@ const TransactionList = ({ refresh }) => {
   const findAccountIdByName = (name) => {
     const m = accounts.find((a) => displayName(a) === name);
     return m?.id ?? "";
-  };
-
-  const findAccountByName = (name) =>
-    accounts.find((a) => displayName(a) === name);
-
-  const writeAccounts = (next) => {
-    safeWrite("accounts", next);
-    setAccounts(next);
-  };
-
-  const updateBalanceByName = (accName, newBalance) => {
-    const next = accounts.map((a) =>
-      displayName(a) === accName ? { ...a, bakiye: Number(newBalance) || 0 } : a
-    );
-    writeAccounts(next);
   };
 
   useEffect(() => {
@@ -116,7 +92,7 @@ const TransactionList = ({ refresh }) => {
     setEditToId(findAccountIdByName(tx.to));
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editFromId || !editToId) {
       toast.error("Kaynak ve hedef hesap seçiniz.");
       return;
@@ -127,60 +103,30 @@ const TransactionList = ({ refresh }) => {
     }
 
     try {
-      const txs = safeRead("transactions", []);
-      const idx = txs.findIndex((x) => x.id === editingTransaction.id);
-      if (idx >= 0) {
-        const fromAcc = accounts.find(
-          (a) => String(a.id) === String(editFromId)
-        );
-        const toAcc = accounts.find((a) => String(a.id) === String(editToId));
+      const updated = {
+        ...editingTransaction,
+        hesapID: editFromId,
+        aliciHesapID: editToId,
+        tutar: Number(editAmount),
+      };
 
-        txs[idx] = {
-          ...txs[idx],
-          from: fromAcc ? displayName(fromAcc) : txs[idx].from,
-          to: toAcc ? displayName(toAcc) : txs[idx].to,
-          tutar: Number(editAmount),
-        };
-
-        safeWrite("transactions", txs);
-        setEditingTransaction(null);
-        fetchAll();
-        toast.success("İşlem güncellendi.");
-      }
+      await api.put(`/transactions/${editingTransaction.id}`, updated);
+      setEditingTransaction(null);
+      await fetchAll();
+      toast.success("İşlem güncellendi.");
     } catch (err) {
       console.error("Güncelleme hatası:", err);
       toast.error("Güncelleme hatası");
     }
   };
 
-  const handleDelete = (tx) => {
+  const handleDelete = async (tx) => {
     if (!window.confirm("Bu işlemi silmek istediğinizden emin misiniz?")) return;
 
-    const amount = Number(tx.tutar ?? tx.amount ?? 0) || 0;
-
     try {
-      if (tx.type === "transfer") {
-        const from = findAccountByName(tx.from);
-        const to = findAccountByName(tx.to);
-        if (from) updateBalanceByName(tx.from, Number(from.bakiye || 0) + amount);
-        if (to) updateBalanceByName(tx.to, Number(to.bakiye || 0) - amount);
-      } else if (tx.type === "paraYatirma") {
-        const a = findAccountByName(tx.from);
-        if (a) updateBalanceByName(tx.from, Number(a.bakiye || 0) - amount);
-      } else if (tx.type === "paraCekme" || tx.type === "faturaOdeme") {
-        const a = findAccountByName(tx.from);
-        if (a) updateBalanceByName(tx.from, Number(a.bakiye || 0) + amount);
-      } else {
-        console.warn("Bilinmeyen transaction type:", tx.type);
-      }
-
-      const txs = safeRead("transactions", []);
-      const nextTxs = txs.filter((t) => t.id !== tx.id);
-      safeWrite("transactions", nextTxs);
-
-      setIslemler(nextTxs);
+      await api.delete(`/transactions/${tx.id}`);
+      setIslemler((prev) => prev.filter((t) => t.id !== tx.id));
       setFilteredTransactions((prev) => prev.filter((t) => t.id !== tx.id));
-
       toast.success("İşlem silindi.");
     } catch (err) {
       console.error("Silme hatası:", err);
