@@ -73,6 +73,7 @@ const CustomerList = ({ refresh, onEdit }) => {
     }
   };
 
+  /* === PDF: TC Kimlik No'ya kadar sütunlar === */
   const exportPDF = () => {
     const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
     try {
@@ -83,43 +84,46 @@ const CustomerList = ({ refresh, onEdit }) => {
       autoTable(doc, {
         startY: 25,
         head: [[
-          "Müşteri No", "Ad", "Soyad", "Ünvan", "Tür", "Vergi No", "TC Kimlik No",
-          "Baba Adı", "Anne Adı", "Doğum Tarihi", "Doğum Yeri", "Cinsiyet",
-          "Öğrenim Durumu", "Medeni Durum", "Telefon", "Email", "Adres", "Kayıt Tarihi"
+          "Müşteri No",
+          "Ad",
+          "Soyad",
+          "Ünvan",
+          "Tür",
+          "Vergi No",
+          "TC Kimlik No",
         ]],
-        body: filteredCustomers.map(c => [
-          c.musteriNo, c.ad, c.soyad, c.unvan,
+        body: filteredCustomers.map((c) => [
+          c.musteriNo,
+          c.ad,
+          c.soyad,
+          c.unvan,
           c.musteriTuru === "G" ? "Gerçek" : "Tüzel",
-          c.vergiKimlikNo, c.tcKimlikNo, c.babaAdi, c.anneAdi,
-          c.dogumTarihi, c.dogumYeri,
-          c.cinsiyet === "K" ? "Kadın" : c.cinsiyet === "E" ? "Erkek" : "-",
-          c.ogrenimDurumu, c.medeniDurum, c.telefon,
-          c.email, c.adres, c.kayitTarihi
+          c.vergiKimlikNo,
+          c.tcKimlikNo,
         ]),
         styles: {
-          fontSize: 7,
-          cellPadding: 2,
+          fontSize: 9,
+          cellPadding: 3,
           halign: "center",
           valign: "middle",
-          overflow: "linebreak"
+          overflow: "linebreak",
         },
         headStyles: {
           fillColor: [41, 128, 185],
           textColor: 255,
-          fontSize: 8,
+          fontSize: 10,
         },
+        // 7 sütun için makul genişlikler (isteğe göre düzenleyebilirsin)
         columnStyles: {
-          0: { cellWidth: 18 },
-          1: { cellWidth: 20 },
-          2: { cellWidth: 20 },
-          3: { cellWidth: 22 },
-          4: { cellWidth: 15 },
-          5: { cellWidth: 25 },
-          6: { cellWidth: 28 },
-          15: { cellWidth: 35 },
-          16: { cellWidth: 40 },
+          0: { cellWidth: 28 }, // Müşteri No
+          1: { cellWidth: 28 }, // Ad
+          2: { cellWidth: 28 }, // Soyad
+          3: { cellWidth: 35 }, // Ünvan
+          4: { cellWidth: 20 }, // Tür
+          5: { cellWidth: 30 }, // Vergi No
+          6: { cellWidth: 35 }, // TC Kimlik No
         },
-        theme: "striped"
+        theme: "striped",
       });
 
       doc.save("musteri-listesi.pdf");
@@ -129,25 +133,25 @@ const CustomerList = ({ refresh, onEdit }) => {
   };
 
   const exportExcel = () => {
-    const data = filteredCustomers.map(c => ({
+    const data = filteredCustomers.map((c) => ({
       "Müşteri No": c.musteriNo,
-      "Ad": c.ad,
-      "Soyad": c.soyad,
-      "Ünvan": c.unvan,
-      "Tür": c.musteriTuru === "G" ? "Gerçek" : "Tüzel",
+      Ad: c.ad,
+      Soyad: c.soyad,
+      Ünvan: c.unvan,
+      Tür: c.musteriTuru === "G" ? "Gerçek" : "Tüzel",
       "Vergi No": c.vergiKimlikNo,
       "TC Kimlik No": c.tcKimlikNo,
       "Baba Adı": c.babaAdi,
       "Anne Adı": c.anneAdi,
       "Doğum Tarihi": c.dogumTarihi,
       "Doğum Yeri": c.dogumYeri,
-      "Cinsiyet": c.cinsiyet === "K" ? "Kadın" : c.cinsiyet === "E" ? "Erkek" : "-",
+      Cinsiyet: c.cinsiyet === "K" ? "Kadın" : c.cinsiyet === "E" ? "Erkek" : "-",
       "Öğrenim Durumu": c.ogrenimDurumu,
       "Medeni Durum": c.medeniDurum,
-      "Telefon": c.telefon,
-      "Email": c.email,
-      "Adres": c.adres,
-      "Kayıt Tarihi": c.kayitTarihi
+      Telefon: c.telefon,
+      Email: c.email,
+      Adres: c.adres,
+      "Kayıt Tarihi": c.kayitTarihi,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
@@ -159,10 +163,25 @@ const CustomerList = ({ refresh, onEdit }) => {
   };
 
   const headers = [
-    "Müşteri No", "Ad", "Soyad", "Ünvan", "Tür", "Vergi No", "TC Kimlik No",
-    "Baba Adı", "Anne Adı", "Doğum Tarihi", "Doğum Yeri", "Cinsiyet",
-    "Öğrenim Durumu", "Medeni Durum", "Telefon", "Email", "Adres",
-    "Kayıt Tarihi", "İşlem"
+    "Müşteri No",
+    "Ad",
+    "Soyad",
+    "Ünvan",
+    "Tür",
+    "Vergi No",
+    "TC Kimlik No",
+    "Baba Adı",
+    "Anne Adı",
+    "Doğum Tarihi",
+    "Doğum Yeri",
+    "Cinsiyet",
+    "Öğrenim Durumu",
+    "Medeni Durum",
+    "Telefon",
+    "Email",
+    "Adres",
+    "Kayıt Tarihi",
+    "İşlem",
   ];
 
   return (
@@ -315,7 +334,7 @@ const CustomerList = ({ refresh, onEdit }) => {
                 onClick={() => setPage(i + 1)}
                 className="pill"
                 style={{
-                  backgroundColor: page === i + 1 ? "#4caf50" : "#555"
+                  backgroundColor: page === i + 1 ? "#4caf50" : "#555",
                 }}
               >
                 {i + 1}
@@ -329,4 +348,3 @@ const CustomerList = ({ refresh, onEdit }) => {
 };
 
 export default CustomerList;
-
