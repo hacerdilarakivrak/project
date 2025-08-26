@@ -19,7 +19,7 @@ const CustomersPage = () => {
     <div
       style={{
         minHeight: "calc(100vh - 64px)",
-        background: "#2c2c2c", // dış arka plan
+        background: "#2c2c2c", 
         padding: "32px 0",
       }}
     >
@@ -41,7 +41,7 @@ const CustomersPage = () => {
           style={{
             borderRadius: 16,
             border: "1px solid #3a3a3a",
-            background: "#1a1a1a", // panel zemini
+            background: "#1a1a1a", 
             boxShadow: "0 10px 40px rgba(0,0,0,.35)",
             padding: 24,
           }}
