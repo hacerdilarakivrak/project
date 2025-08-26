@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api from "../../api"; 
+import api from "../../api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -167,6 +167,83 @@ const CustomerList = ({ refresh, onEdit }) => {
 
   return (
     <div style={{ marginTop: "40px", overflowX: "auto", paddingBottom: "30px" }}>
+      {/* Component içi stiller */}
+      <style>{`
+        .customer-table {
+          width: 100%;
+          border-collapse: collapse;
+          background: #1e1e1e;
+          color: #eaeaea;
+        }
+        .customer-table th, .customer-table td {
+          padding: 10px 12px;
+          border-bottom: 1px solid #333;
+          text-align: left;
+          vertical-align: top;
+        }
+        .customer-table thead th {
+          background: #2b2b2b;
+          font-weight: 600;
+        }
+        .address-column {
+          max-width: 320px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .btn-update {
+          background-color: #0d6efd;
+          color: #fff;
+          border: none;
+          padding: 6px 14px;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background-color .2s ease, transform .05s ease;
+        }
+        .btn-update:hover { background-color: #0b5ed7; }
+        .btn-update:active { transform: translateY(1px); }
+        .btn-delete {
+          background-color: #dc3545;
+          color: #fff;
+          border: none;
+          padding: 6px 14px;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background-color .2s ease, transform .05s ease;
+          margin-left: 8px;
+        }
+        .btn-delete:hover { background-color: #bb2d3b; }
+        .btn-delete:active { transform: translateY(1px); }
+        .btn-pdf {
+          background-color: #e83e8c;
+          color: #fff;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        .btn-pdf:hover { background-color: #d63384; }
+        .btn-excel {
+          background-color: #198754;
+          color: #fff;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        .btn-excel:hover { background-color: #157347; }
+        .pill {
+          margin: 0 4px;
+          padding: 6px 12px;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+      `}</style>
+
       <h2 style={{ marginBottom: "20px", color: "#fff" }}>📋 Kayıtlı Müşteriler</h2>
 
       <div style={{ marginBottom: "10px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -220,7 +297,7 @@ const CustomerList = ({ refresh, onEdit }) => {
                   <td>{c.medeniDurum}</td>
                   <td>{c.telefon}</td>
                   <td>{c.email}</td>
-                  <td className="address-column">{c.adres}</td>
+                  <td className="address-column" title={c.adres}>{c.adres}</td>
                   <td>{c.kayitTarihi}</td>
                   <td>
                     <button onClick={() => onEdit(c)} className="btn-update">Güncelle</button>
@@ -236,14 +313,9 @@ const CustomerList = ({ refresh, onEdit }) => {
               <button
                 key={i}
                 onClick={() => setPage(i + 1)}
+                className="pill"
                 style={{
-                  margin: "0 4px",
-                  padding: "6px 12px",
-                  backgroundColor: page === i + 1 ? "#4caf50" : "#555",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
+                  backgroundColor: page === i + 1 ? "#4caf50" : "#555"
                 }}
               >
                 {i + 1}
@@ -257,3 +329,4 @@ const CustomerList = ({ refresh, onEdit }) => {
 };
 
 export default CustomerList;
+
