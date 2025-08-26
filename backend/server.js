@@ -67,8 +67,9 @@ const toNum = (v) => {
 const parseTcmbXml = async (xml) => {
   const parsed = await xml2js.parseStringPromise(xml);
   const root = parsed?.Tarih_Date;
-  const asOf =
+  const asOfXml =
     root?.$?.Date || root?.$?.Tarih || new Date().toISOString().slice(0, 10);
+
   const list = root?.Currency || [];
   const rates = {};
   for (const cur of list) {
@@ -83,7 +84,18 @@ const parseTcmbXml = async (xml) => {
       name: cur?.Isim?.[0] || code,
     };
   }
-  return { asOf, base: "TRY", rates };
+
+  // Yeni ekleme: UTC ve Türkiye saati bilgisi
+  const now = new Date();
+  const asOfUtc = now.toISOString();
+  const asOfLocal = now.toLocaleDateString("tr-TR", {
+    timeZone: "Europe/Istanbul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  return { asOfXml, asOfUtc, asOfLocal, base: "TRY", rates };
 };
 
 const buildDatedUrl = (d) => {
@@ -122,7 +134,13 @@ const getRatesFresh = async () => {
 const pickCodes = (full, codes) => {
   const out = {};
   for (const c of codes) if (full.rates[c]) out[c] = full.rates[c];
-  return { asOf: full.asOf, base: full.base, rates: out };
+  return {
+    asOfXml: full.asOfXml,
+    asOfUtc: full.asOfUtc,
+    asOfLocal: full.asOfLocal,
+    base: full.base,
+    rates: out,
+  };
 };
 
 apiRouter.get("/exchange-rates", async (req, res) => {
@@ -424,3 +442,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () =>
   console.log(`Backend running on http://localhost:${PORT}`)
 );
+
