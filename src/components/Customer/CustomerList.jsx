@@ -73,7 +73,6 @@ const CustomerList = ({ refresh, onEdit }) => {
     }
   };
 
-  /* === PDF: TC Kimlik No'ya kadar sütunlar === */
   const exportPDF = () => {
     const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
     try {
@@ -113,15 +112,14 @@ const CustomerList = ({ refresh, onEdit }) => {
           textColor: 255,
           fontSize: 10,
         },
-        // 7 sütun için makul genişlikler (isteğe göre düzenleyebilirsin)
         columnStyles: {
-          0: { cellWidth: 28 }, // Müşteri No
-          1: { cellWidth: 28 }, // Ad
-          2: { cellWidth: 28 }, // Soyad
-          3: { cellWidth: 35 }, // Ünvan
-          4: { cellWidth: 20 }, // Tür
-          5: { cellWidth: 30 }, // Vergi No
-          6: { cellWidth: 35 }, // TC Kimlik No
+          0: { cellWidth: 28 },
+          1: { cellWidth: 28 },
+          2: { cellWidth: 28 },
+          3: { cellWidth: 35 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 30 },
+          6: { cellWidth: 35 },
         },
         theme: "striped",
       });
@@ -186,7 +184,6 @@ const CustomerList = ({ refresh, onEdit }) => {
 
   return (
     <div style={{ marginTop: "40px", overflowX: "auto", paddingBottom: "30px" }}>
-      {/* Component içi stiller */}
       <style>{`
         .customer-table {
           width: 100%;
@@ -348,3 +345,4 @@ const CustomerList = ({ refresh, onEdit }) => {
 };
 
 export default CustomerList;
+
