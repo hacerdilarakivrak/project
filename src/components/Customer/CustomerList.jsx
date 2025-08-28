@@ -345,4 +345,3 @@ const CustomerList = ({ refresh, onEdit }) => {
 };
 
 export default CustomerList;
-
